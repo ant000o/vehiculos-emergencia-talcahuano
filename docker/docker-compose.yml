@@ -1,0 +1,53 @@
+name: vehiculos-emergencia-talcahuano
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: bomberos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-bomberos_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: ${DB_NAME:-bomberos_talcahuano}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-bomberos_user} -d ${DB_NAME:-bomberos_talcahuano}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: bomberos_adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      - db
+
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile.dev
+    container_name: bomberos_backend
+    restart: unless-stopped
+    env_file:
+      - ../apps/backend/.env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-bomberos_user}:${DB_PASSWORD:-changeme}@db:5432/${DB_NAME:-bomberos_talcahuano}?schema=public
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ../apps/backend:/usr/src/app
+      - backend_node_modules:/usr/src/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    command: npm run start:dev
+
+volumes:
+  db_data:
+  backend_node_modules:

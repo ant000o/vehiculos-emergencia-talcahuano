@@ -1,0 +1,17 @@
+{
+  "name": "vehiculos-emergencia-talcahuano",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de Control y Seguimiento de Mantención de Vehículos de Emergencia - Compañía de Bomberos de Talcahuano",
+  "workspaces": [
+    "apps/backend",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:backend": "npm run start:dev --workspace=apps/backend",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:up": "docker compose -f docker/docker-compose.yml up -d db adminer",
+    "db:down": "docker compose -f docker/docker-compose.yml down"
+  }
+}

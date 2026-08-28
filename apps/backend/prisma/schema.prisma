@@ -1,0 +1,37 @@
+// Esquema de base de datos - Sistema de Mantención de Vehículos de Emergencia
+// Bomberos de Talcahuano
+//
+// ⚠️ PENDIENTE: este schema se completará en equipo durante la Fase 0
+// (definición del ERD), en base a las Historias de Usuario ya documentadas
+// (ver 08_Historias_de_Usuario.xlsx) y a la resolución del punto pendiente
+// "grifos vs. vehículos" con el docente.
+//
+// Convenciones acordadas para el modelo:
+// - Usar ENUM de PostgreSQL para campos de estado/tipo en vez de varchar libre.
+// - Toda tabla con datos geoespaciales usa la extensión PostGIS (columnas
+//   de tipo Unsupported("geometry") en Prisma).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+generator erd {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------------------------
+// Ejemplo de referencia (no definitivo) de cómo se modelaría una entidad con
+// geometría usando PostGIS. Se reemplaza una vez cerrado el ERD del equipo.
+// ---------------------------------------------------------------------------
+// model UbicacionDespacho {
+//   id        String                    @id @default(uuid())
+//   nombre    String
+//   ubicacion Unsupported("geometry(Point, 4326)")
+//   createdAt DateTime                  @default(now())
+// }

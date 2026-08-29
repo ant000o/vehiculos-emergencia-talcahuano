@@ -20,7 +20,9 @@ jobs:
       # Instalación única en la raíz: npm workspaces resuelve todas las apps
       # (backend, web) desde un solo package-lock.json.
       - run: npm install
-      - run: npx prisma generate --schema=apps/backend/prisma/schema.prisma
+      # NOTA: "npx prisma generate" se reactiva aquí una vez que el equipo
+      # defina el ERD (Fase 0) y schema.prisma tenga al menos un modelo.
+      # Con el schema vacío, Prisma falla con "no models defined".
       - run: npm run lint --workspace=apps/backend --if-present
       - run: npm run build --workspace=apps/backend
 

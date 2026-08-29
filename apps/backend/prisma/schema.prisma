@@ -12,17 +12,14 @@
 //   de tipo Unsupported("geometry") en Prisma).
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   extensions = [postgis]
-}
-
-generator erd {
-  provider = "prisma-client-js"
 }
 
 // ---------------------------------------------------------------------------

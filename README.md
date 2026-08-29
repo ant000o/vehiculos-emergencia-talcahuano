@@ -82,26 +82,30 @@ docker compose -f docker/docker-compose.yml up -d db adminer
 - BD disponible en `localhost:5432`
 - Adminer (administrador visual de BD) en `http://localhost:8080`
 
-### 3. Backend (NestJS)
+### 3. Instalar dependencias (una sola vez, desde la raíz)
+
+Este repo usa **npm workspaces**: backend y web comparten un único `package-lock.json` en la raíz, así que la instalación se hace una sola vez desde ahí (no dentro de cada carpeta):
 
 ```bash
-cd apps/backend
 npm install
-npx prisma migrate dev
-npm run start:dev
+```
+
+### 4. Backend (NestJS)
+
+```bash
+npx prisma migrate dev --schema=apps/backend/prisma/schema.prisma
+npm run dev:backend
 ```
 
 API disponible en `http://localhost:3000` — documentación Swagger en `http://localhost:3000/api`.
 
-### 4. Web (React)
+### 5. Web (React)
 
 ```bash
-cd apps/web
-npm install
-npm run dev
+npm run dev:web
 ```
 
-### 5. App móvil (React Native / Expo)
+### 6. App móvil (React Native / Expo)
 
 ```bash
 cd apps/mobile

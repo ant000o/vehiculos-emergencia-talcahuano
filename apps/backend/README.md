@@ -4,10 +4,11 @@ NestJS + Prisma + PostgreSQL/PostGIS + JWT.
 
 ## Instalación local
 
+> Este proyecto es parte de un monorepo con npm workspaces: la instalación de dependencias (`npm install`) se hace **una sola vez desde la raíz del repositorio**, no dentro de esta carpeta. Ver el `README.md` raíz.
+
 ```bash
-npm install
 cp .env.example .env
-npx prisma migrate dev
+npx prisma migrate dev --schema=prisma/schema.prisma
 npm run start:dev
 ```
 

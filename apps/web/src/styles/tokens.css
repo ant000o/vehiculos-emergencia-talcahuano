@@ -1,0 +1,51 @@
+/**
+ * Tokens de diseño del sistema.
+ *
+ * Paleta pensada para una herramienta operativa institucional (bomberos,
+ * mecánicos, comandancia), no para un producto de consumo:
+ * - Azul marino profundo como color de marca / estructura.
+ * - Rojo (color universal de emergencias) reservado SOLO para acciones
+ *   primarias y estados de error/alerta — nunca decorativo.
+ * - Tipografía condensada para titulares (evoca placas/rotulado de equipos)
+ *   + sans-serif humanista para texto de formularios e interfaz.
+ */
+
+:root {
+  /* Color */
+  --color-navy-900: #0f1f38;
+  --color-navy-700: #16294a;
+  --color-navy-500: #1f3a63;
+  --color-red-600: #c1272d;
+  --color-red-700: #9e1f24;
+  --color-paper: #f7f7f4;
+  --color-white: #ffffff;
+  --color-ink-900: #14181f;
+  --color-ink-600: #4b5563;
+  --color-ink-400: #9aa3af;
+  --color-border: #dfe1e6;
+  --color-success: #2e7d32;
+
+  /* Tipografía */
+  --font-display: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Otros */
+  --radius-sm: 3px;
+  --shadow-focus: 0 0 0 3px rgba(193, 39, 45, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

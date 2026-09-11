@@ -1,15 +1,27 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './routes/ProtectedRoute';
+import { LoginPage } from './pages/login/LoginPage';
+import { HomePage } from './pages/HomePage';
+
 function App() {
   return (
-    <main style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
-      <h1 style={{ color: '#1B3A6B' }}>
-        Sistema de Mantención de Vehículos de Emergencia
-      </h1>
-      <p>Compañía de Bomberos de Talcahuano — Panel de administración y comando.</p>
-      <p>
-        Este es el punto de partida de la aplicación web. Las pantallas reales
-        se irán agregando por Sprint según el User Story Mapping del proyecto.
-      </p>
-    </main>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

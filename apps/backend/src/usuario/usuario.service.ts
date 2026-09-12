@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Usuario } from './entities/usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -13,16 +14,9 @@ export class UsuarioService {
   ) {}
 
   async create(dto: CreateUsuarioDto) {
-    // NOTA: por ahora se guarda sin hashear para poder probar el CRUD ya.
-    // En el paso de autenticación esto se reemplaza por bcrypt.hash(dto.password, 10).
-
     const { password, ...rest } = dto;
-
-    const usuario = this.repo.create({
-      ...rest,
-      password_hash: password,
-    });
-
+    const password_hash = await bcrypt.hash(password, 10);
+    const usuario = this.repo.create({ ...rest, password_hash });
     return this.repo.save(usuario);
   }
 

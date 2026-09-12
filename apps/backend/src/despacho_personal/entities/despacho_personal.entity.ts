@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { DespachoEmergencia } from '../../despacho_emergencia/entities/despacho_emergencia.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
+import { RolEnDespacho } from '../../common/enums/estados.enum';
 
 // Tabla puente N:M entre despacho_emergencia y usuario (tripulación).
 // PK compuesta (id_despacho, id_usuario) -> no tiene su propio id autogenerado.
@@ -20,8 +21,8 @@ export class DespachoPersonal {
   @JoinColumn({ name: 'id_usuario' })
   usuario: Usuario;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  rol_en_despacho: string;
+  @Column({ type: 'enum', enum: RolEnDespacho, default: RolEnDespacho.BRIGADISTA, nullable: true })
+  rol_en_despacho: RolEnDespacho;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   created_at: Date;

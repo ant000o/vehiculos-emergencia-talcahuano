@@ -6,14 +6,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Mantencion } from './entities/mantencion.entity';
+import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
 import { CreateMantencionDto } from './dto/create-mantencion.dto';
 import { UpdateMantencionDto } from './dto/update-mantencion.dto';
+import { EstadoMantencion, EstadoVehiculo } from '../common/enums/estados.enum';
 
 @Injectable()
 export class MantencionService {
   constructor(
     @InjectRepository(Mantencion)
     private readonly repo: Repository<Mantencion>,
+    // Se inyecta para actualizar el estado del vehículo automáticamente
+    // cuando la mantención se finaliza o cancela.
+    @InjectRepository(Vehiculo)
+    private readonly vehiculoRepo: Repository<Vehiculo>,
   ) {}
 
   create(dto: CreateMantencionDto) {
@@ -61,7 +67,20 @@ export class MantencionService {
 
     Object.assign(item, dto);
 
-    return this.repo.save(item);
+    const mantencionGuardada = await this.repo.save(item);
+
+    // Cuando la mantención se finaliza o cancela, el vehículo vuelve a OPERATIVO
+    // automáticamente. Así no es necesario actualizar el vehículo por separado.
+    if (
+      dto.estado_mantencion === EstadoMantencion.FINALIZADA ||
+      dto.estado_mantencion === EstadoMantencion.CANCELADA
+    ) {
+      await this.vehiculoRepo.update(item.id_vehiculo, {
+        estado_operativo: EstadoVehiculo.OPERATIVO,
+      });
+    }
+
+    return mantencionGuardada;
   }
 
   async remove(id: number) {
@@ -70,3 +89,4 @@ export class MantencionService {
     return this.repo.remove(item);
   }
 }
+

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { CompaniaOption, EstadoVehiculo } from '../../services/vehiculos';
+import type { CompaniaOption, EstadoVehiculo, Vehiculo } from '../../services/vehiculos';
 
 interface VehiculoFormValues {
   patente: string;
@@ -12,6 +12,8 @@ interface VehiculoFormValues {
 }
 
 interface VehiculoFormProps {
+  /** Si viene un vehículo, el formulario opera en modo edición (patente bloqueada). */
+  vehiculoExistente?: Vehiculo;
   companias: CompaniaOption[];
   isSaving: boolean;
   serverError: string | null;
@@ -24,34 +26,50 @@ interface FormErrors {
   marca?: string;
   modelo?: string;
   anio?: string;
+  kilometraje?: string;
 }
 
 const ANIO_ACTUAL = new Date().getFullYear();
 
 export function VehiculoForm({
+  vehiculoExistente,
   companias,
   isSaving,
   serverError,
   onSubmit,
   onCancel,
 }: VehiculoFormProps) {
-  const [patente, setPatente] = useState('');
-  const [marca, setMarca] = useState('');
-  const [modelo, setModelo] = useState('');
-  const [anio, setAnio] = useState(ANIO_ACTUAL);
-  const [kilometraje, setKilometraje] = useState(0);
-  const [estado, setEstado] = useState<EstadoVehiculo>('operativo');
-  const [idCompania, setIdCompania] = useState(companias[0]?.id_compania ?? 0);
+  const esEdicion = vehiculoExistente !== undefined;
+
+  const [patente, setPatente] = useState(vehiculoExistente?.patente ?? '');
+  const [marca, setMarca] = useState(vehiculoExistente?.marca ?? '');
+  const [modelo, setModelo] = useState(vehiculoExistente?.modelo ?? '');
+  const [anio, setAnio] = useState(vehiculoExistente?.anio ?? ANIO_ACTUAL);
+  const [kilometraje, setKilometraje] = useState(
+    vehiculoExistente ? Number(vehiculoExistente.kilometraje) : 0,
+  );
+  const [estado, setEstado] = useState<EstadoVehiculo>(
+    vehiculoExistente?.estado_operativo ?? 'operativo',
+  );
+  const [idCompania, setIdCompania] = useState(
+    vehiculoExistente?.id_compania ?? companias[0]?.id_compania ?? 0,
+  );
   const [errors, setErrors] = useState<FormErrors>({});
 
   function validar(): boolean {
     const nuevosErrores: FormErrors = {};
-    if (!patente.trim()) nuevosErrores.patente = 'Ingresa la patente.';
-    else if (patente.length > 10) nuevosErrores.patente = 'Máximo 10 caracteres.';
+    if (!esEdicion) {
+      if (!patente.trim()) nuevosErrores.patente = 'Ingresa la patente.';
+      else if (patente.length > 10) nuevosErrores.patente = 'Máximo 10 caracteres.';
+    }
     if (!marca.trim()) nuevosErrores.marca = 'Ingresa la marca.';
     if (!modelo.trim()) nuevosErrores.modelo = 'Ingresa el modelo.';
     if (anio < 1950 || anio > ANIO_ACTUAL + 1) {
       nuevosErrores.anio = `El año debe estar entre 1950 y ${ANIO_ACTUAL + 1}.`;
+    }
+    if (kilometraje < 0) nuevosErrores.kilometraje = 'El kilometraje no puede ser negativo.';
+    if (esEdicion && kilometraje < Number(vehiculoExistente!.kilometraje)) {
+      nuevosErrores.kilometraje = 'El kilometraje no puede disminuir respecto al actual.';
     }
     setErrors(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
@@ -61,7 +79,6 @@ export function VehiculoForm({
     event.preventDefault();
     if (!validar()) return;
     onSubmit({
-      // Las patentes se guardan en mayúsculas por convención.
       patente: patente.trim().toUpperCase(),
       marca,
       modelo,
@@ -74,7 +91,9 @@ export function VehiculoForm({
 
   return (
     <form className="vehiculos-form" onSubmit={handleSubmit} noValidate>
-      <h2 className="vehiculos-form__title">Nuevo vehículo</h2>
+      <h2 className="vehiculos-form__title">
+        {esEdicion ? `Editar vehículo — ${vehiculoExistente.patente}` : 'Nuevo vehículo'}
+      </h2>
 
       {serverError && (
         <p className="vehiculos-form__alert" role="alert">
@@ -91,8 +110,12 @@ export function VehiculoForm({
             onChange={(e) => setPatente(e.target.value)}
             placeholder="AB1234"
             maxLength={10}
+            disabled={esEdicion}
             aria-invalid={Boolean(errors.patente)}
           />
+          {esEdicion && (
+            <span className="vehiculos-form__hint">La patente no se puede modificar.</span>
+          )}
           {errors.patente && <span className="vehiculos-form__error">{errors.patente}</span>}
         </div>
 
@@ -135,14 +158,18 @@ export function VehiculoForm({
 
       <div className="vehiculos-form__row">
         <div className="vehiculos-form__field">
-          <label htmlFor="kilometraje">Kilometraje inicial</label>
+          <label htmlFor="kilometraje">Kilometraje</label>
           <input
             id="kilometraje"
             type="number"
             min={0}
             value={kilometraje}
             onChange={(e) => setKilometraje(Number(e.target.value))}
+            aria-invalid={Boolean(errors.kilometraje)}
           />
+          {errors.kilometraje && (
+            <span className="vehiculos-form__error">{errors.kilometraje}</span>
+          )}
         </div>
 
         <div className="vehiculos-form__field">

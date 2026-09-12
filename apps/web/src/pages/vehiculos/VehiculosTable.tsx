@@ -3,6 +3,8 @@ import type { Vehiculo, CompaniaOption, EstadoVehiculo } from '../../services/ve
 interface VehiculosTableProps {
   vehiculos: Vehiculo[];
   companias: CompaniaOption[];
+  /** Si se pasa, se muestra la columna "Acciones" con el botón Editar. */
+  onEditar?: (vehiculo: Vehiculo) => void;
 }
 
 const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
@@ -11,7 +13,7 @@ const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
   fuera_de_servicio: 'Fuera de servicio',
 };
 
-export function VehiculosTable({ vehiculos, companias }: VehiculosTableProps) {
+export function VehiculosTable({ vehiculos, companias, onEditar }: VehiculosTableProps) {
   function nombreCompania(id_compania: number): string {
     return companias.find((c) => c.id_compania === id_compania)?.nombre ?? '—';
   }
@@ -30,6 +32,7 @@ export function VehiculosTable({ vehiculos, companias }: VehiculosTableProps) {
           <th>Kilometraje</th>
           <th>Estado</th>
           <th>Compañía</th>
+          {onEditar && <th aria-label="Acciones"></th>}
         </tr>
       </thead>
       <tbody>
@@ -45,6 +48,11 @@ export function VehiculosTable({ vehiculos, companias }: VehiculosTableProps) {
               </span>
             </td>
             <td>{nombreCompania(v.id_compania)}</td>
+            {onEditar && (
+              <td className="vehiculos-table__actions">
+                <button onClick={() => onEditar(v)}>Editar</button>
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

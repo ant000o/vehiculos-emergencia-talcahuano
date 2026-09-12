@@ -35,10 +35,21 @@ export interface CrearVehiculoInput {
   id_compania: number;
 }
 
+// La patente no se edita: es el identificador único del vehículo, no forma
+// parte de su "ficha técnica" en el sentido que pide la HU-04.
+export type EditarVehiculoInput = Omit<CrearVehiculoInput, 'patente'>;
+
 export async function listarVehiculos(): Promise<Vehiculo[]> {
   return apiClient.get<Vehiculo[]>('/vehiculos');
 }
 
 export async function crearVehiculo(input: CrearVehiculoInput): Promise<Vehiculo> {
   return apiClient.post<Vehiculo>('/vehiculos', input);
+}
+
+export async function editarVehiculo(
+  id_vehiculo: number,
+  input: EditarVehiculoInput,
+): Promise<Vehiculo> {
+  return apiClient.patch<Vehiculo>(`/vehiculos/${id_vehiculo}`, input);
 }

@@ -84,6 +84,20 @@
   color: var(--color-red-700);
 }
 
+.vehiculos-table__actions button {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.vehiculos-table__actions button:hover {
+  border-color: var(--color-navy-500);
+}
+
 /* Formulario (mismo lenguaje visual que usuarios-form) */
 .vehiculos-form {
   max-width: 560px;
@@ -159,6 +173,19 @@
   font-size: 0.8125rem;
   color: var(--color-red-700);
   margin-top: var(--space-1);
+}
+
+.vehiculos-form__hint {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-ink-400);
+  margin-top: var(--space-1);
+}
+
+.vehiculos-form__field input:disabled {
+  background: var(--color-paper);
+  color: var(--color-ink-600);
+  cursor: not-allowed;
 }
 
 .vehiculos-form__actions {

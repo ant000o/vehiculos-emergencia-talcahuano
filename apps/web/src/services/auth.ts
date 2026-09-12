@@ -1,25 +1,15 @@
-/**
- * Servicio de autenticación.
- *
- * ⚠️ MOCK temporal: simula la respuesta del backend mientras Carlo define
- * y construye el endpoint real (POST /auth/login con JWT + refresh token).
- *
- * Para conectar con el backend real más adelante, solo se reemplaza el
- * cuerpo de `login()` por la llamada HTTP real (fetch/axios a VITE_API_URL).
- * Las vistas que consumen este servicio (LoginPage, AuthContext) no deberían
- * necesitar cambios.
- */
-
 export interface LoginCredentials {
   email: string;
   password: string;
 }
 
+export type Rol = 'administrador' | 'mecanico' | 'comandancia' | 'bombero';
+
 export interface AuthUser {
   id: string;
   nombre: string;
   email: string;
-  rol: 'bombero' | 'mecanico' | 'comandancia' | 'administrador';
+  rol: Rol;
 }
 
 export interface LoginResponse {
@@ -29,38 +19,52 @@ export interface LoginResponse {
 }
 
 const MOCK_DELAY_MS = 600;
+const MOCK_PASSWORD = 'demo1234';
 
-// Usuario de prueba mientras no existe backend real.
-// Credenciales: demo@bomberostalcahuano.cl / demo1234
-const MOCK_USER: AuthUser = {
-  id: 'mock-1',
-  nombre: 'Usuario Demo',
-  email: 'demo@bomberostalcahuano.cl',
-  rol: 'bombero',
+// Un usuario de prueba por rol, para poder ver cómo cambia la navegación
+// según quién inicia sesión. Todos comparten la misma contraseña.
+const MOCK_USERS: Record<string, AuthUser> = {
+  'demo@bomberostalcahuano.cl': {
+    id: 'mock-admin',
+    nombre: 'Antonia Soto (Admin)',
+    email: 'demo@bomberostalcahuano.cl',
+    rol: 'administrador',
+  },
+  'mecanico@bomberostalcahuano.cl': {
+    id: 'mock-mecanico',
+    nombre: 'Pedro Ruiz (Mecánico)',
+    email: 'mecanico@bomberostalcahuano.cl',
+    rol: 'mecanico',
+  },
+  'comandancia@bomberostalcahuano.cl': {
+    id: 'mock-comandancia',
+    nombre: 'Capitán Rojas',
+    email: 'comandancia@bomberostalcahuano.cl',
+    rol: 'comandancia',
+  },
+  'bombero@bomberostalcahuano.cl': {
+    id: 'mock-bombero',
+    nombre: 'Juan Pérez (Conductor)',
+    email: 'bombero@bomberostalcahuano.cl',
+    rol: 'bombero',
+  },
 };
 
 function delay<T>(value: T, ms = MOCK_DELAY_MS): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
 }
 
-export async function login(
-  credentials: LoginCredentials,
-): Promise<LoginResponse> {
-  const emailValido = credentials.email.trim().toLowerCase();
-  const esCredencialDemo =
-    emailValido === MOCK_USER.email && credentials.password === 'demo1234';
+export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
+  const email = credentials.email.trim().toLowerCase();
+  const user = MOCK_USERS[email];
+  const esValido = user !== undefined && credentials.password === MOCK_PASSWORD;
 
-  if (!esCredencialDemo) {
-    // Simula el mismo formato de error que devolverá NestJS (401).
+  if (!esValido) {
     await delay(null, MOCK_DELAY_MS);
     throw new Error('Correo o contraseña incorrectos.');
   }
 
-  return delay({
-    user: MOCK_USER,
-    accessToken: 'mock-access-token',
-    refreshToken: 'mock-refresh-token',
-  });
+  return delay({ user, accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
 }
 
 export function logout(): void {

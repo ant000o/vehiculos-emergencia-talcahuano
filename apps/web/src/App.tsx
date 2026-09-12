@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
+import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/login/LoginPage';
-import { HomePage } from './pages/HomePage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ComingSoonPage } from './pages/placeholder/ComingSoonPage';
 
 function App() {
   return (
@@ -10,14 +12,24 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+
+          {/* Todo lo de acá abajo comparte el mismo AppLayout (sidebar +
+              topbar). ProtectedRoute exige sesión iniciada antes de mostrar
+              cualquiera de estas rutas. */}
           <Route
-            path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <AppLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="vehiculos" element={<ComingSoonPage title="Vehículos" />} />
+            <Route path="mantenciones" element={<ComingSoonPage title="Mantenciones" />} />
+            <Route path="grifos" element={<ComingSoonPage title="Grifos" />} />
+            <Route path="usuarios" element={<ComingSoonPage title="Usuarios" />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

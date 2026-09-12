@@ -1,18 +1,4 @@
 @import './styles/tokens.css';
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  background-color: var(--color-paper);
-  color: var(--color-ink-900);
-}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: var(--font-body); background-color: var(--color-paper); color: var(--color-ink-900); }

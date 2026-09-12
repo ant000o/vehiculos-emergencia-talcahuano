@@ -21,8 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('refreshToken', response.refreshToken);
       setUser(response.user);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'No se pudo iniciar sesión.';
+      const message = err instanceof Error ? err.message : 'No se pudo iniciar sesión.';
       setError(message);
       throw err;
     } finally {
@@ -36,16 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: user !== null,
-        isLoading,
-        error,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: user !== null, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,38 +1,57 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { UsuarioModule } from './usuario/usuario.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 import { RolModule } from './rol/rol.module';
-import { CompañiaModule } from './compañia/compañia.module';
+import { CompaniaModule } from './compania/compania.module';
+import { CategoriaArticuloModule } from './categoria_articulo/categoria_articulo.module';
+import { UsuarioModule } from './usuario/usuario.module';
+import { VehiculoModule } from './vehiculo/vehiculo.module';
+import { GrifoModule } from './grifo/grifo.module';
+import { ArticuloInventarioModule } from './articulo_inventario/articulo_inventario.module';
+import { RegistroOperatividadModule } from './registro_operatividad/registro_operatividad.module';
+import { MantencionModule } from './mantencion/mantencion.module';
+import { DetalleArticuloMantencionModule } from './detalle_articulo_mantencion/detalle_articulo_mantencion.module';
+import { MovimientoInventarioModule } from './movimiento_inventario/movimiento_inventario.module';
+import { DespachoEmergenciaModule } from './despacho_emergencia/despacho_emergencia.module';
+import { DespachoPersonalModule } from './despacho_personal/despacho_personal.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    // 1. Habilita la lectura del archivo .env en todo el proyecto
-    ConfigModule.forRoot({
-      isGlobal: true, 
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        url: config.get<string>('DATABASE_URL'),
+        autoLoadEntities: true,
+        // CRÍTICO: la base ya existe (creada con el script SQL a mano).
+        // Si esto es true, TypeORM puede alterar/borrar tus enums, triggers
+        // y constraints personalizados. Usa migraciones para cambios futuros.
+        synchronize: false,
+        ssl: { rejectUnauthorized: false }, // requerido por Supabase
+      }),
     }),
-    
-    // 2. Configura la conexión a Supabase
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      ssl: { 
-        rejectUnauthorized: false // Obligatorio para conexiones seguras a la nube de Supabase
-      }, 
-      autoLoadEntities: true, // Carga automáticamente las tablas que vayamos creando en código
-      synchronize: false, // ¡CRÍTICO! Debe estar en false porque ya creamos la BD perfecta en 3NF con el script SQL. Si está en true, TypeORM podría intentar borrar o alterar tus tablas de PostGIS.
-    }),
-    
-    AuthModule,
-    
-    UsuarioModule,
-    
     RolModule,
-    
-    CompañiaModule,
+    CompaniaModule,
+    CategoriaArticuloModule,
+    UsuarioModule,
+    VehiculoModule,
+    GrifoModule,
+    ArticuloInventarioModule,
+    RegistroOperatividadModule,
+    MantencionModule,
+    DetalleArticuloMantencionModule,
+    MovimientoInventarioModule,
+    DespachoEmergenciaModule,
+    DespachoPersonalModule,
+    AuthModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/swagger';
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CreateUsuarioDto } from './create-usuario.dto';
 
-export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
+// La contraseña no se actualiza por este endpoint; eso se maneja aparte
+// (ej. un endpoint /usuarios/:id/password) cuando se implemente auth.
+export class UpdateUsuarioDto extends PartialType(OmitType(CreateUsuarioDto, ['password'] as const)) {}

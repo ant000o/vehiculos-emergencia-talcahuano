@@ -1,14 +1,12 @@
 /**
  * Servicio de autenticación — CONECTADO al backend real de Carlo.
  *
- * Nota sobre roles: el backend hoy solo tiene 3 roles sembrados
- * ('administrador', 'bombero', 'capitan'), no los 4 que habíamos asumido
- * ('mecanico', 'comandancia' incluidos). Falta que el equipo confirme el
- * modelo final de roles — mientras tanto, el tipo Rol refleja lo que
- * REALMENTE existe hoy en la base de datos.
+ * Roles reales confirmados en la BD: administrador, bombero, capitan, mecanico.
+ * 'capitan' es el nombre en BD para lo que las HU llaman "Comandancia /
+ * Oficial a Cargo" — confirmar con Carlo que esa equivalencia es correcta.
  */
 
-export type Rol = 'administrador' | 'bombero' | 'capitan';
+export type Rol = 'administrador' | 'bombero' | 'capitan' | 'mecanico';
 
 export interface LoginCredentials {
   email: string;

@@ -63,8 +63,8 @@ export function UsuarioForm({
     if (!apellidos.trim()) nuevosErrores.apellidos = 'Ingresa los apellidos.';
     if (!email.trim()) nuevosErrores.email = 'Ingresa el correo.';
     else if (!validarEmail(email)) nuevosErrores.email = 'Correo inválido.';
-    if (!esEdicion && password.length < 6) {
-      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres.';
+    if (!esEdicion && password.length < 8) {
+      nuevosErrores.password = 'La contraseña debe tener al menos 8 caracteres.';
     }
     setErrors(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
@@ -95,7 +95,8 @@ export function UsuarioForm({
             id="rut"
             value={rut}
             onChange={(e) => setRut(e.target.value)}
-            placeholder="12.345.678-9"
+            placeholder="12345678-9 (sin puntos)"
+            maxLength={12}
             aria-invalid={Boolean(errors.rut)}
           />
           {errors.rut && <span className="usuarios-form__error">{errors.rut}</span>}

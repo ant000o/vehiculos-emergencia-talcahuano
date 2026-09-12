@@ -6,31 +6,28 @@ export interface NavItem {
   roles: Rol[];
 }
 
-// ⚠️ PROVISIONAL: el backend hoy solo tiene 3 roles ('administrador',
-// 'bombero', 'capitan'), no los 4 que asumimos originalmente. Mientras el
-// equipo no confirme si 'capitan' reemplaza a Mecánico, a Comandancia, o a
-// ambos, le doy acceso a todo lo que antes veían esos dos roles combinados.
-// Revisar esto apenas se resuelva con el equipo.
+// Roles reales confirmados en la BD: administrador, bombero, capitan (=
+// Comandancia/Oficial a Cargo), mecanico.
 export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Inicio',
     path: '/',
-    roles: ['administrador', 'bombero', 'capitan'],
+    roles: ['administrador', 'bombero', 'capitan', 'mecanico'],
   },
   {
     label: 'Vehículos',
     path: '/vehiculos',
-    roles: ['administrador', 'bombero', 'capitan'],
+    roles: ['administrador', 'bombero', 'capitan', 'mecanico'],
   },
   {
     label: 'Mantenciones',
     path: '/mantenciones',
-    roles: ['administrador', 'capitan'],
+    roles: ['administrador', 'capitan', 'mecanico'],
   },
   {
     label: 'Grifos',
     path: '/grifos',
-    roles: ['administrador', 'capitan'],
+    roles: ['administrador', 'capitan', 'mecanico'],
   },
   {
     label: 'Usuarios',
@@ -42,5 +39,6 @@ export const NAV_ITEMS: NavItem[] = [
 export const ROLE_LABELS: Record<Rol, string> = {
   administrador: 'Administrador',
   bombero: 'Bombero / Conductor',
-  capitan: 'Capitán',
+  capitan: 'Capitán / Comandancia',
+  mecanico: 'Mecánico',
 };

@@ -6,28 +6,31 @@ export interface NavItem {
   roles: Rol[];
 }
 
-// Un solo lugar para decidir qué ve cada rol. Agregar una vista nueva al
-// menú es agregar una línea acá — el layout no necesita tocarse.
+// ⚠️ PROVISIONAL: el backend hoy solo tiene 3 roles ('administrador',
+// 'bombero', 'capitan'), no los 4 que asumimos originalmente. Mientras el
+// equipo no confirme si 'capitan' reemplaza a Mecánico, a Comandancia, o a
+// ambos, le doy acceso a todo lo que antes veían esos dos roles combinados.
+// Revisar esto apenas se resuelva con el equipo.
 export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Inicio',
     path: '/',
-    roles: ['administrador', 'mecanico', 'comandancia', 'bombero'],
+    roles: ['administrador', 'bombero', 'capitan'],
   },
   {
     label: 'Vehículos',
     path: '/vehiculos',
-    roles: ['administrador', 'mecanico', 'comandancia', 'bombero'],
+    roles: ['administrador', 'bombero', 'capitan'],
   },
   {
     label: 'Mantenciones',
     path: '/mantenciones',
-    roles: ['administrador', 'mecanico'],
+    roles: ['administrador', 'capitan'],
   },
   {
     label: 'Grifos',
     path: '/grifos',
-    roles: ['administrador', 'mecanico', 'comandancia'],
+    roles: ['administrador', 'capitan'],
   },
   {
     label: 'Usuarios',
@@ -38,7 +41,6 @@ export const NAV_ITEMS: NavItem[] = [
 
 export const ROLE_LABELS: Record<Rol, string> = {
   administrador: 'Administrador',
-  mecanico: 'Mecánico',
-  comandancia: 'Comandancia',
   bombero: 'Bombero / Conductor',
+  capitan: 'Capitán',
 };

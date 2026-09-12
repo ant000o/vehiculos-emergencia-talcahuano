@@ -4,6 +4,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/login/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { UsuariosPage } from './pages/usuarios/UsuariosPage';
 import { ComingSoonPage } from './pages/placeholder/ComingSoonPage';
 
 function App() {
@@ -27,7 +28,14 @@ function App() {
             <Route path="vehiculos" element={<ComingSoonPage title="Vehículos" />} />
             <Route path="mantenciones" element={<ComingSoonPage title="Mantenciones" />} />
             <Route path="grifos" element={<ComingSoonPage title="Grifos" />} />
-            <Route path="usuarios" element={<ComingSoonPage title="Usuarios" />} />
+            <Route
+              path="usuarios"
+              element={
+                <ProtectedRoute roles={['administrador']}>
+                  <UsuariosPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

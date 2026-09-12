@@ -1,73 +1,65 @@
+/**
+ * Servicio de autenticación — CONECTADO al backend real de Carlo.
+ *
+ * Nota sobre roles: el backend hoy solo tiene 3 roles sembrados
+ * ('administrador', 'bombero', 'capitan'), no los 4 que habíamos asumido
+ * ('mecanico', 'comandancia' incluidos). Falta que el equipo confirme el
+ * modelo final de roles — mientras tanto, el tipo Rol refleja lo que
+ * REALMENTE existe hoy en la base de datos.
+ */
+
+export type Rol = 'administrador' | 'bombero' | 'capitan';
+
 export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-export type Rol = 'administrador' | 'mecanico' | 'comandancia' | 'bombero';
-
 export interface AuthUser {
-  id: string;
+  id: number;
   nombre: string;
+  apellidos: string;
   email: string;
   rol: Rol;
+  compania: string;
 }
 
 export interface LoginResponse {
   user: AuthUser;
   accessToken: string;
-  refreshToken: string;
 }
 
-const MOCK_DELAY_MS = 600;
-const MOCK_PASSWORD = 'demo1234';
-
-// Un usuario de prueba por rol, para poder ver cómo cambia la navegación
-// según quién inicia sesión. Todos comparten la misma contraseña.
-const MOCK_USERS: Record<string, AuthUser> = {
-  'demo@bomberostalcahuano.cl': {
-    id: 'mock-admin',
-    nombre: 'Antonia Soto (Admin)',
-    email: 'demo@bomberostalcahuano.cl',
-    rol: 'administrador',
-  },
-  'mecanico@bomberostalcahuano.cl': {
-    id: 'mock-mecanico',
-    nombre: 'Pedro Ruiz (Mecánico)',
-    email: 'mecanico@bomberostalcahuano.cl',
-    rol: 'mecanico',
-  },
-  'comandancia@bomberostalcahuano.cl': {
-    id: 'mock-comandancia',
-    nombre: 'Capitán Rojas',
-    email: 'comandancia@bomberostalcahuano.cl',
-    rol: 'comandancia',
-  },
-  'bombero@bomberostalcahuano.cl': {
-    id: 'mock-bombero',
-    nombre: 'Juan Pérez (Conductor)',
-    email: 'bombero@bomberostalcahuano.cl',
-    rol: 'bombero',
-  },
-};
-
-function delay<T>(value: T, ms = MOCK_DELAY_MS): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-  const email = credentials.email.trim().toLowerCase();
-  const user = MOCK_USERS[email];
-  const esValido = user !== undefined && credentials.password === MOCK_PASSWORD;
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
 
-  if (!esValido) {
-    await delay(null, MOCK_DELAY_MS);
-    throw new Error('Correo o contraseña incorrectos.');
+  if (!response.ok) {
+    // El backend responde 401 con { message, statusCode, error } en credenciales inválidas.
+    const cuerpo = await response.json().catch(() => null);
+    throw new Error(cuerpo?.message ?? 'No se pudo iniciar sesión.');
   }
 
-  return delay({ user, accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
+  const data = await response.json();
+
+  // El backend devuelve rol y compañía como TEXTO (no como IDs numéricos),
+  // a diferencia de lo que asumíamos en el mock.
+  const user: AuthUser = {
+    id: data.usuario.id_usuario,
+    nombre: data.usuario.nombre,
+    apellidos: data.usuario.apellidos,
+    email: data.usuario.email,
+    rol: data.usuario.rol,
+    compania: data.usuario.compania,
+  };
+
+  return { user, accessToken: data.access_token };
 }
 
 export function logout(): void {
   localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
 }

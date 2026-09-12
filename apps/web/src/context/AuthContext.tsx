@@ -18,7 +18,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await loginService(credentials);
       localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
       setUser(response.user);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'No se pudo iniciar sesión.';

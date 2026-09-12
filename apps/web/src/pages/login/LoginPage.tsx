@@ -76,11 +76,10 @@ export function LoginPage() {
             {isLoading ? 'Ingresando…' : 'Ingresar'}
           </button>
           <p className="login-form__hint">
-            Prueba distintos roles (todos con clave <code>demo1234</code>):<br />
-            <code>demo@bomberostalcahuano.cl</code> (Admin) ·{' '}
-            <code>mecanico@bomberostalcahuano.cl</code> ·{' '}
-            <code>comandancia@bomberostalcahuano.cl</code> ·{' '}
-            <code>bombero@bomberostalcahuano.cl</code>
+            Backend real, usuarios de prueba (clave <code>Password123</code> para todos):<br />
+            <code>admin@bomberos-talcahuano.cl</code> ·{' '}
+            <code>bombero1@bomberos-talcahuano.cl</code> ·{' '}
+            <code>mecanico@bomberos-talcahuano.cl</code> (rol real: capitán)
           </p>
         </form>
       </main>

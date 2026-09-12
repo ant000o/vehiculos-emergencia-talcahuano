@@ -5,6 +5,7 @@ import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/login/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsuariosPage } from './pages/usuarios/UsuariosPage';
+import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
 import { ComingSoonPage } from './pages/placeholder/ComingSoonPage';
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
             }
           >
             <Route index element={<DashboardPage />} />
-            <Route path="vehiculos" element={<ComingSoonPage title="Vehículos" />} />
+            <Route path="vehiculos" element={<VehiculosPage />} />
             <Route path="mantenciones" element={<ComingSoonPage title="Mantenciones" />} />
             <Route path="grifos" element={<ComingSoonPage title="Grifos" />} />
             <Route

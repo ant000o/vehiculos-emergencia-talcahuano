@@ -3,15 +3,15 @@ import { Vehiculo } from '../../vehiculo/entities/vehiculo.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
 import { DetalleArticuloMantencion } from '../../detalle_articulo_mantencion/entities/detalle_articulo_mantencion.entity';
 import { MovimientoInventario } from '../../movimiento_inventario/entities/movimiento_inventario.entity';
-import { EstadoMantencion } from '../../common/enums/estados.enum';
+import { EstadoMantencion, TipoMantencion } from '../../common/enums/estados.enum';
 
 @Entity('mantencion')
 export class Mantencion {
   @PrimaryGeneratedColumn({ type: 'int' })
   id_mantencion: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  tipo_mantencion: string;
+  @Column({ type: 'enum', enum: TipoMantencion, default: TipoMantencion.PREVENTIVA })
+  tipo_mantencion: TipoMantencion;
 
   @Column({ type: 'timestamptz' })
   fecha_ingreso: Date;

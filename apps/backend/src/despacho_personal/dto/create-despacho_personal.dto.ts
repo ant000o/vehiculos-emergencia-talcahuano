@@ -1,4 +1,5 @@
-import { IsInt, IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsInt, IsOptional, IsEnum } from 'class-validator';
+import { RolEnDespacho } from '../../common/enums/estados.enum';
 
 export class CreateDespachoPersonalDto {
   @IsInt()
@@ -7,8 +8,7 @@ export class CreateDespachoPersonalDto {
   @IsInt()
   id_usuario: number;
 
-  @IsString()
+  @IsEnum(RolEnDespacho)
   @IsOptional()
-  @MaxLength(50)
-  rol_en_despacho?: string;
+  rol_en_despacho?: RolEnDespacho;
 }

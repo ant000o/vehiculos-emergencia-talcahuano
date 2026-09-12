@@ -31,3 +31,15 @@ export enum TipoMovimiento {
   ENTRADA = 'entrada',
   SALIDA = 'salida',
 }
+
+export enum TipoMantencion {
+  PREVENTIVA = 'preventiva',
+  CORRECTIVA = 'correctiva',
+  REVISION = 'revision',
+}
+
+export enum RolEnDespacho {
+  CONDUCTOR = 'conductor',
+  BRIGADISTA = 'brigadista',
+  JEFE_DESPACHO = 'jefe_despacho',
+}

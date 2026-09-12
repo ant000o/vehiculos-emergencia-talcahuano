@@ -1,11 +1,10 @@
 import { IsString, IsNotEmpty, MaxLength, IsInt, IsOptional, IsNumber, Min, IsEnum, IsDateString, ValidateIf } from 'class-validator';
-import { EstadoMantencion } from '../../common/enums/estados.enum';
+import { EstadoMantencion, TipoMantencion } from '../../common/enums/estados.enum';
 
 export class CreateMantencionDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(50)
-  tipo_mantencion: string;
+  @IsEnum(TipoMantencion)
+  tipo_mantencion: TipoMantencion;
+
 
   @IsDateString()
   @IsOptional()

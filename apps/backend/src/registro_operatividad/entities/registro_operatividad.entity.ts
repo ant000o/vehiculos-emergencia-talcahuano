@@ -32,7 +32,7 @@ export class RegistroOperatividad {
   @Column({ type: 'int' })
   id_vehiculo: number;
 
-  @ManyToOne(() => Vehiculo, (vehiculo) => vehiculo.registros_operatividad, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Vehiculo, (vehiculo) => vehiculo.registros_operatividad, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'id_vehiculo' })
   vehiculo: Vehiculo;
 

@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Rol } from '../../rol/entities/rol.entity';
 import { Compania } from '../../compania/entities/compania.entity';
@@ -22,7 +23,9 @@ export class Usuario {
   @Column({ type: 'varchar', length: 150, unique: true })
   email: string;
 
-  // Nunca se expone en las respuestas (ver DTO/serialización)
+  // Nunca se expone en las respuestas. @Exclude() + ClassSerializerInterceptor
+  // en main.ts lo omiten de cualquier respuesta JSON, incluyendo relaciones anidadas.
+  @Exclude()
   @Column({ type: 'varchar', length: 255 })
   password_hash: string;
 

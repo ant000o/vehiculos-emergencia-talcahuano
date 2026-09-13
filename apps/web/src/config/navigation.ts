@@ -25,9 +25,14 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['bombero'],
   },
   {
+    label: 'Historial de Estados',
+    path: '/historial-estados',
+    roles: ['mecanico'],
+  },
+  {
     label: 'Mantenciones',
     path: '/mantenciones',
-    roles: ['administrador', 'capitan', 'mecanico'],
+    roles: ['mecanico'],
   },
   {
     label: 'Grifos',

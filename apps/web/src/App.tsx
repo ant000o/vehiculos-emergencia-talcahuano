@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { UsuariosPage } from './pages/usuarios/UsuariosPage';
 import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
 import { RegistrarEstadoPage } from './pages/registro-operatividad/RegistrarEstadoPage';
+import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
+import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
 import { ComingSoonPage } from './pages/placeholder/ComingSoonPage';
 
 function App() {
@@ -36,7 +38,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="mantenciones" element={<ComingSoonPage title="Mantenciones" />} />
+            <Route
+              path="historial-estados"
+              element={
+                <ProtectedRoute roles={['mecanico']}>
+                  <HistorialEstadosPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="mantenciones"
+              element={
+                <ProtectedRoute roles={['mecanico']}>
+                  <MantencionesPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="grifos" element={<ComingSoonPage title="Grifos" />} />
             <Route
               path="usuarios"

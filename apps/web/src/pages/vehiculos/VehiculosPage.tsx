@@ -69,7 +69,6 @@ export function VehiculosPage() {
     setIsSaving(true);
     setFormError(null);
     try {
-      // La patente nunca se envía en la edición (ver EditarVehiculoInput).
       const { patente: _patente, ...resto } = values;
       const actualizado = await editarVehiculo(id_vehiculo, resto);
       setVehiculos((prev) =>

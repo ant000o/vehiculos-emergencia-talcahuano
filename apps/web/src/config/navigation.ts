@@ -20,6 +20,11 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['administrador', 'bombero', 'capitan', 'mecanico'],
   },
   {
+    label: 'Registrar Estado',
+    path: '/registrar-estado',
+    roles: ['bombero'],
+  },
+  {
     label: 'Mantenciones',
     path: '/mantenciones',
     roles: ['administrador', 'capitan', 'mecanico'],

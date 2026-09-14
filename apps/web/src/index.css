@@ -1,14 +1,4 @@
-:root {
-  --color-navy-institucional: #1b3a6b;
-  color-scheme: light;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background-color: #f5f6f8;
-}
+@import './styles/tokens.css';
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: var(--font-body); background-color: var(--color-paper); color: var(--color-ink-900); }

@@ -1,36 +1,35 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  // whitelist: descarta campos no declarados en los DTO (evita mass-assignment)
+  // transform: convierte automáticamente tipos (ej. strings de query params a number)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      transform: true,
       forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('API - Vehículos de Emergencia Bomberos Talcahuano')
-    .setDescription(
-      'API REST del Sistema de Control y Seguimiento de Mantención de Vehículos de Emergencia',
-    )
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // Activa @Exclude() en todas las entidades de TypeORM.
+  // Necesario para que password_hash no viaje en ninguna respuesta,
+  // incluyendo cuando Usuario aparece como relación anidada.
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  // eslint-disable-next-line no-console
-  console.log(`Backend corriendo en http://localhost:${port}`);
-  // eslint-disable-next-line no-console
-  console.log(`Documentación Swagger en http://localhost:${port}/api`);
+  // En producción, leer el origen desde la variable CORS_ORIGIN (coma-separado).
+  // En desarrollo, si no está definida, se acepta cualquier origen.
+  const corsOrigin = process.env.CORS_ORIGIN;
+  app.enableCors({
+    origin: corsOrigin ? corsOrigin.split(',') : '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
+

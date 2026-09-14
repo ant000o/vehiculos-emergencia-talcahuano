@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { MantencionPreventivaForm } from './MantencionPreventivaForm';
 import { RegistrarFallaForm } from './RegistrarFallaForm';
+import { DescontarRepuestoForm } from './DescontarRepuestoForm';
 import './mantenciones.css';
 
-type Pestana = 'falla' | 'preventiva';
+type Pestana = 'falla' | 'preventiva' | 'repuestos';
 
 export function MantencionesPage() {
   const [pestana, setPestana] = useState<Pestana>('falla');
@@ -25,9 +26,17 @@ export function MantencionesPage() {
         >
           Finalizar mantención preventiva
         </button>
+        <button
+          className={pestana === 'repuestos' ? 'is-active' : ''}
+          onClick={() => setPestana('repuestos')}
+        >
+          Descontar repuestos
+        </button>
       </div>
 
-      {pestana === 'falla' ? <RegistrarFallaForm /> : <MantencionPreventivaForm />}
+      {pestana === 'falla' && <RegistrarFallaForm />}
+      {pestana === 'preventiva' && <MantencionPreventivaForm />}
+      {pestana === 'repuestos' && <DescontarRepuestoForm />}
     </div>
   );
 }

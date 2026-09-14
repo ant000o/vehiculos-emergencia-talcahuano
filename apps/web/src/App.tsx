@@ -9,7 +9,7 @@ import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
 import { RegistrarEstadoPage } from './pages/registro-operatividad/RegistrarEstadoPage';
 import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
 import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
-import { ComingSoonPage } from './pages/placeholder/ComingSoonPage';
+import { MarcarEstadoGrifoPage } from './pages/grifos/MarcarEstadoGrifoPage';
 
 function App() {
   return (
@@ -54,7 +54,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="grifos" element={<ComingSoonPage title="Grifos" />} />
+            <Route path="grifos" element={<MarcarEstadoGrifoPage />} />
             <Route
               path="usuarios"
               element={

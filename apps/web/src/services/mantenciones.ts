@@ -24,6 +24,7 @@ export interface Mantencion {
   id_vehiculo: number;
   id_usuario_mecanico: number | null;
   taller_externo: string | null;
+  vehiculo?: { id_vehiculo: number; patente: string };
 }
 
 export interface RegistrarMantencionPreventivaInput {

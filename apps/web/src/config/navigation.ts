@@ -37,7 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Grifos',
     path: '/grifos',
-    roles: ['administrador', 'capitan', 'mecanico'],
+    roles: ['administrador', 'capitan', 'mecanico', 'bombero'],
   },
   {
     label: 'Usuarios',

@@ -22,7 +22,7 @@ export class Vehiculo {
   @Column({ type: 'int' })
   anio: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'int', default: 0 })
   kilometraje: number;
 
   @Column({ type: 'enum', enum: EstadoVehiculo, default: EstadoVehiculo.OPERATIVO })
@@ -30,6 +30,12 @@ export class Vehiculo {
 
   @Column({ type: 'int' })
   id_compania: number;
+
+  // Ubicación GPS actual del vehículo. Nullable: no todos los vehículos tienen GPS.
+  // El cliente envía [latitud, longitud] → el service convierte a [longitud, latitud] para PostGIS.
+  // Ejemplo cliente: { "type": "Point", "coordinates": [-36.7196, -73.1168] }
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: true })
+  coordenadas: object;
 
   @ManyToOne(() => Compania, (compania) => compania.vehiculos, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'id_compania' })

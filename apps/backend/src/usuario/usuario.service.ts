@@ -64,7 +64,14 @@ export class UsuarioService {
   async update(id: number, dto: UpdateUsuarioDto) {
     const usuario = await this.findOne(id);
 
-    Object.assign(usuario, dto);
+    // Si se envía una nueva contraseña, la hasheamos antes de guardar
+    if ((dto as any).password) {
+      const password_hash = await bcrypt.hash((dto as any).password, 10);
+      const { password, ...rest } = dto as any;
+      Object.assign(usuario, { ...rest, password_hash });
+    } else {
+      Object.assign(usuario, dto);
+    }
 
     return this.repo.save(usuario);
   }

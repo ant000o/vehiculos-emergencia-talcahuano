@@ -13,6 +13,8 @@ export class DespachoEmergencia {
   @Column({ type: 'timestamptz' })
   fecha_hora_despacho: Date;
 
+  // Coordenada del lugar de la emergencia.
+  // Formato: GeoJSON { type: 'Point', coordinates: [longitud, latitud] }
   @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326 })
   coordenada_destino: object;
 

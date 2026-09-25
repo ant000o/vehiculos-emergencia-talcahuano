@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt, MaxLength, Min, Max, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, MaxLength, Min, Max, IsEnum, IsOptional, IsObject } from 'class-validator';
 import { EstadoVehiculo } from '../../common/enums/estados.enum';
 
 export class CreateVehiculoDto {
@@ -33,4 +33,11 @@ export class CreateVehiculoDto {
 
   @IsInt()
   id_compania: number;
+
+  // GeoJSON Point con coordenadas en orden [latitud, longitud] (el backend hace el swap)
+  // Ejemplo: { "type": "Point", "coordinates": [-36.7196, -73.1168] }
+  @IsObject()
+  @IsOptional()
+  ubicacion?: object;
 }
+

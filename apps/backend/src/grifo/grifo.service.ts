@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Grifo } from './entities/grifo.entity';
 import { CreateGrifoDto } from './dto/create-grifo.dto';
 import { UpdateGrifoDto } from './dto/update-grifo.dto';
+import { toPostGIS, fromPostGIS } from '../common/utils/geo.util';
 
 @Injectable()
 export class GrifoService {
@@ -13,47 +14,48 @@ export class GrifoService {
   ) {}
 
   create(dto: CreateGrifoDto) {
-    return this.repo.save(this.repo.create(dto));
+    // El cliente manda [lat, lng] → convertimos a [lng, lat] para PostGIS
+    const entity = this.repo.create({
+      ...dto,
+      coordenadas: toPostGIS(dto.coordenadas as any),
+    });
+    return this.repo.save(entity);
   }
 
-  findAll() {
-    return this.repo.find({
-      relations: {
-        compania: true,
-      },
-    });
+  async findAll() {
+    const items = await this.repo.find({ relations: { compania: true } });
+    // Convertimos coordenadas de vuelta a [lat, lng] para el cliente
+    return items.map((g) => ({ ...g, coordenadas: fromPostGIS(g.coordenadas) }));
   }
 
   async findOne(id: number) {
     const item = await this.repo.findOne({
-      where: {
-        id_grifo: id,
-      },
-      relations: {
-        compania: true,
-      },
+      where: { id_grifo: id },
+      relations: { compania: true },
     });
 
-    if (!item) {
-      throw new NotFoundException(
-        `Grifo con id ${id} no encontrado`,
-      );
-    }
+    if (!item) throw new NotFoundException(`Grifo con id ${id} no encontrado`);
 
-    return item;
+    return { ...item, coordenadas: fromPostGIS(item.coordenadas) };
   }
 
   async update(id: number, dto: UpdateGrifoDto) {
-    const item = await this.findOne(id);
+    const item = await this.repo.findOne({ where: { id_grifo: id } });
+    if (!item) throw new NotFoundException(`Grifo con id ${id} no encontrado`);
 
-    Object.assign(item, dto);
+    Object.assign(item, {
+      ...dto,
+      ...(dto.coordenadas && { coordenadas: toPostGIS(dto.coordenadas as any) }),
+    });
 
-    return this.repo.save(item);
+    const saved = await this.repo.save(item);
+    return { ...saved, coordenadas: fromPostGIS(saved.coordenadas) };
   }
 
   async remove(id: number) {
-    const item = await this.findOne(id);
-
+    const item = await this.repo.findOne({ where: { id_grifo: id } });
+    if (!item) throw new NotFoundException(`Grifo con id ${id} no encontrado`);
     return this.repo.remove(item);
   }
 }
+

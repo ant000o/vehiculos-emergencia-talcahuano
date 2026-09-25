@@ -31,6 +31,12 @@ export class Vehiculo {
   @Column({ type: 'int' })
   id_compania: number;
 
+  // Ubicación GPS actual del vehículo. Nullable: no todos los vehículos tienen GPS.
+  // Formato de entrada/salida: GeoJSON { type: 'Point', coordinates: [longitud, latitud] }
+  // PostGIS usa [longitud, latitud] (= [x, y]), NO [latitud, longitud].
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: true })
+  ubicacion: object;
+
   @ManyToOne(() => Compania, (compania) => compania.vehiculos, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'id_compania' })
   compania: Compania;

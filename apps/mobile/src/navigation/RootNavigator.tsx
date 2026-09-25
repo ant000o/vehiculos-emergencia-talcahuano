@@ -5,6 +5,8 @@ import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
+import UsuariosListScreen from '../screens/UsuariosListScreen';
+import UsuarioFormScreen from '../screens/UsuarioFormScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,11 +23,23 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator>
         {usuario ? (
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="UsuariosList"
+              component={UsuariosListScreen}
+              options={{ title: 'Personal' }}
+            />
+            <Stack.Screen
+              name="UsuarioForm"
+              component={UsuarioFormScreen}
+              options={{ title: 'Usuario' }}
+            />
+          </>
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

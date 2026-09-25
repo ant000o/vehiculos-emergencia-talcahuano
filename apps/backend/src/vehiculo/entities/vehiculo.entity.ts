@@ -35,7 +35,7 @@ export class Vehiculo {
   // Formato de entrada/salida: GeoJSON { type: 'Point', coordinates: [longitud, latitud] }
   // PostGIS usa [longitud, latitud] (= [x, y]), NO [latitud, longitud].
   @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: true })
-  ubicacion: object;
+  coordenadas: object;
 
   @ManyToOne(() => Compania, (compania) => compania.vehiculos, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'id_compania' })

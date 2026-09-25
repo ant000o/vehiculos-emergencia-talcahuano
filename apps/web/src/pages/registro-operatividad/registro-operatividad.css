@@ -1,0 +1,108 @@
+.registro-page__title {
+  font-family: var(--font-display);
+  color: var(--color-navy-900);
+  margin: 0 0 var(--space-1);
+}
+
+.registro-page__subtitle {
+  color: var(--color-ink-600);
+  font-family: var(--font-body);
+  margin: 0 0 var(--space-6);
+}
+
+.registro-page__success {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-success);
+  background: rgba(46, 125, 50, 0.08);
+  border: 1px solid rgba(46, 125, 50, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.registro-page__alert {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-red-700);
+  background: rgba(193, 39, 45, 0.08);
+  border: 1px solid rgba(193, 39, 45, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.registro-form {
+  max-width: 480px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-6);
+}
+
+.registro-form__field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-5);
+}
+
+.registro-form__field label {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-900);
+  margin-bottom: var(--space-2);
+}
+
+.registro-form__field select,
+.registro-form__field textarea {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  resize: vertical;
+}
+
+.registro-form__slider {
+  margin-bottom: var(--space-5);
+}
+
+.registro-form__slider label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-900);
+  margin-bottom: var(--space-2);
+}
+
+.registro-form__slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--color-navy-900);
+}
+
+.registro-form__submit {
+  width: 100%;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-white);
+  background-color: var(--color-navy-900);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.registro-form__submit:hover:not(:disabled) {
+  background-color: var(--color-navy-700);
+}
+
+.registro-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

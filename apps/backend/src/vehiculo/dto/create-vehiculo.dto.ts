@@ -38,6 +38,6 @@ export class CreateVehiculoDto {
   // Ejemplo: { "type": "Point", "coordinates": [-36.7196, -73.1168] }
   @IsObject()
   @IsOptional()
-  ubicacion?: object;
+  coordenadas?: object;
 }
 

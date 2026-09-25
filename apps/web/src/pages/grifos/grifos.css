@@ -73,49 +73,6 @@
   padding: var(--space-3);
 }
 
-.grifos-form__row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-
-.grifos-form__ubicacion {
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  margin-bottom: var(--space-5);
-}
-
-.grifos-form__gps {
-  width: 100%;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  color: var(--color-navy-900);
-  background: var(--color-paper);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-  cursor: pointer;
-  margin-bottom: var(--space-4);
-}
-
-.grifos-form__gps:hover:not(:disabled) {
-  border-color: var(--color-navy-500);
-}
-
-.grifos-form__gps:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.grifos-form__gps-error {
-  display: block;
-  font-family: var(--font-body);
-  font-size: 0.8125rem;
-  color: var(--color-red-700);
-  margin: calc(var(--space-4) * -1) 0 var(--space-4);
-}
 
 .grifos-form__submit {
   width: 100%;
@@ -137,4 +94,12 @@
 .grifos-form__submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.grifos-form__coords {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+  margin-top: var(--space-2);
 }

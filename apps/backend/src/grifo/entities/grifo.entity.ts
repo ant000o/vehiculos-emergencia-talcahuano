@@ -8,6 +8,9 @@ export class Grifo {
   @PrimaryGeneratedColumn({ type: 'int' })
   id_grifo: number;
 
+  // Posición geográfica del grifo.
+  // Formato: GeoJSON { type: 'Point', coordinates: [longitud, latitud] }
+  // Ejemplo Talcahuano: { type: 'Point', coordinates: [-73.115, -36.720] }
   @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326 })
   coordenadas: object;
 

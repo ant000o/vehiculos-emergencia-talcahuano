@@ -13,7 +13,7 @@ export class Mantencion {
   @Column({ type: 'enum', enum: TipoMantencion, default: TipoMantencion.PREVENTIVA })
   tipo_mantencion: TipoMantencion;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   fecha_ingreso: Date;
 
   @Column({ type: 'timestamptz', nullable: true })

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { DespachoEmergencia } from './entities/despacho_emergencia.entity';
 import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dto';
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
+import { toPostGIS, fromPostGIS } from '../common/utils/geo.util';
 
 @Injectable()
 export class DespachoEmergenciaService {
@@ -18,22 +19,25 @@ export class DespachoEmergenciaService {
       fecha_hora_despacho: dto.fecha_hora_despacho
         ? new Date(dto.fecha_hora_despacho)
         : new Date(),
+      coordenada_destino: toPostGIS(dto.coordenada_destino as any),
     });
 
     return this.repo.save(despacho);
   }
 
-  findAll() {
-    return this.repo.find({
+  async findAll() {
+    const items = await this.repo.find({
       relations: {
         vehiculo: true,
         grifo: true,
         compania: true,
-        tripulacion: {
-          usuario: true,
-        },
+        tripulacion: { usuario: true },
       },
     });
+    return items.map((d) => ({
+      ...d,
+      coordenada_destino: fromPostGIS(d.coordenada_destino),
+    }));
   }
 
   async findOne(id: number) {
@@ -43,32 +47,34 @@ export class DespachoEmergenciaService {
         vehiculo: true,
         grifo: true,
         compania: true,
-        tripulacion: {
-          usuario: true,
-        },
+        tripulacion: { usuario: true },
       },
     });
 
-    if (!item) {
-      throw new NotFoundException(
-        `Despacho con id ${id} no encontrado`,
-      );
-    }
+    if (!item) throw new NotFoundException(`Despacho con id ${id} no encontrado`);
 
-    return item;
+    return { ...item, coordenada_destino: fromPostGIS(item.coordenada_destino) };
   }
 
   async update(id: number, dto: UpdateDespachoEmergenciaDto) {
-    const item = await this.findOne(id);
+    const item = await this.repo.findOne({ where: { id_despacho: id } });
+    if (!item) throw new NotFoundException(`Despacho con id ${id} no encontrado`);
 
-    Object.assign(item, dto);
+    Object.assign(item, {
+      ...dto,
+      ...(dto.coordenada_destino && {
+        coordenada_destino: toPostGIS(dto.coordenada_destino as any),
+      }),
+    });
 
-    return this.repo.save(item);
+    const saved = await this.repo.save(item);
+    return { ...saved, coordenada_destino: fromPostGIS(saved.coordenada_destino) };
   }
 
   async remove(id: number) {
-    const item = await this.findOne(id);
-
+    const item = await this.repo.findOne({ where: { id_despacho: id } });
+    if (!item) throw new NotFoundException(`Despacho con id ${id} no encontrado`);
     return this.repo.remove(item);
   }
 }
+

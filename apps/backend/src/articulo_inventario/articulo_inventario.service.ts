@@ -42,7 +42,12 @@ export class ArticuloInventarioService {
   async update(id: number, dto: UpdateArticuloInventarioDto) {
     const item = await this.findOne(id);
 
-    Object.assign(item, dto);
+    // stock_actual es controlado por el trigger de BD (movimiento_inventario).
+    // Se excluye del update para evitar desincronizar el inventario.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { stock_actual, ...safeDto } = dto as any;
+
+    Object.assign(item, safeDto);
 
     return this.repo.save(item);
   }

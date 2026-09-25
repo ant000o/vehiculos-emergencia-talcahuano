@@ -7,7 +7,7 @@ export class RegistroOperatividad {
   @PrimaryGeneratedColumn({ type: 'int' })
   id_registro: number;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   fecha_hora_registro: Date;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })

@@ -2,20 +2,21 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
-  "description": "Aplicación web - Panel de administración y comando (Bomberos Talcahuano)",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --fix"
   },
   "dependencies": {
     "axios": "^1.6.7",
+    "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.8",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.0",

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { listarGrifos, actualizarEstadoGrifo, type Grifo, type EstadoGrifo } from '../../services/grifos';
+import { MapaSeleccionUbicacion } from './MapaSeleccionUbicacion';
 import './grifos.css';
 
 const ESTADO_LABEL: Record<EstadoGrifo, string> = {
@@ -8,14 +9,16 @@ const ESTADO_LABEL: Record<EstadoGrifo, string> = {
   fuera_de_servicio: 'Fuera de servicio',
 };
 
+// Centro de Talcahuano, solo como respaldo si un grifo no tuviera
+// coordenadas cargadas todavía.
+const CENTRO_TALCAHUANO: [number, number] = [-36.7169, -73.1162];
+
 export function MarcarEstadoGrifoPage() {
   const [grifos, setGrifos] = useState<Grifo[]>([]);
   const [idGrifo, setIdGrifo] = useState<number | null>(null);
   const [estado, setEstado] = useState<EstadoGrifo>('operativo');
-  const [lat, setLat] = useState<number | ''>('');
-  const [lng, setLng] = useState<number | ''>('');
-  const [ubicandoGPS, setUbicandoGPS] = useState(false);
-  const [gpsError, setGpsError] = useState<string | null>(null);
+  const [lat, setLat] = useState(CENTRO_TALCAHUANO[0]);
+  const [lng, setLng] = useState(CENTRO_TALCAHUANO[1]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,49 +30,30 @@ export function MarcarEstadoGrifoPage() {
       const lista = await listarGrifos();
       setGrifos(lista);
       if (lista[0]) {
-        setIdGrifo(lista[0].id_grifo);
-        setEstado(lista[0].estado_operativo);
+        aplicarGrifo(lista[0]);
       }
       setIsLoading(false);
     }
     cargar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleSeleccionarGrifo(id: number) {
-    setIdGrifo(id);
-    const grifo = grifos.find((g) => g.id_grifo === id);
-    if (grifo) setEstado(grifo.estado_operativo);
-    setLat('');
-    setLng('');
+  function aplicarGrifo(grifo: Grifo) {
+    setIdGrifo(grifo.id_grifo);
+    setEstado(grifo.estado_operativo);
+    const [lngActual, latActual] = grifo.coordenadas.coordinates;
+    setLat(latActual);
+    setLng(lngActual);
   }
 
-  function capturarUbicacionActual() {
-    if (!navigator.geolocation) {
-      setGpsError('Este navegador no soporta geolocalización. Ingresa las coordenadas manualmente.');
-      return;
-    }
-    setUbicandoGPS(true);
-    setGpsError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLat(Number(position.coords.latitude.toFixed(6)));
-        setLng(Number(position.coords.longitude.toFixed(6)));
-        setUbicandoGPS(false);
-      },
-      () => {
-        setGpsError('No se pudo obtener tu ubicación. Puedes ingresarla manualmente.');
-        setUbicandoGPS(false);
-      },
-    );
+  function handleSeleccionarGrifo(id: number) {
+    const grifo = grifos.find((g) => g.id_grifo === id);
+    if (grifo) aplicarGrifo(grifo);
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!idGrifo) return;
-    if (lat === '' || lng === '') {
-      setError('Captura tu ubicación (botón GPS) o ingrésala manualmente antes de guardar.');
-      return;
-    }
 
     setIsSaving(true);
     setError(null);
@@ -77,7 +61,7 @@ export function MarcarEstadoGrifoPage() {
 
     try {
       const actualizado = await actualizarEstadoGrifo(idGrifo, {
-        coordenadas: { type: 'Point', coordinates: [Number(lng), Number(lat)] },
+        coordenadas: { type: 'Point', coordinates: [lng, lat] },
         estado_operativo: estado,
         ultima_revision: new Date().toISOString().slice(0, 10),
       });
@@ -100,7 +84,8 @@ export function MarcarEstadoGrifoPage() {
     <div className="grifos-page">
       <h1 className="grifos-page__title">Marcar estado de grifo</h1>
       <p className="grifos-page__subtitle">
-        Selecciona el grifo en el que te encuentras, confirma tu ubicación y actualiza su estado.
+        Selecciona el grifo, haz clic en el mapa para fijar su ubicación exacta y
+        actualiza su estado.
       </p>
 
       {confirmacion && (
@@ -142,36 +127,22 @@ export function MarcarEstadoGrifoPage() {
             </select>
           </div>
 
-          <div className="grifos-form__ubicacion">
-            <button type="button" className="grifos-form__gps" onClick={capturarUbicacionActual} disabled={ubicandoGPS}>
-              {ubicandoGPS ? 'Obteniendo ubicación…' : '📍 Usar mi ubicación actual'}
-            </button>
-            {gpsError && <span className="grifos-form__gps-error">{gpsError}</span>}
-
-            <div className="grifos-form__row">
-              <div className="grifos-form__field">
-                <label htmlFor="lat">Latitud</label>
-                <input
-                  id="lat"
-                  type="number"
-                  step="any"
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value === '' ? '' : Number(e.target.value))}
-                  placeholder="-36.719"
-                />
-              </div>
-              <div className="grifos-form__field">
-                <label htmlFor="lng">Longitud</label>
-                <input
-                  id="lng"
-                  type="number"
-                  step="any"
-                  value={lng}
-                  onChange={(e) => setLng(e.target.value === '' ? '' : Number(e.target.value))}
-                  placeholder="-73.116"
-                />
-              </div>
-            </div>
+          <div className="grifos-form__field">
+            <label>Ubicación (haz clic en el mapa para actualizarla)</label>
+            {/* key={idGrifo}: al cambiar de grifo, el mapa se vuelve a centrar
+                desde cero en la ubicación de ese grifo. */}
+            <MapaSeleccionUbicacion
+              key={idGrifo}
+              lat={lat}
+              lng={lng}
+              onSeleccionar={(nuevaLat, nuevaLng) => {
+                setLat(nuevaLat);
+                setLng(nuevaLng);
+              }}
+            />
+            <span className="grifos-form__coords">
+              Lat: {lat.toFixed(6)} · Lng: {lng.toFixed(6)}
+            </span>
           </div>
 
           <button type="submit" className="grifos-form__submit" disabled={isSaving}>

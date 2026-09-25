@@ -246,15 +246,14 @@ async function seed() {
   // El trigger aplicar_movimiento_inventario actualiza stock_actual automáticamente.
   const movRepo = ds.getRepository(MovimientoInventario);
   await movRepo.save([
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 20, id_articulo: filtroAceite.id_articulo, observacion: 'Compra inicial — OC #001' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 15, id_articulo: bujias.id_articulo,     observacion: 'Compra inicial — OC #001' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 8,  id_articulo: manguera.id_articulo,   observacion: 'Compra inicial — OC #002' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 30, id_articulo: guantes.id_articulo,    observacion: 'Compra inicial — OC #002' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 5,  id_articulo: llaveGrifos.id_articulo, observacion: 'Compra inicial — OC #003' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 40, id_articulo: aceiteMotor.id_articulo, observacion: 'Compra inicial — OC #003' }),
-    // Segunda entrada posterior para filtros y aceite
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 10, id_articulo: filtroAceite.id_articulo, observacion: 'Reposición — OC #008' }),
-    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 20, id_articulo: aceiteMotor.id_articulo,  observacion: 'Reposición — OC #008' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 20, fecha_movimiento: new Date(), id_articulo: filtroAceite.id_articulo, observacion: 'Compra inicial — OC #001' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 15, fecha_movimiento: new Date(), id_articulo: bujias.id_articulo,      observacion: 'Compra inicial — OC #001' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 8,  fecha_movimiento: new Date(), id_articulo: manguera.id_articulo,    observacion: 'Compra inicial — OC #002' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 30, fecha_movimiento: new Date(), id_articulo: guantes.id_articulo,     observacion: 'Compra inicial — OC #002' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 5,  fecha_movimiento: new Date(), id_articulo: llaveGrifos.id_articulo, observacion: 'Compra inicial — OC #003' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 40, fecha_movimiento: new Date(), id_articulo: aceiteMotor.id_articulo, observacion: 'Compra inicial — OC #003' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 10, fecha_movimiento: new Date(), id_articulo: filtroAceite.id_articulo, observacion: 'Reposición — OC #008' }),
+    movRepo.create({ tipo_movimiento: TipoMovimiento.ENTRADA, cantidad: 20, fecha_movimiento: new Date(), id_articulo: aceiteMotor.id_articulo,  observacion: 'Reposición — OC #008' }),
   ]);
   console.log('✅ Movimientos de entrada creados (stock actualizado por trigger).');
 

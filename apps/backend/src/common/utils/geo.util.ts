@@ -47,7 +47,7 @@ export function fromPostGIS(point: any): { type: string; coordinates: [number, n
  *
  * @example
  *   transformGeoFields(grifo, ['coordenadas'])
- *   transformGeoFields(vehiculo, ['ubicacion'])
+ *   transformGeoFields(vehiculo, ['coordenadas'])
  */
 export function transformGeoFields(
   entity: Record<string, any>,

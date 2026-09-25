@@ -22,7 +22,7 @@ export class Vehiculo {
   @Column({ type: 'int' })
   anio: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'int', default: 0 })
   kilometraje: number;
 
   @Column({ type: 'enum', enum: EstadoVehiculo, default: EstadoVehiculo.OPERATIVO })
@@ -32,8 +32,8 @@ export class Vehiculo {
   id_compania: number;
 
   // Ubicación GPS actual del vehículo. Nullable: no todos los vehículos tienen GPS.
-  // Formato de entrada/salida: GeoJSON { type: 'Point', coordinates: [longitud, latitud] }
-  // PostGIS usa [longitud, latitud] (= [x, y]), NO [latitud, longitud].
+  // El cliente envía [latitud, longitud] → el service convierte a [longitud, latitud] para PostGIS.
+  // Ejemplo cliente: { "type": "Point", "coordinates": [-36.7196, -73.1168] }
   @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: true })
   coordenadas: object;
 

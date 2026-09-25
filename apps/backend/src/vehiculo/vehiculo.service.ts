@@ -16,14 +16,14 @@ export class VehiculoService {
   create(dto: CreateVehiculoDto) {
     const entity = this.repo.create({
       ...dto,
-      ...(dto.ubicacion && { ubicacion: toPostGIS(dto.ubicacion as any) }),
+      ...(dto.coordenadas && { coordenadas: toPostGIS(dto.coordenadas as any) }),
     });
     return this.repo.save(entity);
   }
 
   async findAll() {
     const items = await this.repo.find({ relations: { compania: true } });
-    return items.map((v) => ({ ...v, ubicacion: fromPostGIS(v.ubicacion) }));
+    return items.map((v) => ({ ...v, coordenadas: fromPostGIS(v.coordenadas) }));
   }
 
   async findOne(id: number) {
@@ -34,7 +34,7 @@ export class VehiculoService {
 
     if (!item) throw new NotFoundException(`Vehículo con id ${id} no encontrado`);
 
-    return { ...item, ubicacion: fromPostGIS(item.ubicacion) };
+    return { ...item, coordenadas: fromPostGIS(item.coordenadas) };
   }
 
   async update(id: number, dto: UpdateVehiculoDto) {
@@ -43,11 +43,11 @@ export class VehiculoService {
 
     Object.assign(item, {
       ...dto,
-      ...(dto.ubicacion && { ubicacion: toPostGIS(dto.ubicacion as any) }),
+      ...(dto.coordenadas && { coordenadas: toPostGIS(dto.coordenadas as any) }),
     });
 
     const saved = await this.repo.save(item);
-    return { ...saved, ubicacion: fromPostGIS(saved.ubicacion) };
+    return { ...saved, coordenadas: fromPostGIS(saved.coordenadas) };
   }
 
   async remove(id: number) {
@@ -56,4 +56,3 @@ export class VehiculoService {
     return this.repo.remove(item);
   }
 }
-

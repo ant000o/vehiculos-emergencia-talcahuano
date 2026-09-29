@@ -1,7 +1,141 @@
+.grifos-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
 .grifos-page__title {
   font-family: var(--font-display);
   color: var(--color-navy-900);
-  margin: 0 0 var(--space-1);
+  margin: 0;
+}
+
+.grifos-page__nuevo {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-white);
+  background-color: var(--color-navy-900);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.grifos-page__nuevo:hover {
+  background-color: var(--color-navy-700);
+}
+
+.grifos-page__ubicacion-direccion {
+  font-family: var(--font-body);
+  color: var(--color-ink-600);
+  margin: var(--space-3) 0 0;
+}
+
+.grifos-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+}
+
+.grifos-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-600);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3);
+}
+
+.grifos-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-ink-900);
+}
+
+.grifos-table__id {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.grifos-table__empty {
+  color: var(--color-ink-600);
+  font-family: var(--font-body);
+}
+
+.grifos-table__badge {
+  display: inline-block;
+  font-size: 0.8125rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.grifos-table__badge.is-operativo {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--color-success);
+}
+
+.grifos-table__badge.is-en_mantencion {
+  background: rgba(193, 39, 45, 0.08);
+  color: #b45309;
+}
+
+.grifos-table__badge.is-fuera_de_servicio {
+  background: rgba(193, 39, 45, 0.08);
+  color: var(--color-red-700);
+}
+
+.grifos-table__actions button {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.grifos-table__actions button:hover {
+  border-color: var(--color-navy-500);
+}
+
+.grifos-form__title {
+  font-family: var(--font-display);
+  color: var(--color-navy-900);
+  margin: 0 0 var(--space-4);
+}
+
+.grifos-form__alert {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-red-700);
+  background: rgba(193, 39, 45, 0.08);
+  border: 1px solid rgba(193, 39, 45, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.grifos-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.grifos-form__cancel {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
 }
 
 .grifos-page__subtitle {

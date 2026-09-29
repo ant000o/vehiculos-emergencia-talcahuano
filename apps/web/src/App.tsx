@@ -9,7 +9,7 @@ import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
 import { RegistrarEstadoPage } from './pages/registro-operatividad/RegistrarEstadoPage';
 import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
 import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
-import { MarcarEstadoGrifoPage } from './pages/grifos/MarcarEstadoGrifoPage';
+import { GrifosPage } from './pages/grifos/GrifosPage';
 
 function App() {
   return (
@@ -33,7 +33,7 @@ function App() {
             <Route
               path="registrar-estado"
               element={
-                <ProtectedRoute roles={['bombero']}>
+                <ProtectedRoute roles={['administrador', 'bombero']}>
                   <RegistrarEstadoPage />
                 </ProtectedRoute>
               }
@@ -41,7 +41,7 @@ function App() {
             <Route
               path="historial-estados"
               element={
-                <ProtectedRoute roles={['mecanico']}>
+                <ProtectedRoute roles={['administrador', 'mecanico']}>
                   <HistorialEstadosPage />
                 </ProtectedRoute>
               }
@@ -49,12 +49,12 @@ function App() {
             <Route
               path="mantenciones"
               element={
-                <ProtectedRoute roles={['mecanico']}>
+                <ProtectedRoute roles={['administrador', 'mecanico']}>
                   <MantencionesPage />
                 </ProtectedRoute>
               }
             />
-            <Route path="grifos" element={<MarcarEstadoGrifoPage />} />
+            <Route path="grifos" element={<GrifosPage />} />
             <Route
               path="usuarios"
               element={

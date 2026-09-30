@@ -13,7 +13,8 @@ import RegistroOperatividadFormScreen from '../screens/RegistroOperatividadFormS
 import MantencionesListScreen from '../screens/MantencionesListScreen';
 import MantencionFormScreen from '../screens/MantencionFormScreen';
 import MantencionDetalleScreen from '../screens/MantencionDetalleScreen';
-import RepuestoFormScreen from '../screens/RepuestoFormScreen';
+import GrifosListScreen from '../screens/GrifosListScreen';
+import GrifoDetalleScreen from '../screens/GrifoDetalleScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,7 +34,7 @@ export default function RootNavigator() {
       <Stack.Navigator>
         {usuario ? (
           <>
-            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen
               name="UsuariosList"
               component={UsuariosListScreen}
@@ -75,9 +76,14 @@ export default function RootNavigator() {
               options={{ title: 'Mantención' }}
             />
             <Stack.Screen
-              name="RepuestoForm"
-              component={RepuestoFormScreen}
-              options={{ title: 'Agregar repuesto' }}
+              name="GrifosList"
+              component={GrifosListScreen}
+              options={{ title: 'Grifos' }}
+            />
+            <Stack.Screen
+              name="GrifoDetalle"
+              component={GrifoDetalleScreen}
+              options={{ title: 'Grifo' }}
             />
           </>
         ) : (

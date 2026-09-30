@@ -23,7 +23,6 @@ export default function UsuariosListScreen({ navigation }: any) {
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Boton "+ Nuevo" en el header, con fondo rojo, solo visible para administrador.
   useEffect(() => {
     navigation.setOptions({
       headerRight: () =>
@@ -48,8 +47,6 @@ export default function UsuariosListScreen({ navigation }: any) {
     }
   }
 
-  // useFocusEffect (no useEffect) para que la lista se refresque
-  // automaticamente al volver desde crear/editar un usuario.
   useFocusEffect(
     useCallback(() => {
       setCargando(true);
@@ -72,8 +69,6 @@ export default function UsuariosListScreen({ navigation }: any) {
   }
 
   return (
-    // edges={['bottom']}: el header ya maneja el "top" (notch/isla dinamica),
-    // solo falta proteger la barra de gestos/home indicator de abajo.
     <SafeAreaView style={styles.container} edges={['bottom']}>
       {error && <Text style={styles.error}>{error}</Text>}
 
@@ -81,12 +76,17 @@ export default function UsuariosListScreen({ navigation }: any) {
         data={usuarios}
         keyExtractor={(item) => String(item.id_usuario)}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} />}
-        contentContainerStyle={usuarios.length === 0 && styles.listaVacia}
+        contentContainerStyle={[
+          styles.listaContenido,
+          usuarios.length === 0 && styles.listaVacia,
+        ]}
+        ItemSeparatorComponent={() => <View style={styles.separador} />}
         ListEmptyComponent={<Text style={styles.vacioTexto}>No hay usuarios registrados.</Text>}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
             disabled={!esAdmin}
+            activeOpacity={esAdmin ? 0.6 : 1}
             onPress={() => esAdmin && navigation.navigate('UsuarioForm', { usuario: item })}
           >
             <View style={styles.cardInfo}>
@@ -94,7 +94,7 @@ export default function UsuariosListScreen({ navigation }: any) {
                 {item.nombre} {item.apellidos}
               </Text>
               <Text style={styles.detalle}>{item.rol.nombre_rol} — {item.compania.nombre}</Text>
-              <Text style={styles.detalle}>{item.email}</Text>
+              <Text style={styles.email}>{item.email}</Text>
             </View>
             <View style={[styles.badge, item.estado_activo ? styles.badgeActivo : styles.badgeInactivo]}>
               <Text style={styles.badgeTexto}>{item.estado_activo ? 'Activo' : 'Deshabilitado'}</Text>
@@ -107,26 +107,34 @@ export default function UsuariosListScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
   centro: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   error: { color: '#B91C1C', textAlign: 'center', padding: 12 },
+  listaContenido: { padding: 12 },
   listaVacia: { flex: 1, justifyContent: 'center' },
   vacioTexto: { textAlign: 'center', color: '#666' },
+  separador: { height: 10 },
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
   },
-  cardInfo: { flex: 1 },
-  nombre: { fontSize: 16, fontWeight: '600' },
-  detalle: { fontSize: 13, color: '#666', marginTop: 2 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginLeft: 8 },
+  cardInfo: { flex: 1, paddingRight: 10 },
+  nombre: { fontSize: 19, fontWeight: '700', color: '#111827' },
+  detalle: { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  email: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
+  badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
   badgeActivo: { backgroundColor: '#DCFCE7' },
   badgeInactivo: { backgroundColor: '#FEE2E2' },
-  badgeTexto: { fontSize: 12, fontWeight: '600' },
+  badgeTexto: { fontSize: 12, fontWeight: '700' },
   headerBoton: {
     backgroundColor: '#B91C1C',
     paddingHorizontal: 12,

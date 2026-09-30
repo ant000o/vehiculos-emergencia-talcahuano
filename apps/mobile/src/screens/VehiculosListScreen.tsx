@@ -70,13 +70,18 @@ export default function VehiculosListScreen({ navigation }: any) {
         data={vehiculos}
         keyExtractor={(item) => String(item.id_vehiculo)}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} />}
-        contentContainerStyle={vehiculos.length === 0 && styles.listaVacia}
+        contentContainerStyle={[
+          styles.listaContenido,
+          vehiculos.length === 0 && styles.listaVacia,
+        ]}
+        ItemSeparatorComponent={() => <View style={styles.separador} />}
         ListEmptyComponent={<Text style={styles.vacioTexto}>No hay vehículos registrados.</Text>}
         renderItem={({ item }) => {
           const colores = ESTADO_COLOR[item.estado_operativo];
           return (
             <TouchableOpacity
               style={styles.card}
+              activeOpacity={0.6}
               onPress={() => navigation.navigate('VehiculoDetalle', { vehiculo: item })}
             >
               <View style={styles.cardInfo}>
@@ -84,7 +89,7 @@ export default function VehiculosListScreen({ navigation }: any) {
                 <Text style={styles.detalle}>
                   {item.marca} {item.modelo} — {item.anio}
                 </Text>
-                <Text style={styles.detalle}>{item.compania.nombre}</Text>
+                <Text style={styles.compania}>{item.compania.nombre}</Text>
               </View>
               <View style={[styles.badge, { backgroundColor: colores.bg }]}>
                 <Text style={[styles.badgeTexto, { color: colores.texto }]}>
@@ -100,22 +105,30 @@ export default function VehiculosListScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
   centro: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   error: { color: '#B91C1C', textAlign: 'center', padding: 12 },
+  listaContenido: { padding: 12 },
   listaVacia: { flex: 1, justifyContent: 'center' },
   vacioTexto: { textAlign: 'center', color: '#666' },
+  separador: { height: 10 },
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
   },
-  cardInfo: { flex: 1 },
-  patente: { fontSize: 18, fontWeight: '700' },
-  detalle: { fontSize: 13, color: '#666', marginTop: 2 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginLeft: 8 },
-  badgeTexto: { fontSize: 12, fontWeight: '600' },
+  cardInfo: { flex: 1, paddingRight: 10 },
+  patente: { fontSize: 20, fontWeight: '800', color: '#111827' },
+  detalle: { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  compania: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
+  badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
+  badgeTexto: { fontSize: 12, fontWeight: '700' },
 });

@@ -18,19 +18,29 @@ const ESTADO_COLOR: Record<EstadoVehiculo, { bg: string; texto: string }> = {
   [EstadoVehiculo.FUERA_DE_SERVICIO]: { bg: '#FEE2E2', texto: '#991B1B' },
 };
 
-// Barra simple de nivel (0-100), sin librerías externas.
-function BarraNivel({ label, valor }: { label: string; valor: number | null }) {
+function NivelFila({
+  icono,
+  label,
+  valor,
+}: {
+  icono: string;
+  label: string;
+  valor: number | null;
+}) {
   const porcentaje = valor ?? 0;
-  const color = porcentaje < 20 ? '#DC2626' : porcentaje < 50 ? '#D97706' : '#16A34A';
+  const color = valor === null ? '#D1D5DB' : porcentaje < 20 ? '#DC2626' : porcentaje < 50 ? '#D97706' : '#16A34A';
 
   return (
     <View style={styles.nivelFila}>
-      <View style={styles.nivelHeader}>
-        <Text style={styles.nivelLabel}>{label}</Text>
-        <Text style={styles.nivelValor}>{valor === null ? 'Sin datos' : `${valor}%`}</Text>
-      </View>
-      <View style={styles.nivelTrack}>
-        <View style={[styles.nivelFill, { width: `${porcentaje}%`, backgroundColor: color }]} />
+      <Text style={styles.nivelIcono}>{icono}</Text>
+      <View style={styles.nivelCuerpo}>
+        <View style={styles.nivelHeader}>
+          <Text style={styles.nivelLabel}>{label}</Text>
+          <Text style={styles.nivelValor}>{valor === null ? 'Sin datos' : `${valor}%`}</Text>
+        </View>
+        <View style={styles.nivelTrack}>
+          <View style={[styles.nivelFill, { width: `${porcentaje}%`, backgroundColor: color }]} />
+        </View>
       </View>
     </View>
   );
@@ -44,7 +54,12 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
   const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
-    navigation.setOptions({ title: vehiculo.patente });
+    navigation.setOptions({
+      title: 'Detalles del vehículo',
+      headerStyle: { backgroundColor: '#B91C1C' },
+      headerTintColor: '#fff',
+      headerTitleStyle: { fontWeight: '700' },
+    });
   }, []);
 
   useFocusEffect(
@@ -79,6 +94,7 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
         <Text style={styles.subtitulo}>
           {vehiculo.marca} {vehiculo.modelo} — {vehiculo.anio}
         </Text>
+        <Text style={styles.compania}>{vehiculo.compania.nombre}</Text>
 
         <View style={[styles.badge, { backgroundColor: colores.bg }]}>
           <Text style={[styles.badgeTexto, { color: colores.texto }]}>
@@ -95,14 +111,14 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
           </Text>
 
           {cargando ? (
-            <ActivityIndicator color="#B91C1C" style={{ marginVertical: 12 }} />
+            <ActivityIndicator color="#B91C1C" style={{ marginVertical: 16 }} />
           ) : error ? (
             <Text style={styles.error}>{error}</Text>
           ) : (
             <>
-              <BarraNivel label="Combustible" valor={ultimoRegistro?.nivel_combustible ?? null} />
-              <BarraNivel label="Agua" valor={ultimoRegistro?.nivel_agua ?? null} />
-              <BarraNivel label="Aceite" valor={ultimoRegistro?.nivel_aceite ?? null} />
+              <NivelFila icono="⛽" label="Combustible" valor={ultimoRegistro?.nivel_combustible ?? null} />
+              <NivelFila icono="💧" label="Agua" valor={ultimoRegistro?.nivel_agua ?? null} />
+              <NivelFila icono="🛢️" label="Aceite" valor={ultimoRegistro?.nivel_aceite ?? null} />
 
               {ultimoRegistro?.observaciones ? (
                 <View style={styles.observacionesBox}>
@@ -134,34 +150,48 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
   contenido: { padding: 20, paddingBottom: 40 },
-  patente: { fontSize: 28, fontWeight: '800' },
-  subtitulo: { fontSize: 14, color: '#666', marginTop: 2, marginBottom: 12 },
-  badge: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, marginBottom: 20 },
+  patente: { fontSize: 30, fontWeight: '800', color: '#111827' },
+  subtitulo: { fontSize: 15, color: '#4B5563', marginTop: 2 },
+  compania: { fontSize: 13, color: '#9CA3AF', marginBottom: 14 },
+  badge: { alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, marginBottom: 20 },
   badgeTexto: { fontSize: 13, fontWeight: '700' },
-  card: { backgroundColor: '#F3F4F6', borderRadius: 12, padding: 16, marginBottom: 20 },
-  cardTitulo: { fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  cardSubtitulo: { fontSize: 12, color: '#666', marginBottom: 12 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  cardTitulo: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 2 },
+  cardSubtitulo: { fontSize: 12, color: '#9CA3AF', marginBottom: 16 },
   error: { color: '#B91C1C', textAlign: 'center', marginVertical: 8 },
-  nivelFila: { marginBottom: 14 },
+  nivelFila: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  nivelIcono: { fontSize: 22, marginRight: 12 },
+  nivelCuerpo: { flex: 1 },
   nivelHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  nivelLabel: { fontSize: 13, fontWeight: '600', color: '#333' },
+  nivelLabel: { fontSize: 14, fontWeight: '600', color: '#333' },
   nivelValor: { fontSize: 13, color: '#666' },
   nivelTrack: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
   nivelFill: { height: '100%', borderRadius: 4 },
-  observacionesBox: { marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
-  observacionesLabel: { fontSize: 12, fontWeight: '600', color: '#333', marginBottom: 4 },
+  observacionesBox: { marginTop: 4, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
+  observacionesLabel: { fontSize: 12, fontWeight: '700', color: '#333', marginBottom: 4 },
   observacionesTexto: { fontSize: 13, color: '#444' },
-  boton: { backgroundColor: '#B91C1C', borderRadius: 8, padding: 14, alignItems: 'center' },
-  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  boton: { backgroundColor: '#B91C1C', borderRadius: 12, padding: 15, alignItems: 'center' },
+  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
   botonSecundario: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#B91C1C',
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 12,
+    padding: 15,
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: '#fff',
   },
-  botonSecundarioTexto: { color: '#B91C1C', fontSize: 15, fontWeight: '600' },
+  botonSecundarioTexto: { color: '#B91C1C', fontSize: 15, fontWeight: '700' },
 });

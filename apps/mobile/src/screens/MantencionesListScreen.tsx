@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -48,7 +49,9 @@ export default function MantencionesListScreen({ route, navigation }: any) {
       headerRight: () => (
         <TouchableOpacity
           style={styles.headerBoton}
-          onPress={() => navigation.navigate('MantencionForm', { vehiculo })}
+          onPress={() => {
+            navigation.navigate('MantencionForm', { vehiculo });
+          }}
         >
           <Text style={styles.headerBotonTexto}>+ Nueva</Text>
         </TouchableOpacity>

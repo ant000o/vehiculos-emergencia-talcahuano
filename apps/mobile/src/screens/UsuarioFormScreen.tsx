@@ -49,7 +49,7 @@ export default function UsuarioFormScreen({ route, navigation }: any) {
           if (companiasData[0]) setIdCompania(companiasData[0].id_compania);
         }
       } catch {
-        setError('No se pudieron cargar los catalogos de roles y companias.');
+        setError('No se pudieron cargar los catálogos de roles y compañías.');
       } finally {
         setCargandoCatalogos(false);
       }
@@ -142,60 +142,67 @@ export default function UsuarioFormScreen({ route, navigation }: any) {
   }
 
   return (
-    // edges={['bottom']}: el header del stack ya protege la parte de arriba.
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contenido}>
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Text style={styles.label}>RUT</Text>
-        <TextInput style={styles.input} value={rut} onChangeText={setRut} placeholder="12345678-9" />
+        <View style={styles.card}>
+          <Text style={styles.cardTitulo}>Datos personales</Text>
 
-        <Text style={styles.label}>Nombre</Text>
-        <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
+          <Text style={styles.label}>RUT</Text>
+          <TextInput style={styles.input} value={rut} onChangeText={setRut} placeholder="12345678-9" />
 
-        <Text style={styles.label}>Apellidos</Text>
-        <TextInput style={styles.input} value={apellidos} onChangeText={setApellidos} />
+          <Text style={styles.label}>Nombre</Text>
+          <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
 
-        <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <Text style={styles.label}>Apellidos</Text>
+          <TextInput style={styles.input} value={apellidos} onChangeText={setApellidos} />
 
-        {!esEdicion && (
-          <>
-            <Text style={styles.label}>Contraseña</Text>
-            <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
-          </>
-        )}
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-        <Text style={styles.label}>Rol</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker selectedValue={idRol} onValueChange={(v) => setIdRol(v)}>
-            {roles.map((r) => (
-              <Picker.Item key={r.id_rol} label={r.nombre_rol} value={r.id_rol} />
-            ))}
-          </Picker>
+          {!esEdicion && (
+            <>
+              <Text style={styles.label}>Contraseña</Text>
+              <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
+            </>
+          )}
         </View>
 
-        <Text style={styles.label}>Compañía</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker selectedValue={idCompania} onValueChange={(v) => setIdCompania(v)}>
-            {companias.map((c) => (
-              <Picker.Item key={c.id_compania} label={c.nombre} value={c.id_compania} />
-            ))}
-          </Picker>
-        </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitulo}>Rol y compañía</Text>
 
-        {esEdicion && (
-          <View style={styles.switchRow}>
-            <Text style={styles.label}>Usuario activo</Text>
-            <Switch value={estadoActivo} onValueChange={setEstadoActivo} />
+          <Text style={styles.label}>Rol</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker selectedValue={idRol} onValueChange={(v) => setIdRol(v)}>
+              {roles.map((r) => (
+                <Picker.Item key={r.id_rol} label={r.nombre_rol} value={r.id_rol} />
+              ))}
+            </Picker>
           </View>
-        )}
+
+          <Text style={styles.label}>Compañía</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker selectedValue={idCompania} onValueChange={(v) => setIdCompania(v)}>
+              {companias.map((c) => (
+                <Picker.Item key={c.id_compania} label={c.nombre} value={c.id_compania} />
+              ))}
+            </Picker>
+          </View>
+
+          {esEdicion && (
+            <View style={styles.switchRow}>
+              <Text style={styles.label}>Usuario activo</Text>
+              <Switch value={estadoActivo} onValueChange={setEstadoActivo} />
+            </View>
+          )}
+        </View>
 
         <TouchableOpacity
           style={[styles.boton, guardando && styles.botonDeshabilitado]}
@@ -217,41 +224,55 @@ export default function UsuarioFormScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, backgroundColor: '#fff' },
-  contenido: { padding: 20, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  contenido: { padding: 16, paddingBottom: 40 },
   centro: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   error: { color: '#B91C1C', marginBottom: 12, textAlign: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: '#333', marginTop: 12, marginBottom: 4 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  cardTitulo: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 4 },
+  label: { fontSize: 13, fontWeight: '600', color: '#333', marginTop: 14, marginBottom: 6 },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#E5E7EB',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
+    backgroundColor: '#fff',
   },
-  pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8 },
+  pickerWrapper: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, backgroundColor: '#fff' },
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 18,
   },
   boton: {
     backgroundColor: '#B91C1C',
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 12,
+    padding: 15,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 4,
   },
   botonDeshabilitado: { opacity: 0.6 },
-  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
   botonSecundario: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#B91C1C',
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 12,
+    padding: 15,
     alignItems: 'center',
     marginTop: 12,
+    backgroundColor: '#fff',
   },
-  botonSecundarioTexto: { color: '#B91C1C', fontSize: 15, fontWeight: '600' },
+  botonSecundarioTexto: { color: '#B91C1C', fontSize: 15, fontWeight: '700' },
 });

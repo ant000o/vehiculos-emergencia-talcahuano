@@ -13,7 +13,6 @@ import { useAuth } from '../context/AuthContext';
 import { crearRegistroOperatividad } from '../services/registroOperatividad.service';
 import { Vehiculo } from '../types/vehiculo';
 
-// Valida que el texto sea un número entre 0 y 100 (o vacío, ya que los niveles son opcionales).
 function esNivelValido(texto: string): boolean {
   if (texto.trim() === '') return true;
   const n = Number(texto);
@@ -58,9 +57,6 @@ export default function RegistroOperatividadFormScreen({ route, navigation }: an
       return;
     }
 
-    // Chequeo defensivo: en teoría el usuario de sesión siempre trae id_usuario
-    // (viene del login), pero preferimos avisar en vez de mandar un valor
-    // undefined al backend si algo saliera mal restaurando la sesión.
     if (!usuario?.id_usuario) {
       setError('No se pudo identificar al usuario de la sesión. Vuelve a iniciar sesión.');
       return;
@@ -91,42 +87,48 @@ export default function RegistroOperatividadFormScreen({ route, navigation }: an
       <ScrollView style={styles.container} contentContainerStyle={styles.contenido}>
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Text style={styles.label}>Nivel de combustible (%)</Text>
-        <TextInput
-          style={styles.input}
-          value={nivelCombustible}
-          onChangeText={setNivelCombustible}
-          keyboardType="numeric"
-          placeholder="0 - 100"
-        />
+        <View style={styles.card}>
+          <Text style={styles.cardTitulo}>Niveles del vehículo</Text>
 
-        <Text style={styles.label}>Nivel de agua (%)</Text>
-        <TextInput
-          style={styles.input}
-          value={nivelAgua}
-          onChangeText={setNivelAgua}
-          keyboardType="numeric"
-          placeholder="0 - 100"
-        />
+          <Text style={styles.label}>Nivel de combustible (%)</Text>
+          <TextInput
+            style={styles.input}
+            value={nivelCombustible}
+            onChangeText={setNivelCombustible}
+            keyboardType="numeric"
+            placeholder="0 - 100"
+          />
 
-        <Text style={styles.label}>Nivel de aceite (%)</Text>
-        <TextInput
-          style={styles.input}
-          value={nivelAceite}
-          onChangeText={setNivelAceite}
-          keyboardType="numeric"
-          placeholder="0 - 100"
-        />
+          <Text style={styles.label}>Nivel de agua (%)</Text>
+          <TextInput
+            style={styles.input}
+            value={nivelAgua}
+            onChangeText={setNivelAgua}
+            keyboardType="numeric"
+            placeholder="0 - 100"
+          />
 
-        <Text style={styles.label}>Observaciones</Text>
-        <TextInput
-          style={[styles.input, styles.inputMultilinea]}
-          value={observaciones}
-          onChangeText={setObservaciones}
-          multiline
-          numberOfLines={4}
-          placeholder="Detalles adicionales de la revisión (opcional)"
-        />
+          <Text style={styles.label}>Nivel de aceite (%)</Text>
+          <TextInput
+            style={styles.input}
+            value={nivelAceite}
+            onChangeText={setNivelAceite}
+            keyboardType="numeric"
+            placeholder="0 - 100"
+          />
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitulo}>Observaciones</Text>
+          <TextInput
+            style={[styles.input, styles.inputMultilinea]}
+            value={observaciones}
+            onChangeText={setObservaciones}
+            multiline
+            numberOfLines={4}
+            placeholder="Detalles adicionales de la revisión (opcional)"
+          />
+        </View>
 
         <TouchableOpacity
           style={[styles.boton, guardando && styles.botonDeshabilitado]}
@@ -142,25 +144,38 @@ export default function RegistroOperatividadFormScreen({ route, navigation }: an
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1 },
-  contenido: { padding: 20, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  contenido: { padding: 16, paddingBottom: 40 },
   error: { color: '#B91C1C', marginBottom: 12, textAlign: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: '#333', marginTop: 12, marginBottom: 4 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  cardTitulo: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 4 },
+  label: { fontSize: 13, fontWeight: '600', color: '#333', marginTop: 14, marginBottom: 6 },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#E5E7EB',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
+    backgroundColor: '#fff',
   },
   inputMultilinea: { minHeight: 90, textAlignVertical: 'top' },
   boton: {
     backgroundColor: '#B91C1C',
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 12,
+    padding: 15,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 4,
   },
   botonDeshabilitado: { opacity: 0.6 },
-  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

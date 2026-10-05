@@ -22,17 +22,20 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Registrar Estado',
     path: '/registrar-estado',
-    roles: ['bombero'],
+    // Admin puede ver y hacer todo lo que ve un bombero, capitán o mecánico
+    // desde la web (HU actualizada en clase: solo admin/capitán/mecánico
+    // usan computador, los bomberos operan desde la app).
+    roles: ['administrador', 'bombero'],
   },
   {
     label: 'Historial de Estados',
     path: '/historial-estados',
-    roles: ['mecanico'],
+    roles: ['administrador', 'mecanico'],
   },
   {
     label: 'Mantenciones',
     path: '/mantenciones',
-    roles: ['mecanico'],
+    roles: ['administrador', 'mecanico'],
   },
   {
     label: 'Grifos',

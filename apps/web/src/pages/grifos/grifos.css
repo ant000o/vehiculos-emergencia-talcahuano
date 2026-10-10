@@ -33,6 +33,48 @@
   margin: var(--space-3) 0 0;
 }
 
+.grifos-page__filtros {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.grifos-page__busqueda {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.grifos-page__busqueda:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.grifos-page__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-ink-900);
+  white-space: nowrap;
+}
+
+.grifos-page__contador {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+  margin: 0 0 var(--space-3);
+}
+
 .grifos-table {
   width: 100%;
   border-collapse: collapse;

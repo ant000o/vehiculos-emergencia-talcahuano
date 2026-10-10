@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import {
   listarGrifos,
@@ -34,6 +34,23 @@ export function GrifosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // HU-14: búsqueda por identificador o dirección + exclusión de grifos "Malos"
+  // (interpretado como estado_operativo = 'fuera_de_servicio').
+  const [busqueda, setBusqueda] = useState('');
+  const [excluirMalos, setExcluirMalos] = useState(false);
+
+  const grifosFiltrados = useMemo(() => {
+    const texto = busqueda.trim().toLowerCase();
+    return grifos.filter((g) => {
+      const coincideTexto =
+        texto === '' ||
+        String(g.id_grifo).includes(texto) ||
+        (g.direccion ?? '').toLowerCase().includes(texto);
+      const noEsMalo = !excluirMalos || g.estado_operativo !== 'fuera_de_servicio';
+      return coincideTexto && noEsMalo;
+    });
+  }, [grifos, busqueda, excluirMalos]);
 
   useEffect(() => {
     async function cargarDatos() {
@@ -84,11 +101,37 @@ export function GrifosPage() {
       </div>
 
       {vista.modo === 'lista' && (
-        <GrifosTable
-          grifos={grifos}
-          companias={companias}
-          onVerUbicacion={(grifo) => setGrifoUbicacion(grifo)}
-        />
+        <>
+          <div className="grifos-page__filtros">
+            <input
+              type="search"
+              className="grifos-page__busqueda"
+              placeholder="Buscar por N° de grifo o dirección…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              aria-label="Buscar grifo por identificador o dirección"
+            />
+            <label className="grifos-page__checkbox">
+              <input
+                type="checkbox"
+                checked={excluirMalos}
+                onChange={(e) => setExcluirMalos(e.target.checked)}
+              />
+              Ocultar grifos fuera de servicio
+            </label>
+          </div>
+          {(busqueda || excluirMalos) && (
+            <p className="grifos-page__contador">
+              {grifosFiltrados.length} de {grifos.length} grifos
+            </p>
+          )}
+
+          <GrifosTable
+            grifos={grifosFiltrados}
+            companias={companias}
+            onVerUbicacion={(grifo) => setGrifoUbicacion(grifo)}
+          />
+        </>
       )}
 
       {vista.modo === 'crear' && (

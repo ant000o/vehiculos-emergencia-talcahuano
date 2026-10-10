@@ -27,6 +27,49 @@
   background-color: var(--color-navy-700);
 }
 
+.vehiculos-page__filtros {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.vehiculos-page__busqueda {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.vehiculos-page__filtro-estado {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  min-width: 180px;
+}
+
+.vehiculos-page__busqueda:focus-visible,
+.vehiculos-page__filtro-estado:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.vehiculos-page__contador {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+  margin: 0 0 var(--space-3);
+}
+
 .vehiculos-table {
   width: 100%;
   border-collapse: collapse;

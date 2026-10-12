@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { listarVehiculos, type Vehiculo } from '../../services/vehiculos';
 import { crearRegistroOperatividad } from '../../services/registroOperatividad';
+import { NivelBadge } from '../../components/NivelBadge';
 import './registro-operatividad.css';
 
 export function RegistrarEstadoPage() {
@@ -21,10 +22,15 @@ export function RegistrarEstadoPage() {
 
   useEffect(() => {
     async function cargar() {
-      const lista = await listarVehiculos();
-      setVehiculos(lista);
-      setIdVehiculo(lista[0]?.id_vehiculo ?? null);
-      setIsLoading(false);
+      try {
+        const lista = await listarVehiculos();
+        setVehiculos(lista);
+        setIdVehiculo(lista[0]?.id_vehiculo ?? null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     }
     cargar();
   }, []);
@@ -59,19 +65,19 @@ export function RegistrarEstadoPage() {
   }
 
   if (isLoading) {
-    return <p>Cargando vehículos…</p>;
+    return <p style={{ color: 'var(--color-ink-600)', fontFamily: 'var(--font-body)' }}>Cargando vehículos…</p>;
   }
 
   return (
     <div className="registro-page">
-      <h1 className="registro-page__title">Registrar estado del vehículo</h1>
+      <h1 className="registro-page__title">Registrar Estado del Vehículo</h1>
       <p className="registro-page__subtitle">
-        Reporta el estado del vehículo antes o después de su uso.
+        Reporta los niveles de operatividad y estado general del vehículo antes o después de un servicio.
       </p>
 
       {ultimoRegistro && (
         <p className="registro-page__success" role="status">
-          ✓ Registro guardado — {ultimoRegistro}
+          ✓ Registro guardado exitosamente — {ultimoRegistro}
         </p>
       )}
       {error && (
@@ -82,7 +88,7 @@ export function RegistrarEstadoPage() {
 
       <form className="registro-form" onSubmit={handleSubmit}>
         <div className="registro-form__field">
-          <label htmlFor="vehiculo">Vehículo</label>
+          <label htmlFor="vehiculo">Vehículo a inspeccionar</label>
           <select
             id="vehiculo"
             value={idVehiculo ?? ''}
@@ -96,9 +102,11 @@ export function RegistrarEstadoPage() {
           </select>
         </div>
 
+        {/* Nivel de Combustible */}
         <div className="registro-form__slider">
-          <label htmlFor="combustible">
-            Nivel de combustible <strong>{nivelCombustible}%</strong>
+          <label htmlFor="combustible" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>Nivel de Combustible</span>
+            <NivelBadge valor={nivelCombustible} mostrarEtiqueta />
           </label>
           <input
             id="combustible"
@@ -110,9 +118,11 @@ export function RegistrarEstadoPage() {
           />
         </div>
 
+        {/* Nivel de Agua */}
         <div className="registro-form__slider">
-          <label htmlFor="agua">
-            Nivel de agua <strong>{nivelAgua}%</strong>
+          <label htmlFor="agua" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>Nivel de Agua</span>
+            <NivelBadge valor={nivelAgua} mostrarEtiqueta />
           </label>
           <input
             id="agua"
@@ -124,9 +134,11 @@ export function RegistrarEstadoPage() {
           />
         </div>
 
+        {/* Nivel de Aceite */}
         <div className="registro-form__slider">
-          <label htmlFor="aceite">
-            Nivel de aceite <strong>{nivelAceite}%</strong>
+          <label htmlFor="aceite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>Nivel de Aceite</span>
+            <NivelBadge valor={nivelAceite} mostrarEtiqueta />
           </label>
           <input
             id="aceite"
@@ -139,18 +151,18 @@ export function RegistrarEstadoPage() {
         </div>
 
         <div className="registro-form__field">
-          <label htmlFor="observaciones">Observaciones</label>
+          <label htmlFor="observaciones">Observaciones adicionales</label>
           <textarea
             id="observaciones"
             rows={3}
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
-            placeholder="Ej: se escucha ruido extraño en el motor…"
+            placeholder="Ej: neumáticos en buen estado, nivel de aceite revisado en frío..."
           />
         </div>
 
         <button type="submit" className="registro-form__submit" disabled={isSaving || !idVehiculo}>
-          {isSaving ? 'Guardando…' : 'Registrar estado'}
+          {isSaving ? 'Guardando registro…' : 'Guardar Registro de Operatividad'}
         </button>
       </form>
     </div>

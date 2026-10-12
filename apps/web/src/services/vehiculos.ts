@@ -1,9 +1,4 @@
-/**
- * Servicio de vehículos (HU-03) — conectado al backend real.
- * Reutiliza listarCompanias() de usuarios.ts para no duplicar esa llamada.
- */
-
-import { apiClient } from './apiClient';
+﻿import { apiClient } from './apiClient';
 import { listarCompanias, type CompaniaOption } from './usuarios';
 
 export type { CompaniaOption };
@@ -17,39 +12,25 @@ export interface Vehiculo {
   marca: string;
   modelo: string;
   anio: number;
-  // El backend usa bigint para este campo; el driver de Postgres a veces
-  // lo entrega como string para no perder precisión. Lo tratamos como tal
-  // al mostrarlo (ver VehiculosTable).
   kilometraje: number | string;
   estado_operativo: EstadoVehiculo;
   id_compania: number;
+  coordenadas?: any;
 }
 
-export interface CrearVehiculoInput {
-  patente: string;
-  marca: string;
-  modelo: string;
-  anio: number;
-  kilometraje?: number;
-  estado_operativo?: EstadoVehiculo;
-  id_compania: number;
+export interface PaginatedVehiculos {
+  data: Vehiculo[];
+  total: number;
+  page: number;
 }
 
-// La patente no se edita: es el identificador único del vehículo, no forma
-// parte de su "ficha técnica" en el sentido que pide la HU-04.
-export type EditarVehiculoInput = Omit<CrearVehiculoInput, 'patente'>;
+export const listarVehiculos = (params?: { estado?: string; q?: string }) => {
+  const url = new URL(import.meta.env.VITE_API_URL + '/vehiculos');
+  if (params?.estado) url.searchParams.append('estado', params.estado);
+  if (params?.q) url.searchParams.append('q', params.q);
+  return apiClient.get<PaginatedVehiculos>(url.pathname + url.search).then(r => r.data);
+};
 
-export async function listarVehiculos(): Promise<Vehiculo[]> {
-  return apiClient.get<Vehiculo[]>('/vehiculos');
-}
+export const crearVehiculo = (body: unknown) => apiClient.post<Vehiculo>('/vehiculos', body);
+export const editarVehiculo = (id: number, body: unknown) => apiClient.patch<Vehiculo>(`/vehiculos/${id}`, body);
 
-export async function crearVehiculo(input: CrearVehiculoInput): Promise<Vehiculo> {
-  return apiClient.post<Vehiculo>('/vehiculos', input);
-}
-
-export async function editarVehiculo(
-  id_vehiculo: number,
-  input: EditarVehiculoInput,
-): Promise<Vehiculo> {
-  return apiClient.patch<Vehiculo>(`/vehiculos/${id_vehiculo}`, input);
-}

@@ -1,17 +1,22 @@
 /**
  * Servicio de mantenciones — conectado al backend real.
- *
- * Detalle importante: el backend solo cambia el estado del vehículo a
- * "operativo" dentro de update() cuando estado_mantencion pasa a
- * 'finalizada' o 'cancelada' — NO ocurre si se crea la mantención ya con
- * ese estado. Por eso "registrar una mantención finalizada" son en
- * realidad 2 llamadas: crear, y luego marcar como finalizada.
  */
 
 import { apiClient } from './apiClient';
 
-export type TipoMantencion = 'preventiva' | 'correctiva' | 'revision';
+export type TipoMantencion = 'preventiva' | 'correctiva' | 'revision' | 'emergencia';
 export type EstadoMantencion = 'pendiente' | 'en_proceso' | 'finalizada' | 'cancelada';
+
+export interface DetalleRepuestoEnMantencion {
+  id_detalle: number;
+  cantidad: number;
+  costo_unitario_historico: number | string;
+  id_articulo: number;
+  articulo?: {
+    id_articulo: number;
+    nombre_articulo: string;
+  };
+}
 
 export interface Mantencion {
   id_mantencion: number;
@@ -24,40 +29,70 @@ export interface Mantencion {
   id_vehiculo: number;
   id_usuario_mecanico: number | null;
   taller_externo: string | null;
-  vehiculo?: { id_vehiculo: number; patente: string };
+  vehiculo?: { id_vehiculo: number; patente: string; marca?: string; modelo?: string };
+  usuarioMecanico?: { id_usuario: number; nombre: string; apellidos: string };
+  detalles_articulos?: DetalleRepuestoEnMantencion[];
 }
 
-export interface RegistrarMantencionPreventivaInput {
-  fecha_ingreso: string;
-  fecha_salida: string;
+export interface CrearMantencionInput {
+  tipo_mantencion: TipoMantencion;
+  id_vehiculo: number;
   descripcion_falla?: string;
   costo_mano_obra?: number;
-  id_vehiculo: number;
-  id_usuario_mecanico: number;
+  estado_mantencion?: EstadoMantencion;
+  id_usuario_mecanico?: number;
+  taller_externo?: string;
+  fecha_ingreso?: string;
+  fecha_salida?: string;
 }
 
-export interface RegistrarMantencionReactivaInput {
+export async function listarMantenciones(params?: {
+  id_vehiculo?: number;
+  estado?: string;
+  tipo?: string;
+}): Promise<Mantencion[]> {
+  const query = new URLSearchParams();
+  if (params?.id_vehiculo) query.append('id_vehiculo', String(params.id_vehiculo));
+  if (params?.estado) query.append('estado', params.estado);
+  if (params?.tipo) query.append('tipo', params.tipo);
+
+  const qs = query.toString();
+  return apiClient.get<Mantencion[]>(`/mantenciones${qs ? `?${qs}` : ''}`);
+}
+
+export async function obtenerMantencion(id: number): Promise<Mantencion> {
+  return apiClient.get<Mantencion>(`/mantenciones/${id}`);
+}
+
+export async function crearMantencion(input: CrearMantencionInput): Promise<Mantencion> {
+  return apiClient.post<Mantencion>('/mantenciones', {
+    ...input,
+    fecha_ingreso: input.fecha_ingreso || new Date().toISOString(),
+    costo_mano_obra: Number(input.costo_mano_obra ?? 0),
+  });
+}
+
+export async function actualizarEstadoMantencion(
+  id: number,
+  estado: EstadoMantencion,
+  fecha_salida?: string,
+): Promise<Mantencion> {
+  return apiClient.patch<Mantencion>(`/mantenciones/${id}`, {
+    estado_mantencion: estado,
+    ...(fecha_salida ? { fecha_salida } : {}),
+  });
+}
+
+// Funciones de compatibilidad
+export async function registrarMantencionReactiva(input: {
   descripcion_falla: string;
   costo_mano_obra: number;
   id_vehiculo: number;
   id_usuario_mecanico: number;
-}
-
-export async function listarMantenciones(): Promise<Mantencion[]> {
-  return apiClient.get<Mantencion[]>('/mantenciones');
-}
-
-// Una falla reactiva se REPORTA, no se cierra en el mismo paso (a diferencia
-// de la preventiva): por eso es una sola llamada create(), sin el segundo
-// PATCH a 'finalizada'. El vehículo puede estar en cualquier estado — la
-// falla recién se está documentando ahora.
-export async function registrarMantencionReactiva(
-  input: RegistrarMantencionReactivaInput,
-): Promise<Mantencion> {
-  return apiClient.post<Mantencion>('/mantenciones', {
+}): Promise<Mantencion> {
+  return crearMantencion({
     tipo_mantencion: 'correctiva',
     estado_mantencion: 'en_proceso',
-    fecha_ingreso: new Date().toISOString(),
     descripcion_falla: input.descripcion_falla,
     costo_mano_obra: input.costo_mano_obra,
     id_vehiculo: input.id_vehiculo,
@@ -65,10 +100,15 @@ export async function registrarMantencionReactiva(
   });
 }
 
-export async function registrarMantencionPreventivaFinalizada(
-  input: RegistrarMantencionPreventivaInput,
-): Promise<Mantencion> {
-  const creada = await apiClient.post<Mantencion>('/mantenciones', {
+export async function registrarMantencionPreventivaFinalizada(input: {
+  fecha_ingreso: string;
+  fecha_salida: string;
+  descripcion_falla?: string;
+  costo_mano_obra?: number;
+  id_vehiculo: number;
+  id_usuario_mecanico: number;
+}): Promise<Mantencion> {
+  const creada = await crearMantencion({
     tipo_mantencion: 'preventiva',
     fecha_ingreso: input.fecha_ingreso,
     fecha_salida: input.fecha_salida,
@@ -77,10 +117,5 @@ export async function registrarMantencionPreventivaFinalizada(
     id_vehiculo: input.id_vehiculo,
     id_usuario_mecanico: input.id_usuario_mecanico,
   });
-
-  // Este segundo llamado es el que realmente dispara el cambio automático
-  // de estado del vehículo a "operativo" en el backend.
-  return apiClient.patch<Mantencion>(`/mantenciones/${creada.id_mantencion}`, {
-    estado_mantencion: 'finalizada',
-  });
+  return actualizarEstadoMantencion(creada.id_mantencion, 'finalizada', input.fecha_salida);
 }

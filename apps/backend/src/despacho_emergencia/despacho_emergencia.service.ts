@@ -5,15 +5,17 @@ import { DespachoEmergencia } from './entities/despacho_emergencia.entity';
 import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dto';
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
 import { toPostGIS, fromPostGIS } from '../common/utils/geo.util';
+import { NotificacionesGateway } from '../notificaciones/notificaciones.gateway';
 
 @Injectable()
 export class DespachoEmergenciaService {
   constructor(
     @InjectRepository(DespachoEmergencia)
     private readonly repo: Repository<DespachoEmergencia>,
+    private readonly notificacionesGateway: NotificacionesGateway,
   ) {}
 
-  create(dto: CreateDespachoEmergenciaDto) {
+  async create(dto: CreateDespachoEmergenciaDto) {
     const despacho = this.repo.create({
       ...dto,
       fecha_hora_despacho: dto.fecha_hora_despacho
@@ -22,7 +24,15 @@ export class DespachoEmergenciaService {
       coordenada_destino: toPostGIS(dto.coordenada_destino as any),
     });
 
-    return this.repo.save(despacho);
+    const saved = await this.repo.save(despacho);
+    
+    // Buscar con relaciones para enviar todo el contexto por socket
+    const completo = await this.findOne(saved.id_despacho);
+    
+    // HU-20 / HU-21: Notificar a todos los clientes (especialmente app movil)
+    this.notificacionesGateway.emitNuevoDespacho(completo);
+
+    return saved;
   }
 
   async findAll() {
@@ -77,4 +87,5 @@ export class DespachoEmergenciaService {
     return this.repo.remove(item);
   }
 }
+
 

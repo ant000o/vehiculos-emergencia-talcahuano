@@ -6,21 +6,19 @@ import { LoginPage } from './pages/login/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsuariosPage } from './pages/usuarios/UsuariosPage';
 import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
-import { RegistrarEstadoPage } from './pages/registro-operatividad/RegistrarEstadoPage';
+import { CentralMapaPage } from './pages/mapa/CentralMapaPage';
 import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
 import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
 import { GrifosPage } from './pages/grifos/GrifosPage';
+import { InventarioPage } from './pages/inventario/InventarioPage';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Todo lo de acá abajo comparte el mismo AppLayout (sidebar +
-              topbar). ProtectedRoute exige sesión iniciada antes de mostrar
-              cualquiera de estas rutas. */}
           <Route
             element={
               <ProtectedRoute>
@@ -30,31 +28,48 @@ function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="vehiculos" element={<VehiculosPage />} />
-            <Route
-              path="registrar-estado"
-              element={
-                <ProtectedRoute roles={['administrador', 'bombero']}>
-                  <RegistrarEstadoPage />
-                </ProtectedRoute>
-              }
-            />
+            
+            {/* Historial de Estados (incluye registro de estado integrado) */}
             <Route
               path="historial-estados"
               element={
-                <ProtectedRoute roles={['administrador', 'mecanico']}>
+                <ProtectedRoute roles={['administrador', 'mecanico', 'bombero', 'capitan']}>
                   <HistorialEstadosPage />
                 </ProtectedRoute>
               }
             />
+            {/* Redirección para compatibilidad si alguien accede a /registrar-estado */}
+            <Route path="registrar-estado" element={<Navigate to="/historial-estados" replace />} />
+
             <Route
               path="mantenciones"
               element={
-                <ProtectedRoute roles={['administrador', 'mecanico']}>
+                <ProtectedRoute roles={['administrador', 'mecanico', 'capitan']}>
                   <MantencionesPage />
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="inventario"
+              element={
+                <ProtectedRoute roles={['administrador', 'mecanico', 'capitan']}>
+                  <InventarioPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="grifos" element={<GrifosPage />} />
+
+            <Route
+              path="mapa"
+              element={
+                <ProtectedRoute roles={['administrador', 'capitan']}>
+                  <CentralMapaPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="usuarios"
               element={

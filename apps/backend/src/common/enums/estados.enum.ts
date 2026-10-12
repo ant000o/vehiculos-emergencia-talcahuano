@@ -36,6 +36,7 @@ export enum TipoMantencion {
   PREVENTIVA = 'preventiva',
   CORRECTIVA = 'correctiva',
   REVISION = 'revision',
+  EMERGENCIA = 'emergencia',
 }
 
 export enum RolEnDespacho {

@@ -20,11 +20,16 @@ export function MantencionPreventivaForm() {
 
   useEffect(() => {
     async function cargar() {
-      const lista = await listarVehiculos();
-      const enMantencion = lista.filter((v) => v.estado_operativo === 'en_mantencion');
-      setVehiculos(enMantencion);
-      setIdVehiculo(enMantencion[0]?.id_vehiculo ?? null);
-      setIsLoading(false);
+      try {
+        const lista = await listarVehiculos();
+        const enMantencion = lista.filter((v) => v.estado_operativo === 'en_mantencion');
+        setVehiculos(enMantencion);
+        setIdVehiculo(enMantencion[0]?.id_vehiculo ?? null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     }
     cargar();
   }, []);
@@ -83,14 +88,13 @@ export function MantencionPreventivaForm() {
   }
 
   if (isLoading) {
-    return <p>Cargando vehículos…</p>;
+    return <p style={{ color: 'var(--color-ink-600)', fontFamily: 'var(--font-body)' }}>Cargando vehículos…</p>;
   }
 
   return (
     <div>
       <p className="mantenciones-page__subtitle">
-        Al guardar, la mantención queda marcada como finalizada y el vehículo vuelve a
-        quedar disponible (operativo) automáticamente.
+        Al guardar, la mantención queda marcada como finalizada y el vehículo vuelve a quedar disponible (operativo) automáticamente.
       </p>
 
       {patenteConfirmada && (
@@ -106,9 +110,7 @@ export function MantencionPreventivaForm() {
 
       {vehiculos.length === 0 ? (
         <p className="mantenciones-page__empty">
-          No hay vehículos en mantención actualmente. Para registrar una mantención
-          finalizada, primero un Administrador debe marcar el vehículo como
-          "En mantención" desde la ficha del vehículo.
+          No hay vehículos en mantención actualmente. Para registrar una mantención finalizada, primero un Administrador debe marcar el vehículo como "En mantención" desde la ficha del vehículo.
         </p>
       ) : (
         <form className="mantenciones-form" onSubmit={handleSubmit}>

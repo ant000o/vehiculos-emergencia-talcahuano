@@ -11,9 +11,6 @@ interface FormErrors {
 export function RegistrarFallaForm() {
   const { user } = useAuth();
 
-  // Acá SÍ se muestran todos los vehículos (no solo los "en mantención"):
-  // una falla puede ocurrir en cualquier vehículo que hasta ahora estaba
-  // operativo — es justo lo que se está reportando recién.
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [idVehiculo, setIdVehiculo] = useState<number | null>(null);
   const [descripcion, setDescripcion] = useState('');
@@ -27,19 +24,21 @@ export function RegistrarFallaForm() {
 
   useEffect(() => {
     async function cargar() {
-      const lista = await listarVehiculos();
-      setVehiculos(lista);
-      setIdVehiculo(lista[0]?.id_vehiculo ?? null);
-      setIsLoading(false);
+      try {
+        const lista = await listarVehiculos();
+        setVehiculos(lista);
+        setIdVehiculo(lista[0]?.id_vehiculo ?? null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     }
     cargar();
   }, []);
 
   function validar(): boolean {
     const nuevosErrores: FormErrors = {};
-    // La HU pide explícitamente "descripción técnica" y "costo numérico"
-    // como parte del criterio de éxito — ambos van requeridos acá, a
-    // diferencia del formulario de mantención preventiva donde son opcionales.
     if (!descripcion.trim()) {
       nuevosErrores.descripcion = 'Describe técnicamente la falla detectada.';
     }
@@ -79,15 +78,13 @@ export function RegistrarFallaForm() {
   }
 
   if (isLoading) {
-    return <p>Cargando vehículos…</p>;
+    return <p style={{ color: 'var(--color-ink-600)', fontFamily: 'var(--font-body)' }}>Cargando vehículos…</p>;
   }
 
   return (
     <div>
       <p className="mantenciones-page__subtitle">
-        Documenta una falla detectada. El registro queda en estado "En proceso"
-        — el cambio de estado del vehículo lo define el Administrador
-        manualmente, según corresponda.
+        Documenta una falla detectada. El registro queda en estado "En proceso" — el cambio de estado del vehículo lo define el Administrador manualmente, según corresponda.
       </p>
 
       {patenteConfirmada && (

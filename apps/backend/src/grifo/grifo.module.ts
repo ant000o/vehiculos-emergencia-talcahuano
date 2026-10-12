@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Grifo } from './entities/grifo.entity';
 import { GrifoService } from './grifo.service';
@@ -8,6 +8,5 @@ import { GrifoController } from './grifo.controller';
   imports: [TypeOrmModule.forFeature([Grifo])],
   controllers: [GrifoController],
   providers: [GrifoService],
-  exports: [GrifoService],
 })
 export class GrifoModule {}

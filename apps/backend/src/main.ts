@@ -1,9 +1,11 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // whitelist: descarta campos no declarados en los DTO (evita mass-assignment)
   // transform: convierte automáticamente tipos (ej. strings de query params a number)

@@ -29,6 +29,10 @@ export class MovimientoInventarioService {
         articulo: true,
         mantencion: true,
       },
+      order: {
+        fecha_movimiento: 'DESC',
+        id_movimiento: 'DESC',
+      },
     });
   }
 

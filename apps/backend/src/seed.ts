@@ -156,24 +156,28 @@ async function seed() {
       anio: 2018, kilometraje: 45000,
       estado_operativo: EstadoVehiculo.OPERATIVO,
       id_compania: comp1.id_compania,
+      coordenadas: { type: 'Point', coordinates: [-73.1165, -36.7190] },
     }),
     vehiculoRepo.create({
       patente: 'CCCC22', marca: 'Scania', modelo: 'P 320',
       anio: 2015, kilometraje: 112000,
       estado_operativo: EstadoVehiculo.EN_MANTENCION,
       id_compania: comp1.id_compania,
+      coordenadas: { type: 'Point', coordinates: [-73.1170, -36.7210] },
     }),
     vehiculoRepo.create({
       patente: 'DDDD33', marca: 'Volkswagen', modelo: 'Crafter',
       anio: 2021, kilometraje: 18500,
       estado_operativo: EstadoVehiculo.OPERATIVO,
       id_compania: comp2.id_compania,
+      coordenadas: { type: 'Point', coordinates: [-73.1110, -36.7240] },
     }),
     vehiculoRepo.create({
       patente: 'EEEE44', marca: 'Ford', modelo: 'F-550',
       anio: 2019, kilometraje: 67000,
       estado_operativo: EstadoVehiculo.FUERA_DE_SERVICIO,
       id_compania: comp3.id_compania,
+      coordenadas: { type: 'Point', coordinates: [-73.1220, -36.7160] },
     }),
   ]);
   console.log('✅ Vehículos creados.');

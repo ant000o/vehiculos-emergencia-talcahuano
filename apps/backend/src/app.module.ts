@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -18,6 +18,9 @@ import { MovimientoInventarioModule } from './movimiento_inventario/movimiento_i
 import { DespachoEmergenciaModule } from './despacho_emergencia/despacho_emergencia.module';
 import { DespachoPersonalModule } from './despacho_personal/despacho_personal.module';
 import { AuthModule } from './auth/auth.module';
+import { EstadisticasModule } from './estadisticas/estadisticas.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
+
 
 @Module({
   imports: [
@@ -29,7 +32,7 @@ import { AuthModule } from './auth/auth.module';
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        // CRÍTICO: la base ya existe (creada con el script SQL a mano).
+        // CRÃTICO: la base ya existe (creada con el script SQL a mano).
         // Si esto es true, TypeORM puede alterar/borrar tus enums, triggers
         // y constraints personalizados. Usa migraciones para cambios futuros.
         synchronize: false,
@@ -50,8 +53,11 @@ import { AuthModule } from './auth/auth.module';
     DespachoEmergenciaModule,
     DespachoPersonalModule,
     AuthModule,
+    EstadisticasModule,
+    NotificacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

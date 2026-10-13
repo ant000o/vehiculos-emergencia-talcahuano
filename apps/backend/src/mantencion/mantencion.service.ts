@@ -1,92 +1,75 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Mantencion } from './entities/mantencion.entity';
 import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
 import { CreateMantencionDto } from './dto/create-mantencion.dto';
 import { UpdateMantencionDto } from './dto/update-mantencion.dto';
-import { EstadoMantencion, EstadoVehiculo } from '../common/enums/estados.enum';
+import { EstadoMantencion, EstadoVehiculo, TipoMantencion } from '../common/enums/estados.enum';
+
+import { NotificacionesGateway } from '../notificaciones/notificaciones.gateway';
 
 @Injectable()
 export class MantencionService {
   constructor(
     @InjectRepository(Mantencion)
     private readonly repo: Repository<Mantencion>,
-    // Se inyecta para actualizar el estado del vehículo automáticamente
-    // cuando la mantención se finaliza o cancela.
     @InjectRepository(Vehiculo)
     private readonly vehiculoRepo: Repository<Vehiculo>,
+    private readonly notificacionesGateway: NotificacionesGateway,
   ) {}
 
-  create(dto: CreateMantencionDto) {
-    if (!dto.id_usuario_mecanico && !dto.taller_externo) {
-      throw new BadRequestException(
-        'Debe indicar id_usuario_mecanico o taller_externo',
+  async create(dto: CreateMantencionDto) {
+    if (!dto.id_usuario_mecanico && !dto.taller_externo)
+      throw new BadRequestException('Debe indicar id_usuario_mecanico o taller_externo');
+    const entity = this.repo.create(dto);
+    const saved = await this.repo.save(entity);
+    if (dto.tipo_mantencion === TipoMantencion.EMERGENCIA) {
+      await this.vehiculoRepo.update(dto.id_vehiculo, { estado_operativo: EstadoVehiculo.FUERA_DE_SERVICIO });
+      const veh = await this.vehiculoRepo.findOne({ where: { id_vehiculo: dto.id_vehiculo } });
+      this.notificacionesGateway.emitAlertaFallaGrave(
+        veh,
+        `Falla grave reportada en ${veh?.patente ?? 'vehículo'}: ${dto.descripcion_falla || 'Unidad Fuera de Servicio'}`,
       );
+    } else if (dto.estado_mantencion === EstadoMantencion.EN_PROCESO) {
+      await this.vehiculoRepo.update(dto.id_vehiculo, { estado_operativo: EstadoVehiculo.EN_MANTENCION });
     }
-
-    return this.repo.save(this.repo.create(dto));
+    return saved;
   }
 
-  findAll() {
+  findAll(opts: { id_vehiculo?: number; estado?: EstadoMantencion; tipo?: TipoMantencion } = {}) {
+    const where: any = {};
+    if (opts.id_vehiculo) where.id_vehiculo = opts.id_vehiculo;
+    if (opts.estado) where.estado_mantencion = opts.estado;
+    if (opts.tipo) where.tipo_mantencion = opts.tipo;
     return this.repo.find({
-      relations: {
-        vehiculo: true,
-        usuarioMecanico: true,
-      },
+      where: Object.keys(where).length ? where : undefined,
+      relations: { vehiculo: true, usuarioMecanico: true, detalles_articulos: { articulo: true } },
+      order: { fecha_ingreso: 'DESC' },
     });
   }
 
   async findOne(id: number) {
     const item = await this.repo.findOne({
-      where: {
-        id_mantencion: id,
-      },
-      relations: {
-        vehiculo: true,
-        usuarioMecanico: true,
-        detalles_articulos: true,
-      },
+      where: { id_mantencion: id },
+      relations: { vehiculo: true, usuarioMecanico: true, detalles_articulos: { articulo: true } },
     });
-
-    if (!item) {
-      throw new NotFoundException(
-        `Mantención con id ${id} no encontrada`,
-      );
-    }
-
+    if (!item) throw new NotFoundException(`Mantención con id ${id} no encontrada`);
     return item;
   }
 
   async update(id: number, dto: UpdateMantencionDto) {
     const item = await this.findOne(id);
-
     Object.assign(item, dto);
-
-    const mantencionGuardada = await this.repo.save(item);
-
-    // Cuando la mantención se finaliza o cancela, el vehículo vuelve a OPERATIVO
-    // automáticamente. Así no es necesario actualizar el vehículo por separado.
-    if (
-      dto.estado_mantencion === EstadoMantencion.FINALIZADA ||
-      dto.estado_mantencion === EstadoMantencion.CANCELADA
-    ) {
-      await this.vehiculoRepo.update(item.id_vehiculo, {
-        estado_operativo: EstadoVehiculo.OPERATIVO,
-      });
+    const saved = await this.repo.save(item);
+    if (dto.estado_mantencion === EstadoMantencion.FINALIZADA || dto.estado_mantencion === EstadoMantencion.CANCELADA) {
+      await this.vehiculoRepo.update(item.id_vehiculo, { estado_operativo: EstadoVehiculo.OPERATIVO });
     }
-
-    return mantencionGuardada;
+    return saved;
   }
 
   async remove(id: number) {
     const item = await this.findOne(id);
-
     return this.repo.remove(item);
   }
 }
-

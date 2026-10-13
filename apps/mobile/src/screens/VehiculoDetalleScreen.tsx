@@ -28,7 +28,8 @@ function NivelFila({
   valor: number | null;
 }) {
   const porcentaje = valor ?? 0;
-  const color = valor === null ? '#D1D5DB' : porcentaje < 20 ? '#DC2626' : porcentaje < 50 ? '#D97706' : '#16A34A';
+  const color = valor === null ? '#D1D5DB' : porcentaje < 25 ? '#DC2626' : porcentaje < 50 ? '#EA580C' : porcentaje <70 ?'#EAB308' : '#16A34A';
+
 
   return (
     <View style={styles.nivelFila}>

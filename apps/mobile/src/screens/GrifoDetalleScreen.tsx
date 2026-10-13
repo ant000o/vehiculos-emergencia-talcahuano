@@ -35,7 +35,11 @@ export default function GrifoDetalleScreen({ route, navigation }: any) {
         estado_operativo: estadoSeleccionado,
         ultima_revision: hoy,
       });
-      setGrifo(actualizado);
+      // El backend no devuelve la relación "compania" en el PATCH (bug conocido
+      // en grifo.service.ts: su update() no incluye relations:{compania:true}
+      // como sí hace findAll/findOne). La conservamos del estado anterior,
+      // ya que esta acción nunca cambia la compañía del grifo.
+      setGrifo({ ...actualizado, compania: actualizado.compania ?? grifo.compania });
       setExito(true);
     } catch (err: any) {
       const mensaje = err?.response?.data?.message ?? 'No se pudo actualizar el estado del grifo.';

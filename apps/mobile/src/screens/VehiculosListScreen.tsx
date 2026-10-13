@@ -11,7 +11,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { listarVehiculos } from '../services/vehiculo.service';
+import { obtenerUltimosRegistrosPorVehiculo } from '../services/registroOperatividad.service';
 import { Vehiculo, EstadoVehiculo } from '../types/vehiculo';
+import { RegistroOperatividad } from '../types/registroOperatividad';
 
 const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
   [EstadoVehiculo.OPERATIVO]: 'Operativo',
@@ -25,16 +27,42 @@ const ESTADO_COLOR: Record<EstadoVehiculo, { bg: string; texto: string }> = {
   [EstadoVehiculo.FUERA_DE_SERVICIO]: { bg: '#FEE2E2', texto: '#991B1B' },
 };
 
+function colorNivel(valor: number | null | undefined): string {
+  if (valor === null || valor === undefined) return '#D1D5DB'; // gris: sin datos
+  if (valor < 45) return '#DC2626';
+  if (valor < 50) return '#EA580C';
+  if (valor < 75) return '#EAB308';
+  return '#16A34A';
+}
+
+
+function PuntosNiveles({ registro }: { registro: RegistroOperatividad | undefined }) {
+  return (
+    <View style={styles.puntosFila}>
+      <View style={[styles.punto, { backgroundColor: colorNivel(registro?.nivel_combustible) }]} />
+      <View style={[styles.punto, { backgroundColor: colorNivel(registro?.nivel_agua) }]} />
+      <View style={[styles.punto, { backgroundColor: colorNivel(registro?.nivel_aceite) }]} />
+    </View>
+  );
+}
+
 export default function VehiculosListScreen({ navigation }: any) {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [ultimosRegistros, setUltimosRegistros] = useState<Map<number, RegistroOperatividad>>(
+    new Map(),
+  );
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function cargarVehiculos() {
     try {
-      const data = await listarVehiculos();
-      setVehiculos(data);
+      const [vehiculosData, registrosMap] = await Promise.all([
+        listarVehiculos(),
+        obtenerUltimosRegistrosPorVehiculo(),
+      ]);
+      setVehiculos(vehiculosData);
+      setUltimosRegistros(registrosMap);
       setError(null);
     } catch {
       setError('No se pudo cargar el listado de vehículos.');
@@ -90,6 +118,7 @@ export default function VehiculosListScreen({ navigation }: any) {
                   {item.marca} {item.modelo} — {item.anio}
                 </Text>
                 <Text style={styles.compania}>{item.compania.nombre}</Text>
+                <PuntosNiveles registro={ultimosRegistros.get(item.id_vehiculo)} />
               </View>
               <View style={[styles.badge, { backgroundColor: colores.bg }]}>
                 <Text style={[styles.badgeTexto, { color: colores.texto }]}>
@@ -129,6 +158,8 @@ const styles = StyleSheet.create({
   patente: { fontSize: 20, fontWeight: '800', color: '#111827' },
   detalle: { fontSize: 14, color: '#6B7280', marginTop: 4 },
   compania: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
+  puntosFila: { flexDirection: 'row', gap: 6, marginTop: 8 },
+  punto: { width: 10, height: 10, borderRadius: 5 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
   badgeTexto: { fontSize: 12, fontWeight: '700' },
 });

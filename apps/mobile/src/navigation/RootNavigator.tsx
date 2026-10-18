@@ -15,6 +15,7 @@ import MantencionFormScreen from '../screens/MantencionFormScreen';
 import MantencionDetalleScreen from '../screens/MantencionDetalleScreen';
 import GrifosListScreen from '../screens/GrifosListScreen';
 import GrifoDetalleScreen from '../screens/GrifoDetalleScreen';
+import DespachosScreen from '../screens/DespachosScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +80,11 @@ export default function RootNavigator() {
               name="GrifosList"
               component={GrifosListScreen}
               options={{ title: 'Grifos' }}
+            />
+            <Stack.Screen
+              name="DespachosList"
+              component={DespachosScreen}
+              options={{ title: 'Despachos en curso' }}
             />
             <Stack.Screen
               name="GrifoDetalle"

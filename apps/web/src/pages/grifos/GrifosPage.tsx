@@ -62,6 +62,18 @@ export function GrifosPage() {
     }
   }
 
+  const [q, setQ] = useState('');
+  const [estado, setEstado] = useState<EstadoGrifo | ''>('');
+
+  const grifosFiltrados = grifos.filter((g) => {
+    const matchEstado = !estado || g.estado_operativo === estado;
+    const matchQ =
+      !q ||
+      g.id_grifo.toString().includes(q.trim()) ||
+      (g.direccion && g.direccion.toLowerCase().includes(q.toLowerCase().trim()));
+    return matchEstado && matchQ;
+  });
+
   if (isLoading) {
     return <p>Cargando grifos…</p>;
   }
@@ -84,11 +96,33 @@ export function GrifosPage() {
       </div>
 
       {vista.modo === 'lista' && (
-        <GrifosTable
-          grifos={grifos}
-          companias={companias}
-          onVerUbicacion={(grifo) => setGrifoUbicacion(grifo)}
-        />
+        <>
+          <div className="grifos-page__filtros">
+            <input
+              type="text"
+              className="grifos-page__filtro-input"
+              placeholder="Buscar por identificador (#) o dirección..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+            <select
+              className="grifos-page__filtro-select"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as EstadoGrifo | '')}
+            >
+              <option value="">Todos los estados</option>
+              <option value="operativo">Operativo</option>
+              <option value="en_mantencion">En mantención</option>
+              <option value="fuera_de_servicio">Fuera de servicio</option>
+            </select>
+          </div>
+
+          <GrifosTable
+            grifos={grifosFiltrados}
+            companias={companias}
+            onVerUbicacion={(grifo) => setGrifoUbicacion(grifo)}
+          />
+        </>
       )}
 
       {vista.modo === 'crear' && (

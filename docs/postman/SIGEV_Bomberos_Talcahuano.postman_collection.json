@@ -1,0 +1,3343 @@
+{
+  "info": {
+    "_postman_id": "8f74a382-71c8-47d0-a367-9387d559be39",
+    "name": "SIGEV - Bomberos Talcahuano (Pruebas CRUD 13 Tablas)",
+    "description": "Colección completa de pruebas de endpoints y operaciones CRUD para el Sistema de Gestión y Control de Flota de Bomberos de Talcahuano (SIGEV).\nCubre las 13 tablas relacionales de la base de datos + endpoints de autenticación y estadísticas para Sprint 1 y Sprint 2.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "id_rol",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_compania",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_usuario",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_vehiculo",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_grifo",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_categoria",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_articulo",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_mantencion",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_despacho",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_registro",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_movimiento",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "id_detalle",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00. Autenticación",
+      "description": "Endpoints de inicio de sesión y gestión de credenciales JWT",
+      "item": [
+        {
+          "name": "Login Administrador (Obtener JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesión y extrae automáticamente el token JWT para los siguientes requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200/201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "if (data.access_token) {",
+                  "    pm.environment.set(\"token\", data.access_token);",
+                  "    pm.collectionVariables.set(\"token\", data.access_token);",
+                  "    console.log(\"Token JWT guardado exitosamente\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01. Roles",
+      "description": "CRUD para la tabla roles (roles de usuario en el sistema)",
+      "item": [
+        {
+          "name": "Listar Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "description": "Obtiene todos los roles registrados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "description": "Crea un nuevo rol y guarda su ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_rol\": \"test_rol_postman\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rol creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_rol) {",
+                  "        pm.collectionVariables.set(\"id_rol\", data.id_rol);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Rol por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{id_rol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{id_rol}}"
+              ]
+            },
+            "description": "Obtiene los datos del rol por ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Rol",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{id_rol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{id_rol}}"
+              ]
+            },
+            "description": "Actualiza parcialmente el rol.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_rol\": \"test_rol_modificado\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Rol",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{id_rol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{id_rol}}"
+              ]
+            },
+            "description": "Elimina el rol de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Compañías",
+      "description": "CRUD para la tabla compania (unidades y cuarteles de Talcahuano)",
+      "item": [
+        {
+          "name": "Listar Compañías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companias"
+              ]
+            },
+            "description": "Lista todas las compañías de bomberos registradas."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Compañía",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companias"
+              ]
+            },
+            "description": "Crea una nueva compañía y almacena id_compania.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_compania\": 99,\n  \"nombre\": \"Novena Compañía Postman Test\",\n  \"ubicacion_geo\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -36.721,\n      -73.118\n    ]\n  }\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Compañía creada exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_compania) {",
+                  "        pm.collectionVariables.set(\"id_compania\", data.id_compania);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Compañía por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companias/{{id_compania}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companias",
+                "{{id_compania}}"
+              ]
+            },
+            "description": "Obtiene compañía por ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Compañía",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companias/{{id_compania}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companias",
+                "{{id_compania}}"
+              ]
+            },
+            "description": "Modifica nombre de la compañía.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Novena Compañía Actualizada\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Compañía",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companias/{{id_compania}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companias",
+                "{{id_compania}}"
+              ]
+            },
+            "description": "Elimina la compañía de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Usuarios",
+      "description": "CRUD para la tabla usuario (bomberos, mecánicos, oficiales, central, admin)",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Lista todos los usuarios del sistema."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Crea un nuevo usuario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rut\": \"21.555.444-3\",\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Reyes Test\",\n  \"email\": \"carlos.reyes.test@bomberos.cl\",\n  \"password\": \"Password123\",\n  \"id_rol\": 1,\n  \"id_compania\": 1,\n  \"estado_activo\": true\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Usuario creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_usuario) {",
+                  "        pm.collectionVariables.set(\"id_usuario\", data.id_usuario);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Obtiene el usuario por ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Actualiza datos del usuario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos Alberto\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Elimina el usuario de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Vehículos",
+      "description": "CRUD para la tabla vehiculo (flota de carros de bomba, escalas y aljibes)",
+      "item": [
+        {
+          "name": "Listar Vehículos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ]
+            },
+            "description": "Lista todo el parque vehicular."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar Vehículos por Estado y Búsqueda (HU-12, HU-13)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?estado=operativo&q=B-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos?estado=operativo&q=B-1"
+              ]
+            },
+            "description": "Filtro de búsqueda por texto (patente/modelo) y estado operativo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Vehículo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ]
+            },
+            "description": "Registra una nueva máquina de bomberos.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patente\": \"PMAN99\",\n  \"marca\": \"Renault\",\n  \"modelo\": \"Midlum 240\",\n  \"anio\": 2021,\n  \"kilometraje\": 14500,\n  \"estado_operativo\": \"operativo\",\n  \"id_compania\": 1,\n  \"coordenadas\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -36.7196,\n      -73.1168\n    ]\n  }\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Vehículo creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_vehiculo) {",
+                  "        pm.collectionVariables.set(\"id_vehiculo\", data.id_vehiculo);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Vehículo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{id_vehiculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{id_vehiculo}}"
+              ]
+            },
+            "description": "Obtiene detalles del vehículo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Vehículo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{id_vehiculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{id_vehiculo}}"
+              ]
+            },
+            "description": "Actualiza estado u odómetro del carro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kilometraje\": 15200,\n  \"estado_operativo\": \"en_mantencion\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Vehículo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{id_vehiculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{id_vehiculo}}"
+              ]
+            },
+            "description": "Elimina la unidad de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Grifos",
+      "description": "CRUD para la tabla grifo (red de abastecimiento hídrico geolocalizada)",
+      "item": [
+        {
+          "name": "Listar Grifos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos"
+              ]
+            },
+            "description": "Lista todos los grifos registrados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar Grifos Cercanos (Geoespacial PostGIS)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos/cercanos?lat=-36.716&lng=-73.115&radio=1500&solo_operativos=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos",
+                "cercanos?lat=-36.716&lng=-73.115&radio=1500&solo_operativos=true"
+              ]
+            },
+            "description": "Búsqueda espacial de grifos operativos en radio determinado."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Grifo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos"
+              ]
+            },
+            "description": "Registra un grifo con coordenadas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direccion\": \"Calle Blanco Encalada 500, Talcahuano\",\n  \"estado_operativo\": \"operativo\",\n  \"id_compania\": 1,\n  \"coordenadas\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -36.7172,\n      -73.1145\n    ]\n  }\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Grifo creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_grifo) {",
+                  "        pm.collectionVariables.set(\"id_grifo\", data.id_grifo);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Grifo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos/{{id_grifo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos",
+                "{{id_grifo}}"
+              ]
+            },
+            "description": "Obtiene ficha del grifo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Grifo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos/{{id_grifo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos",
+                "{{id_grifo}}"
+              ]
+            },
+            "description": "Actualiza estado y dirección.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado_operativo\": \"en_mantencion\",\n  \"direccion\": \"Calle Blanco Encalada 500 (Válvula averiada)\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Grifo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/grifos/{{id_grifo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "grifos",
+                "{{id_grifo}}"
+              ]
+            },
+            "description": "Elimina el grifo de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. Categorías de Artículo",
+      "description": "CRUD para la tabla categoria_articulo (clasificación de repuestos e insumos)",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias-articulo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias-articulo"
+              ]
+            },
+            "description": "Lista todas las categorías de inventario."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias-articulo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias-articulo"
+              ]
+            },
+            "description": "Crea una nueva categoría de repuesto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_categoria\": \"Neumáticos y Llantas Test\",\n  \"descripcion\": \"Categoría para prueba automatizada en Postman\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Categoría creada exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_categoria) {",
+                  "        pm.collectionVariables.set(\"id_categoria\", data.id_categoria);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias-articulo/{{id_categoria}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias-articulo",
+                "{{id_categoria}}"
+              ]
+            },
+            "description": "Obtiene detalles de categoría."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias-articulo/{{id_categoria}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias-articulo",
+                "{{id_categoria}}"
+              ]
+            },
+            "description": "Actualiza descripción.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Descripción corregida para auditoría\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias-articulo/{{id_categoria}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias-articulo",
+                "{{id_categoria}}"
+              ]
+            },
+            "description": "Elimina categoría de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07. Artículos de Inventario",
+      "description": "CRUD para la tabla articulo_inventario (control de stock y costos de repuestos)",
+      "item": [
+        {
+          "name": "Listar Artículos de Inventario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articulos-inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "articulos-inventario"
+              ]
+            },
+            "description": "Lista todos los repuestos y artículos disponibles."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Artículo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articulos-inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "articulos-inventario"
+              ]
+            },
+            "description": "Registra nuevo artículo con stock inicial.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_articulo\": \"Juego Pastillas Freno Delanteras Test\",\n  \"stock_actual\": 8,\n  \"costo_unitario_actual\": 32500,\n  \"id_categoria\": 1\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Artículo creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_articulo) {",
+                  "        pm.collectionVariables.set(\"id_articulo\", data.id_articulo);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Artículo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articulos-inventario/{{id_articulo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "articulos-inventario",
+                "{{id_articulo}}"
+              ]
+            },
+            "description": "Obtiene ficha del repuesto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Artículo (Precio y Nombre)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articulos-inventario/{{id_articulo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "articulos-inventario",
+                "{{id_articulo}}"
+              ]
+            },
+            "description": "Actualiza precio y nombre (el stock se actualiza vía movimientos).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_articulo\": \"Juego Pastillas Freno Delanteras Cerámicas\",\n  \"costo_unitario_actual\": 36000\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Artículo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articulos-inventario/{{id_articulo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "articulos-inventario",
+                "{{id_articulo}}"
+              ]
+            },
+            "description": "Elimina el repuesto de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08. Mantenciones",
+      "description": "CRUD para la tabla mantencion (órdenes de trabajo preventivas y correctivas)",
+      "item": [
+        {
+          "name": "Listar Mantenciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mantenciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mantenciones"
+              ]
+            },
+            "description": "Lista historial de mantenciones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Mantención Preventiva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mantenciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mantenciones"
+              ]
+            },
+            "description": "Crea una orden de mantención.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo_mantencion\": \"preventiva\",\n  \"fecha_ingreso\": \"2026-10-18T09:00:00Z\",\n  \"descripcion_falla\": \"Mantenimiento preventivo programado de 10.000 km\",\n  \"costo_mano_obra\": 55000,\n  \"estado_mantencion\": \"en_proceso\",\n  \"id_vehiculo\": 1,\n  \"id_usuario_mecanico\": 1\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mantención creada exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_mantencion) {",
+                  "        pm.collectionVariables.set(\"id_mantencion\", data.id_mantencion);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Mantención por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mantenciones/{{id_mantencion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mantenciones",
+                "{{id_mantencion}}"
+              ]
+            },
+            "description": "Obtiene el detalle completo de la mantención."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Mantención",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mantenciones/{{id_mantencion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mantenciones",
+                "{{id_mantencion}}"
+              ]
+            },
+            "description": "Finaliza la mantención y actualiza costo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado_mantencion\": \"finalizada\",\n  \"costo_mano_obra\": 60000,\n  \"fecha_salida\": \"2026-10-18T17:30:00Z\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Mantención",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mantenciones/{{id_mantencion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mantenciones",
+                "{{id_mantencion}}"
+              ]
+            },
+            "description": "Elimina registro de mantención de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09. Despachos de Emergencia",
+      "description": "CRUD para la tabla despacho_emergencia (registro de salidas de unidades a siniestros)",
+      "item": [
+        {
+          "name": "Listar Despachos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despachos-emergencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despachos-emergencia"
+              ]
+            },
+            "description": "Lista todos los despachos emitidos por la central."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Despacho de Emergencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despachos-emergencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despachos-emergencia"
+              ]
+            },
+            "description": "Registra salida de unidad de emergencia.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo_emergencia\": \"10-0-1 Principio de incendio\",\n  \"estado_emergencia\": \"en_curso\",\n  \"id_vehiculo\": 1,\n  \"id_compania\": 1,\n  \"coordenada_destino\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -36.7188,\n      -73.1132\n    ]\n  }\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Despacho creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_despacho) {",
+                  "        pm.collectionVariables.set(\"id_despacho\", data.id_despacho);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Despacho por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despachos-emergencia/{{id_despacho}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despachos-emergencia",
+                "{{id_despacho}}"
+              ]
+            },
+            "description": "Obtiene datos de la orden de salida."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Despacho",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despachos-emergencia/{{id_despacho}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despachos-emergencia",
+                "{{id_despacho}}"
+              ]
+            },
+            "description": "Actualiza estado de la emergencia.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado_emergencia\": \"controlada\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Despacho",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despachos-emergencia/{{id_despacho}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despachos-emergencia",
+                "{{id_despacho}}"
+              ]
+            },
+            "description": "Elimina despacho de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10. Despacho Personal",
+      "description": "CRUD para la tabla despacho_personal (asignación de tripulación y maquinistas)",
+      "item": [
+        {
+          "name": "Listar Asignaciones de Personal",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despacho-personal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despacho-personal"
+              ]
+            },
+            "description": "Lista asignaciones de dotación a despachos."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar Personal a Despacho",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despacho-personal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despacho-personal"
+              ]
+            },
+            "description": "Asigna un bombero como maquinista o brigadista.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_despacho\": 1,\n  \"id_usuario\": 1,\n  \"rol_en_despacho\": \"conductor\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Asignación por Clave Compuesta",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despacho-personal/1/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despacho-personal",
+                "1",
+                "1"
+              ]
+            },
+            "description": "Consulta asignación compuesta /:id_despacho/:id_usuario."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Rol en Despacho",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despacho-personal/1/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despacho-personal",
+                "1",
+                "1"
+              ]
+            },
+            "description": "Cambia rol en despacho a jefe_despacho.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol_en_despacho\": \"jefe_despacho\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desvincular Personal de Despacho",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/despacho-personal/1/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "despacho-personal",
+                "1",
+                "1"
+              ]
+            },
+            "description": "Elimina la asignación de dotación."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "11. Registros de Operatividad",
+      "description": "CRUD para la tabla registro_operatividad (bitácora de control diario de estado)",
+      "item": [
+        {
+          "name": "Listar Registros de Operatividad",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registros-operatividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "registros-operatividad"
+              ]
+            },
+            "description": "Lista todas las revisiones e informes de guardia."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear Registro de Operatividad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registros-operatividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "registros-operatividad"
+              ]
+            },
+            "description": "Registra inspección diaria del maquinista.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_vehiculo\": 1,\n  \"id_usuario_conductor\": 1,\n  \"estado_reportado\": \"operativo\",\n  \"kilometraje_salida\": 25100,\n  \"observaciones\": \"Revisión matutina: niveles y balizas al 100%\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Registro creado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_registro) {",
+                  "        pm.collectionVariables.set(\"id_registro\", data.id_registro);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Registro por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registros-operatividad/{{id_registro}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "registros-operatividad",
+                "{{id_registro}}"
+              ]
+            },
+            "description": "Obtiene la ficha de inspección."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Registro de Operatividad",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registros-operatividad/{{id_registro}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "registros-operatividad",
+                "{{id_registro}}"
+              ]
+            },
+            "description": "Actualiza observaciones de la bitácora.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Inspección revisada y visada por Capitán\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Registro de Operatividad",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registros-operatividad/{{id_registro}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "registros-operatividad",
+                "{{id_registro}}"
+              ]
+            },
+            "description": "Elimina registro de prueba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "12. Movimientos de Inventario",
+      "description": "Operaciones kardex para la tabla movimiento_inventario (auditoría append-only sin PATCH ni DELETE)",
+      "item": [
+        {
+          "name": "Listar Movimientos de Inventario (Kardex)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos-inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos-inventario"
+              ]
+            },
+            "description": "Lista todos los movimientos de entrada y salida."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar Entrada de Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos-inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos-inventario"
+              ]
+            },
+            "description": "Aumenta stock y registra auditoría.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_articulo\": 1,\n  \"tipo_movimiento\": \"entrada\",\n  \"cantidad\": 10,\n  \"id_usuario\": 1,\n  \"motivo\": \"Ingreso por compra central de insumos\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Movimiento registrado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_movimiento) {",
+                  "        pm.collectionVariables.set(\"id_movimiento\", data.id_movimiento);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar Salida de Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos-inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos-inventario"
+              ]
+            },
+            "description": "Descuenta stock y registra auditoría.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_articulo\": 1,\n  \"tipo_movimiento\": \"salida\",\n  \"cantidad\": 2,\n  \"id_usuario\": 1,\n  \"motivo\": \"Retiro para cambio de ampolleta\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Movimiento por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos-inventario/{{id_movimiento}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos-inventario",
+                "{{id_movimiento}}"
+              ]
+            },
+            "description": "Consulta comprobante de movimiento por ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13. Detalles de Mantención",
+      "description": "CRUD para la tabla detalle_articulo_mantencion (repuestos consumidos por cada orden)",
+      "item": [
+        {
+          "name": "Listar Detalles de Mantención",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/detalles-articulo-mantencion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "detalles-articulo-mantencion"
+              ]
+            },
+            "description": "Lista todos los repuestos asociados a mantenciones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asociar Repuesto a Mantención",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/detalles-articulo-mantencion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "detalles-articulo-mantencion"
+              ]
+            },
+            "description": "Asocia repuesto y descuenta stock automáticamente vía trigger.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mantencion\": 1,\n  \"id_articulo\": 1,\n  \"cantidad\": 1,\n  \"costo_unitario_historico\": 12000\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Detalle de repuesto asociado exitosamente\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "    var data = pm.response.json();",
+                  "    if (data.id_detalle) {",
+                  "        pm.collectionVariables.set(\"id_detalle\", data.id_detalle);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener Detalle por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/detalles-articulo-mantencion/{{id_detalle}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "detalles-articulo-mantencion",
+                "{{id_detalle}}"
+              ]
+            },
+            "description": "Obtiene repuesto asignado por ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Detalle de Mantención",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/detalles-articulo-mantencion/{{id_detalle}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "detalles-articulo-mantencion",
+                "{{id_detalle}}"
+              ]
+            },
+            "description": "Modifica cantidad consumida.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 2\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Detalle de Mantención",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/detalles-articulo-mantencion/{{id_detalle}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "detalles-articulo-mantencion",
+                "{{id_detalle}}"
+              ]
+            },
+            "description": "Elimina la asignación de repuesto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "14. Estadísticas y Dashboard (Sprint 2 y 3)",
+      "description": "Endpoints agregados para KPIs, gráficos y requerimientos Sprint 2 (HU-15, HU-24)",
+      "item": [
+        {
+          "name": "Resumen Dashboard General",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "dashboard"
+              ]
+            },
+            "description": "Retorna KPIs de flota, grifos e inventario crítico."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mantenciones por Mes (Gráfico Histórico)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/mantenciones-mes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "mantenciones-mes"
+              ]
+            },
+            "description": "Datos para gráfico de barras histórico."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Top Vehículos Más Mantenidos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/vehiculos-mas-mantenidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "vehiculos-mas-mantenidos"
+              ]
+            },
+            "description": "Ranking de máquinas con mayores costos acumulados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tiempos de Reparación en Taller (HU-24)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/tiempos-reparacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "tiempos-reparacion"
+              ]
+            },
+            "description": "Días promedio y estadía en taller de cada carro."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alertas de Mantención Preventiva (HU-15)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/alertas-mantencion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "alertas-mantencion"
+              ]
+            },
+            "description": "Genera alertas dinámicas por kilometraje o fecha para el banner de la web."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Despachos Activos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/despachos-activos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "despachos-activos"
+              ]
+            },
+            "description": "Lista de siniestros y móviles actualmente en curso."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Stock Crítico de Inventario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/stock-critico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "stock-critico"
+              ]
+            },
+            "description": "Artículos con stock inferior a 5 unidades."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 o exitoso\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 200, 201]);",
+                  "});",
+                  "pm.test(\"Respuesta en formato JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

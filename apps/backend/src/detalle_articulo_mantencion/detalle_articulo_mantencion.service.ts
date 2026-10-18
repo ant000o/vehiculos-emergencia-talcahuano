@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DetalleArticuloMantencion } from './entities/detalle_articulo_mantencion.entity';
 import { ArticuloInventario } from '../articulo_inventario/entities/articulo_inventario.entity';
+import { Mantencion } from '../mantencion/entities/mantencion.entity';
 import { CreateDetalleArticuloMantencionDto } from './dto/create-detalle_articulo_mantencion.dto';
 import { UpdateDetalleArticuloMantencionDto } from './dto/update-detalle_articulo_mantencion.dto';
 
@@ -14,11 +15,19 @@ export class DetalleArticuloMantencionService {
 
     @InjectRepository(ArticuloInventario)
     private readonly articuloRepo: Repository<ArticuloInventario>,
+
+    @InjectRepository(Mantencion)
+    private readonly mantencionRepo: Repository<Mantencion>,
   ) {}
 
   async create(dto: CreateDetalleArticuloMantencionDto) {
-    // Nota: al insertar esta fila, un TRIGGER en la BD genera automáticamente
-    // el movimiento_inventario de tipo 'salida' y descuenta stock_actual.
+    // Validar existencia previa de la mantención para evitar error 500
+    const mantencion = await this.mantencionRepo.findOne({
+      where: { id_mantencion: dto.id_mantencion },
+    });
+    if (!mantencion) {
+      throw new NotFoundException(`Mantención con id ${dto.id_mantencion} no encontrada`);
+    }
 
     let costo = dto.costo_unitario_historico;
 
@@ -43,7 +52,14 @@ export class DetalleArticuloMantencionService {
       costo_unitario_historico: costo,
     });
 
-    return this.repo.save(detalle);
+    try {
+      return await this.repo.save(detalle);
+    } catch (err: any) {
+      if (err.code === '23503' || err.code === '23514' || err.message?.includes('stock')) {
+        throw new BadRequestException(err.detail || err.message || 'Error de restricción al asociar repuesto');
+      }
+      throw err;
+    }
   }
 
   findAll() {

@@ -32,11 +32,11 @@ export class CreateMantencionDto {
 
   // Debe venir id_usuario_mecanico O taller_externo (regla también reforzada por CHECK en la BD)
   @IsInt()
-  @ValidateIf((o) => !o.taller_externo)
+  @IsOptional()
   id_usuario_mecanico?: number;
 
   @IsString()
   @MaxLength(150)
-  @ValidateIf((o) => !o.id_usuario_mecanico)
+  @IsOptional()
   taller_externo?: string;
 }

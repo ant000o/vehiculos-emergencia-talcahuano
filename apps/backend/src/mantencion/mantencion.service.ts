@@ -20,8 +20,9 @@ export class MantencionService {
   ) {}
 
   async create(dto: CreateMantencionDto) {
-    if (!dto.id_usuario_mecanico && !dto.taller_externo)
-      throw new BadRequestException('Debe indicar id_usuario_mecanico o taller_externo');
+    if ((dto.id_usuario_mecanico && dto.taller_externo) || (!dto.id_usuario_mecanico && !dto.taller_externo)) {
+      throw new BadRequestException('Debe indicar exactamente uno: id_usuario_mecanico o taller_externo');
+    }
     const entity = this.repo.create(dto);
     const saved = await this.repo.save(entity);
     if (dto.tipo_mantencion === TipoMantencion.EMERGENCIA) {
@@ -59,6 +60,9 @@ export class MantencionService {
   }
 
   async update(id: number, dto: UpdateMantencionDto) {
+    if (dto.id_usuario_mecanico && dto.taller_externo) {
+      throw new BadRequestException('No puede asignar id_usuario_mecanico y taller_externo simultáneamente');
+    }
     const item = await this.findOne(id);
     Object.assign(item, dto);
     const saved = await this.repo.save(item);

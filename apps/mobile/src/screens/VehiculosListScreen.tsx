@@ -1,7 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -27,14 +28,13 @@ const ESTADO_COLOR: Record<EstadoVehiculo, { bg: string; texto: string }> = {
   [EstadoVehiculo.FUERA_DE_SERVICIO]: { bg: '#FEE2E2', texto: '#991B1B' },
 };
 
+// Mismo criterio de color que en el detalle del vehículo.
 function colorNivel(valor: number | null | undefined): string {
   if (valor === null || valor === undefined) return '#D1D5DB'; // gris: sin datos
-  if (valor < 45) return '#DC2626';
-  if (valor < 50) return '#EA580C';
-  if (valor < 75) return '#EAB308';
+  if (valor < 20) return '#DC2626';
+  if (valor < 50) return '#D97706';
   return '#16A34A';
 }
-
 
 function PuntosNiveles({ registro }: { registro: RegistroOperatividad | undefined }) {
   return (
@@ -54,11 +54,14 @@ export default function VehiculosListScreen({ navigation }: any) {
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busqueda, setBusqueda] = useState('');
+  const busquedaRef = useRef('');
+  const primeraVez = useRef(true);
 
   async function cargarVehiculos() {
     try {
       const [vehiculosData, registrosMap] = await Promise.all([
-        listarVehiculos(),
+        listarVehiculos(busquedaRef.current),
         obtenerUltimosRegistrosPorVehiculo(),
       ]);
       setVehiculos(vehiculosData);
@@ -76,6 +79,20 @@ export default function VehiculosListScreen({ navigation }: any) {
     }, []),
   );
 
+  // Búsqueda por patente (también marca y modelo) en el backend, con pausa
+  // de 400 ms al escribir para no llamar a la API en cada letra.
+  useEffect(() => {
+    busquedaRef.current = busqueda;
+    if (primeraVez.current) {
+      primeraVez.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      cargarVehiculos();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [busqueda]);
+
   async function onRefresh() {
     setRefrescando(true);
     await cargarVehiculos();
@@ -92,6 +109,20 @@ export default function VehiculosListScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.busquedaCaja}>
+        <TextInput
+          style={styles.busqueda}
+          placeholder="Buscar por patente, marca o modelo"
+          placeholderTextColor="#9CA3AF"
+          value={busqueda}
+          onChangeText={setBusqueda}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          returnKeyType="search"
+          clearButtonMode="while-editing"
+        />
+      </View>
+
       {error && <Text style={styles.error}>{error}</Text>}
 
       <FlatList
@@ -103,7 +134,11 @@ export default function VehiculosListScreen({ navigation }: any) {
           vehiculos.length === 0 && styles.listaVacia,
         ]}
         ItemSeparatorComponent={() => <View style={styles.separador} />}
-        ListEmptyComponent={<Text style={styles.vacioTexto}>No hay vehículos registrados.</Text>}
+        ListEmptyComponent={<Text style={styles.vacioTexto}>
+            {busqueda.trim()
+              ? `Sin resultados para "${busqueda.trim()}".`
+              : 'No hay vehículos registrados.'}
+          </Text>}
         renderItem={({ item }) => {
           const colores = ESTADO_COLOR[item.estado_operativo];
           return (
@@ -137,6 +172,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
   centro: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   error: { color: '#B91C1C', textAlign: 'center', padding: 12 },
+  busquedaCaja: { paddingHorizontal: 12, paddingTop: 12 },
+  busqueda: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: '#111827',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
   listaContenido: { padding: 12 },
   listaVacia: { flex: 1, justifyContent: 'center' },
   vacioTexto: { textAlign: 'center', color: '#666' },

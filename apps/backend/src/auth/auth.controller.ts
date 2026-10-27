@@ -1,4 +1,4 @@
-﻿import { Controller, Post, Body, Get, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -13,10 +13,10 @@ export class AuthController {
 
   /**
    * GET /auth/me
-   * Devuelve los datos del usuario autenticado (útil para mobile al arrancar).
+   * Devuelve los datos del usuario autenticado (�til para mobile al arrancar).
    * El guard inyecta req.user desde el JWT.
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  me(@Req() req: any) { return req.user; }
+  me(@Req() req: any) { return this.authService.getMe(req.user.sub); }
 }

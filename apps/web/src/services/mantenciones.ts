@@ -24,12 +24,13 @@ export interface Mantencion {
   fecha_ingreso: string;
   fecha_salida: string | null;
   descripcion_falla: string | null;
+  kilometraje?: number | null;
   costo_mano_obra: number | string;
   estado_mantencion: EstadoMantencion;
   id_vehiculo: number;
   id_usuario_mecanico: number | null;
   taller_externo: string | null;
-  vehiculo?: { id_vehiculo: number; patente: string; marca?: string; modelo?: string };
+  vehiculo?: { id_vehiculo: number; patente: string; marca?: string; modelo?: string; kilometraje?: number | string };
   usuarioMecanico?: { id_usuario: number; nombre: string; apellidos: string };
   detalles_articulos?: DetalleRepuestoEnMantencion[];
 }
@@ -37,6 +38,7 @@ export interface Mantencion {
 export interface CrearMantencionInput {
   tipo_mantencion: TipoMantencion;
   id_vehiculo: number;
+  kilometraje?: number;
   descripcion_falla?: string;
   costo_mano_obra?: number;
   estado_mantencion?: EstadoMantencion;
@@ -69,6 +71,7 @@ export async function crearMantencion(input: CrearMantencionInput): Promise<Mant
     ...input,
     fecha_ingreso: input.fecha_ingreso || new Date().toISOString(),
     costo_mano_obra: Number(input.costo_mano_obra ?? 0),
+    kilometraje: input.kilometraje !== undefined && input.kilometraje !== null ? Number(input.kilometraje) : undefined,
   });
 }
 
@@ -89,6 +92,7 @@ export async function registrarMantencionReactiva(input: {
   costo_mano_obra: number;
   id_vehiculo: number;
   id_usuario_mecanico: number;
+  kilometraje?: number;
 }): Promise<Mantencion> {
   return crearMantencion({
     tipo_mantencion: 'correctiva',
@@ -97,6 +101,7 @@ export async function registrarMantencionReactiva(input: {
     costo_mano_obra: input.costo_mano_obra,
     id_vehiculo: input.id_vehiculo,
     id_usuario_mecanico: input.id_usuario_mecanico,
+    kilometraje: input.kilometraje,
   });
 }
 
@@ -107,6 +112,7 @@ export async function registrarMantencionPreventivaFinalizada(input: {
   costo_mano_obra?: number;
   id_vehiculo: number;
   id_usuario_mecanico: number;
+  kilometraje?: number;
 }): Promise<Mantencion> {
   const creada = await crearMantencion({
     tipo_mantencion: 'preventiva',
@@ -116,6 +122,7 @@ export async function registrarMantencionPreventivaFinalizada(input: {
     costo_mano_obra: input.costo_mano_obra,
     id_vehiculo: input.id_vehiculo,
     id_usuario_mecanico: input.id_usuario_mecanico,
+    kilometraje: input.kilometraje,
   });
   return actualizarEstadoMantencion(creada.id_mantencion, 'finalizada', input.fecha_salida);
 }

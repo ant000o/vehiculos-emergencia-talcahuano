@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 /**
@@ -144,4 +144,19 @@ export class EstadisticasService {
       ORDER BY v.kilometraje DESC
     `);
   }
-}
+
+    /** KPIs operativos en tiempo real: bomberos, flota, grifos y repuestos criticos */
+  async getKpisOperativos() {
+    const res = await this.dataSource.query(`
+      SELECT
+        (SELECT COUNT(u.id_usuario)::int FROM usuario u JOIN rol r ON r.id_rol = u.id_rol WHERE u.estado_activo = true AND r.nombre_rol IN ('bombero','capitan') AND u.id_usuario NOT IN (SELECT dp.id_usuario FROM despacho_personal dp JOIN despacho_emergencia d ON d.id_despacho = dp.id_despacho WHERE d.estado_emergencia = 'en_curso')) AS bomberos_operativos,
+        (SELECT COUNT(DISTINCT dp.id_usuario)::int FROM despacho_personal dp JOIN despacho_emergencia d ON d.id_despacho = dp.id_despacho WHERE d.estado_emergencia = 'en_curso') AS bomberos_en_emergencia,
+        (SELECT COUNT(*)::int FROM vehiculo v WHERE v.estado_operativo = 'operativo' AND v.id_vehiculo NOT IN (SELECT d.id_vehiculo FROM despacho_emergencia d WHERE d.estado_emergencia = 'en_curso')) AS flota_operativa,
+        (SELECT COUNT(DISTINCT d.id_vehiculo)::int FROM despacho_emergencia d WHERE d.estado_emergencia = 'en_curso') AS flota_en_emergencia,
+        (SELECT COUNT(*)::int FROM vehiculo WHERE estado_operativo = 'en_mantencion') AS flota_en_mantencion,
+        (SELECT COUNT(*)::int FROM grifo WHERE estado_operativo = 'operativo') AS grifos_operativos,
+        (SELECT COUNT(*)::int FROM grifo WHERE estado_operativo = 'fuera_de_servicio') AS grifos_fuera_servicio,
+        (SELECT COUNT(*)::int FROM articulo_inventario WHERE stock_actual <= 5) AS repuestos_criticos
+    `);
+    return res[0];
+  }}

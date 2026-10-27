@@ -22,6 +22,9 @@ export class Mantencion {
   @Column({ type: 'text', nullable: true })
   descripcion_falla: string;
 
+  @Column({ type: 'int', nullable: true })
+  kilometraje: number;
+
   @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   costo_mano_obra: number;
 

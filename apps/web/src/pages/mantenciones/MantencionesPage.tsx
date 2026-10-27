@@ -41,6 +41,7 @@ export function MantencionesPage() {
   // Formulario de Nueva Mantención
   const [formTipo, setFormTipo] = useState<TipoMantencion>('preventiva');
   const [formIdVehiculo, setFormIdVehiculo] = useState<number | ''>('');
+  const [formKilometraje, setFormKilometraje] = useState<number | ''>('');
   const [formDescripcion, setFormDescripcion] = useState('');
   const [formCostoMO, setFormCostoMO] = useState<number>(0);
   const [formTallerExterno, setFormTallerExterno] = useState('');
@@ -59,11 +60,24 @@ export function MantencionesPage() {
       setArticulos(arts.sort((a, b) => a.id_articulo - b.id_articulo));
       if (!formIdVehiculo && vehs.length > 0) {
         setFormIdVehiculo(vehs[0].id_vehiculo);
+        if (vehs[0].kilometraje) {
+          setFormKilometraje(Number(vehs[0].kilometraje));
+        }
       }
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCambiarVehiculo = (id: number) => {
+    setFormIdVehiculo(id);
+    const v = vehiculos.find((veh) => veh.id_vehiculo === id);
+    if (v && v.kilometraje !== undefined && v.kilometraje !== null) {
+      setFormKilometraje(Number(v.kilometraje));
+    } else {
+      setFormKilometraje('');
     }
   };
 
@@ -97,6 +111,7 @@ export function MantencionesPage() {
       const nueva = await crearMantencion({
         tipo_mantencion: formTipo,
         id_vehiculo: Number(formIdVehiculo),
+        kilometraje: formKilometraje !== '' ? Number(formKilometraje) : undefined,
         descripcion_falla: formDescripcion.trim() || undefined,
         costo_mano_obra: Number(formCostoMO),
         estado_mantencion: 'en_proceso',
@@ -109,6 +124,7 @@ export function MantencionesPage() {
       setFormDescripcion('');
       setFormCostoMO(0);
       setFormTallerExterno('');
+      setFormKilometraje('');
       // Abrir directamente la ficha de la mantención recién creada para que pueda imputar repuestos
       setMantencionDetalle(nueva);
     } catch (err) {
@@ -373,12 +389,12 @@ export function MantencionesPage() {
               <select
                 id="vehiculo-select"
                 value={formIdVehiculo}
-                onChange={(e) => setFormIdVehiculo(Number(e.target.value))}
+                onChange={(e) => handleCambiarVehiculo(Number(e.target.value))}
                 required
               >
                 {vehiculos.map((v) => (
                   <option key={v.id_vehiculo} value={v.id_vehiculo}>
-                    {v.patente} — {v.marca} {v.modelo} (Estado actual: {v.estado_operativo})
+                    {v.patente} — {v.marca} {v.modelo} (Estado actual: {v.estado_operativo}{v.kilometraje ? ` | Odómetro: ${Number(v.kilometraje).toLocaleString('es-CL')} km` : ''})
                   </option>
                 ))}
               </select>
@@ -399,6 +415,18 @@ export function MantencionesPage() {
 
             <div className="mantenciones-form__row">
               <div className="mantenciones-form__field">
+                <label htmlFor="km-ingreso">Kilometraje al ingreso (km)</label>
+                <input
+                  id="km-ingreso"
+                  type="number"
+                  min={0}
+                  placeholder="Ej: 52000"
+                  value={formKilometraje}
+                  onChange={(e) => setFormKilometraje(e.target.value === '' ? '' : Number(e.target.value))}
+                />
+              </div>
+
+              <div className="mantenciones-form__field">
                 <label htmlFor="costo-mo">Costo Mano de Obra (CLP)</label>
                 <input
                   id="costo-mo"
@@ -408,17 +436,17 @@ export function MantencionesPage() {
                   onChange={(e) => setFormCostoMO(Number(e.target.value))}
                 />
               </div>
+            </div>
 
-              <div className="mantenciones-form__field">
-                <label htmlFor="taller-ext">Taller externo (opcional)</label>
-                <input
-                  id="taller-ext"
-                  type="text"
-                  placeholder="Dejar vacío si atiende mecánico interno"
-                  value={formTallerExterno}
-                  onChange={(e) => setFormTallerExterno(e.target.value)}
-                />
-              </div>
+            <div className="mantenciones-form__field" style={{ maxWidth: '100%' }}>
+              <label htmlFor="taller-ext">Taller externo (opcional)</label>
+              <input
+                id="taller-ext"
+                type="text"
+                placeholder="Dejar vacío si atiende mecánico interno"
+                value={formTallerExterno}
+                onChange={(e) => setFormTallerExterno(e.target.value)}
+              />
             </div>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: 'var(--space-4)' }}>
@@ -553,6 +581,7 @@ export function MantencionesPage() {
                   <th>Vehículo</th>
                   <th>Tipo</th>
                   <th>Estado</th>
+                  <th>Km Ingreso</th>
                   <th>Fecha Ingreso</th>
                   <th>Repuestos Usados</th>
                   <th>Costo Total</th>
@@ -612,6 +641,15 @@ export function MantencionesPage() {
                         >
                           {bEst.label}
                         </span>
+                      </td>
+                      <td>
+                        {m.kilometraje ? (
+                          <strong style={{ fontSize: '0.8125rem', color: 'var(--color-navy-900)' }}>
+                            {Number(m.kilometraje).toLocaleString('es-CL')} km
+                          </strong>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-400)' }}>—</span>
+                        )}
                       </td>
                       <td style={{ whiteSpace: 'nowrap' }}>
                         {new Date(m.fecha_ingreso).toLocaleDateString('es-CL')}
@@ -706,6 +744,13 @@ export function MantencionesPage() {
                 >
                   {badgeEstado(mantencionDetalle.estado_mantencion).label}
                 </span>
+              </div>
+
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-600)', display: 'block' }}>Km al Ingreso</span>
+                <strong style={{ fontSize: '0.875rem', color: 'var(--color-navy-900)' }}>
+                  {mantencionDetalle.kilometraje ? `${Number(mantencionDetalle.kilometraje).toLocaleString('es-CL')} km` : 'No registrado'}
+                </strong>
               </div>
 
               <div>

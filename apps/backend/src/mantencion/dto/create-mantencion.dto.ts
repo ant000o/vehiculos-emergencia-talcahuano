@@ -1,10 +1,16 @@
 import { IsString, IsNotEmpty, MaxLength, IsInt, IsOptional, IsNumber, Min, IsEnum, IsDateString, ValidateIf } from 'class-validator';
+import { Type } from 'class-transformer';
 import { EstadoMantencion, TipoMantencion } from '../../common/enums/estados.enum';
 
 export class CreateMantencionDto {
   @IsEnum(TipoMantencion)
   tipo_mantencion: TipoMantencion;
 
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  kilometraje?: number;
 
   @IsDateString()
   @IsOptional()
@@ -27,10 +33,12 @@ export class CreateMantencionDto {
   @IsOptional()
   estado_mantencion?: EstadoMantencion;
 
+  @Type(() => Number)
   @IsInt()
   id_vehiculo: number;
 
-  // Debe venir id_usuario_mecanico O taller_externo (regla también reforzada por CHECK en la BD)
+  // Debe venir exactamente uno: id_usuario_mecanico O taller_externo
+  @Type(() => Number)
   @IsInt()
   @IsOptional()
   id_usuario_mecanico?: number;

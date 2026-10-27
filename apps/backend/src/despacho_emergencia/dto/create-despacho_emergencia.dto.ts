@@ -1,5 +1,15 @@
-import { IsObject, IsString, IsNotEmpty, MaxLength, IsEnum, IsInt, IsOptional, IsDateString } from 'class-validator';
-import { EstadoEmergencia } from '../../common/enums/estados.enum';
+import { IsObject, IsString, IsNotEmpty, MaxLength, IsEnum, IsInt, IsOptional, IsDateString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { EstadoEmergencia, RolEnDespacho } from '../../common/enums/estados.enum';
+
+export class TripulanteAsignadoDto {
+  @IsInt()
+  id_usuario: number;
+
+  @IsEnum(RolEnDespacho)
+  @IsOptional()
+  rol_en_despacho?: RolEnDespacho;
+}
 
 export class CreateDespachoEmergenciaDto {
   @IsDateString()
@@ -28,4 +38,10 @@ export class CreateDespachoEmergenciaDto {
 
   @IsInt()
   id_compania: number;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => TripulanteAsignadoDto)
+  tripulacion?: TripulanteAsignadoDto[];
 }

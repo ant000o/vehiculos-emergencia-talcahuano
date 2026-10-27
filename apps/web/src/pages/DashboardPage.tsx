@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import { ROLE_LABELS } from '../config/navigation';
 import { 
@@ -7,12 +7,14 @@ import {
   obtenerVehiculosMasMantenidos,
   obtenerTiemposReparacion,
   obtenerAlertasMantencion,
+  obtenerKpisOperativos,
   exportarGastosCSV,
   type ResumenDashboard,
   type MantencionPorMes,
   type VehiculoMasMantenido,
   type TiempoReparacion,
-  type AlertaMantencion
+  type AlertaMantencion,
+  type KpisOperativos
 } from '../services/estadisticas';
 
 import {
@@ -40,6 +42,7 @@ export function DashboardPage() {
   const [vehiculos, setVehiculos] = useState<VehiculoMasMantenido[]>([]);
   const [tiempos, setTiempos] = useState<TiempoReparacion[]>([]);
   const [alertas, setAlertas] = useState<AlertaMantencion[]>([]);
+  const [kpis, setKpis] = useState<KpisOperativos | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -47,13 +50,15 @@ export function DashboardPage() {
       obtenerMantencionesPorMes(),
       obtenerVehiculosMasMantenidos(),
       obtenerTiemposReparacion().catch(() => []),
-      obtenerAlertasMantencion().catch(() => [])
-    ]).then(([d, m, v, t, a]) => {
+      obtenerAlertasMantencion().catch(() => []),
+      obtenerKpisOperativos().catch(() => null)
+    ]).then(([d, m, v, t, a, k]) => {
       setDashboard(d);
       setMeses(m);
       setVehiculos([...v].sort((a, b) => Number(b.costo_total) - Number(a.costo_total)));
       setTiempos(t);
       setAlertas(a);
+      setKpis(k as KpisOperativos | null);
     }).catch(console.error);
   }, []);
 
@@ -175,27 +180,61 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Indicadores KPI */}
+            {/* Indicadores KPI - 8 tarjetas operativas en tiempo real */}
       <div className="dashboard__kpis">
+        {/* Bomberos Operativos */}
         <div className="dashboard__kpi-card">
-          <span className="dashboard__kpi-label">Flota Operativa</span>
-          <p className="dashboard__kpi-value">{dashboard?.flota.find(f => f.estado === 'operativo')?.total || 0}</p>
-          <span className="dashboard__kpi-desc">Unidades listas para servicio</span>
+          <span className="dashboard__kpi-label">Bomberos Operativos</span>
+          <p className="dashboard__kpi-value" style={{ color: '#15803d' }}>{kpis?.bomberos_operativos ?? 0}</p>
+          <span className="dashboard__kpi-desc">Disponibles, sin emergencia activa</span>
         </div>
 
+        {/* Bomberos en Emergencia */}
+        <div className="dashboard__kpi-card">
+          <span className="dashboard__kpi-label">Bomberos en Emergencia</span>
+          <p className="dashboard__kpi-value" style={{ color: kpis?.bomberos_en_emergencia ? '#b91c1c' : undefined }}>{kpis?.bomberos_en_emergencia ?? 0}</p>
+          <span className="dashboard__kpi-desc">En despacho activo</span>
+        </div>
+
+        {/* Flota Operativa */}
+        <div className="dashboard__kpi-card">
+          <span className="dashboard__kpi-label">Flota Operativa</span>
+          <p className="dashboard__kpi-value" style={{ color: '#15803d' }}>{kpis?.flota_operativa ?? 0}</p>
+          <span className="dashboard__kpi-desc">Unidades listas, sin despacho activo</span>
+        </div>
+
+        {/* Flota en Emergencia */}
+        <div className="dashboard__kpi-card">
+          <span className="dashboard__kpi-label">Flota en Emergencia</span>
+          <p className="dashboard__kpi-value" style={{ color: kpis?.flota_en_emergencia ? '#b91c1c' : undefined }}>{kpis?.flota_en_emergencia ?? 0}</p>
+          <span className="dashboard__kpi-desc">Vehículos en despacho activo</span>
+        </div>
+
+        {/* Flota en Mantención */}
+        <div className="dashboard__kpi-card">
+          <span className="dashboard__kpi-label">Flota en Mantención</span>
+          <p className="dashboard__kpi-value" style={{ color: kpis?.flota_en_mantencion ? '#c2410c' : undefined }}>{kpis?.flota_en_mantencion ?? 0}</p>
+          <span className="dashboard__kpi-desc">Vehículos en taller</span>
+        </div>
+
+        {/* Grifos Operativos */}
+        <div className="dashboard__kpi-card">
+          <span className="dashboard__kpi-label">Grifos Funcionando</span>
+          <p className="dashboard__kpi-value" style={{ color: '#15803d' }}>{kpis?.grifos_operativos ?? 0}</p>
+          <span className="dashboard__kpi-desc">En servicio y operativos</span>
+        </div>
+
+        {/* Grifos Fuera de Servicio */}
         <div className="dashboard__kpi-card">
           <span className="dashboard__kpi-label">Grifos Fuera de Servicio</span>
-          <p className="dashboard__kpi-value" style={{ color: dashboard?.grifos.find(g => g.estado === 'fuera_de_servicio')?.total ? '#c1272d' : undefined }}>
-            {dashboard?.grifos.find(g => g.estado === 'fuera_de_servicio')?.total || 0}
-          </p>
+          <p className="dashboard__kpi-value" style={{ color: kpis?.grifos_fuera_servicio ? '#b91c1c' : undefined }}>{kpis?.grifos_fuera_servicio ?? 0}</p>
           <span className="dashboard__kpi-desc">Reportados con fallas</span>
         </div>
 
+        {/* Repuestos Críticos */}
         <div className="dashboard__kpi-card">
           <span className="dashboard__kpi-label">Repuestos Críticos</span>
-          <p className="dashboard__kpi-value" style={{ color: dashboard?.inventario.articulos_bajo_stock ? '#b45309' : undefined }}>
-            {dashboard?.inventario.articulos_bajo_stock || 0}
-          </p>
+          <p className="dashboard__kpi-value" style={{ color: kpis?.repuestos_criticos ? '#b45309' : undefined }}>{kpis?.repuestos_criticos ?? 0}</p>
           <span className="dashboard__kpi-desc">Artículos con stock ≤ 5</span>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dt
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('despachos-emergencia')
+@Controller(['despachos-emergencia', 'despacho-emergencia'])
 export class DespachoEmergenciaController {
   constructor(private readonly service: DespachoEmergenciaService) {}
 

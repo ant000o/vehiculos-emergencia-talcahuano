@@ -1,9 +1,6 @@
 /**
- * Servicio de autenticación — CONECTADO al backend real de Carlo.
- *
+ * Servicio de autenticación — CONECTADO al backend real.
  * Roles reales confirmados en la BD: administrador, bombero, capitan, mecanico.
- * 'capitan' es el nombre en BD para lo que las HU llaman "Comandancia /
- * Oficial a Cargo" — confirmar con Carlo que esa equivalencia es correcta.
  */
 
 export type Rol = 'administrador' | 'bombero' | 'capitan' | 'mecanico';
@@ -37,15 +34,12 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
   });
 
   if (!response.ok) {
-    // El backend responde 401 con { message, statusCode, error } en credenciales inválidas.
     const cuerpo = await response.json().catch(() => null);
     throw new Error(cuerpo?.message ?? 'No se pudo iniciar sesión.');
   }
 
   const data = await response.json();
 
-  // El backend devuelve rol y compañía como TEXTO (no como IDs numéricos),
-  // a diferencia de lo que asumíamos en el mock.
   const user: AuthUser = {
     id: data.usuario.id_usuario,
     nombre: data.usuario.nombre,
@@ -56,6 +50,36 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
   };
 
   return { user, accessToken: data.access_token };
+}
+
+export async function obtenerUsuarioActual(): Promise<AuthUser | null> {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+
+  try {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      localStorage.removeItem('accessToken');
+      return null;
+    }
+
+    const data = await response.json();
+    return {
+      id: data.id_usuario,
+      nombre: data.nombre,
+      apellidos: data.apellidos,
+      email: data.email,
+      rol: data.rol,
+      compania: data.compania,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function logout(): void {

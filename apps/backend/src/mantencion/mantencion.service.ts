@@ -25,6 +25,15 @@ export class MantencionService {
     }
     const entity = this.repo.create(dto);
     const saved = await this.repo.save(entity);
+
+    // Si se especificó kilometraje al ingreso, actualizar odómetro del vehículo si es mayor
+    if (dto.kilometraje !== undefined && dto.kilometraje !== null) {
+      const veh = await this.vehiculoRepo.findOne({ where: { id_vehiculo: dto.id_vehiculo } });
+      if (veh && (veh.kilometraje === null || dto.kilometraje > veh.kilometraje)) {
+        await this.vehiculoRepo.update(dto.id_vehiculo, { kilometraje: dto.kilometraje });
+      }
+    }
+
     if (dto.tipo_mantencion === TipoMantencion.EMERGENCIA) {
       await this.vehiculoRepo.update(dto.id_vehiculo, { estado_operativo: EstadoVehiculo.FUERA_DE_SERVICIO });
       const veh = await this.vehiculoRepo.findOne({ where: { id_vehiculo: dto.id_vehiculo } });
@@ -66,6 +75,15 @@ export class MantencionService {
     const item = await this.findOne(id);
     Object.assign(item, dto);
     const saved = await this.repo.save(item);
+
+    // Si se actualiza el kilometraje, sincronizar con el odómetro del vehículo si es mayor
+    if (dto.kilometraje !== undefined && dto.kilometraje !== null) {
+      const veh = await this.vehiculoRepo.findOne({ where: { id_vehiculo: item.id_vehiculo } });
+      if (veh && (veh.kilometraje === null || dto.kilometraje > veh.kilometraje)) {
+        await this.vehiculoRepo.update(item.id_vehiculo, { kilometraje: dto.kilometraje });
+      }
+    }
+
     if (dto.estado_mantencion === EstadoMantencion.FINALIZADA || dto.estado_mantencion === EstadoMantencion.CANCELADA) {
       await this.vehiculoRepo.update(item.id_vehiculo, { estado_operativo: EstadoVehiculo.OPERATIVO });
     }

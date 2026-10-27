@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -11,6 +11,7 @@ import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstados
 import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
 import { GrifosPage } from './pages/grifos/GrifosPage';
 import { InventarioPage } from './pages/inventario/InventarioPage';
+import { DespachosPage } from './pages/despachos/DespachosPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             }
           >
             <Route index element={<DashboardPage />} />
+            <Route path="despachos" element={<DespachosPage />} />
             <Route path="vehiculos" element={<VehiculosPage />} />
             
             {/* Historial de Estados (incluye registro de estado integrado) */}
@@ -38,7 +40,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Redirección para compatibilidad si alguien accede a /registrar-estado */}
+            {/* RedirecciÃ³n para compatibilidad si alguien accede a /registrar-estado */}
             <Route path="registrar-estado" element={<Navigate to="/historial-estados" replace />} />
 
             <Route

@@ -80,5 +80,14 @@ export const exportarGastosCSV = async () => {
   a.click();
   document.body.removeChild(a);
 };
-
-
+export interface KpisOperativos {
+  bomberos_operativos: number;
+  bomberos_en_emergencia: number;
+  flota_operativa: number;
+  flota_en_emergencia: number;
+  flota_en_mantencion: number;
+  grifos_operativos: number;
+  grifos_fuera_servicio: number;
+  repuestos_criticos: number;
+}
+export const obtenerKpisOperativos = () => api.get<KpisOperativos>('/estadisticas/kpis-operativos');

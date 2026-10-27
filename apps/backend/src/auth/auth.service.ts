@@ -46,4 +46,19 @@ export class AuthService {
       },
     };
   }
+
+  async getMe(userId: number) {
+    const usuario = await this.usuarioService.findOne(userId);
+    if (!usuario || !usuario.estado_activo) {
+      throw new UnauthorizedException('Usuario inactivo o no encontrado');
+    }
+    return {
+      id_usuario: usuario.id_usuario,
+      nombre: usuario.nombre,
+      apellidos: usuario.apellidos,
+      email: usuario.email,
+      rol: usuario.rol.nombre_rol,
+      compania: usuario.compania?.nombre || '',
+    };
+  }
 }

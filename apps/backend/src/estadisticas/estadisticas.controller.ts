@@ -34,4 +34,8 @@ export class EstadisticasController {
   /** GET /estadisticas/alertas-mantencion — alertas de mantención preventiva (HU-15) */
   @Get('alertas-mantencion')
   getAlertasMantencion() { return this.service.getAlertasMantencion(); }
+
+  /** GET /estadisticas/kpis-operativos - KPIs operativos en tiempo real */
+  @Get('kpis-operativos')
+  getKpisOperativos() { return this.service.getKpisOperativos(); }
 }

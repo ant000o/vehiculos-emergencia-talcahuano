@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength, IsInt, IsOptional, IsNumber, Min, IsEnum, IsDateString, ValidateIf } from 'class-validator';
+import { IsString, MaxLength, IsInt, IsOptional, IsNumber, Min, IsEnum, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EstadoMantencion, TipoMantencion } from '../../common/enums/estados.enum';
 

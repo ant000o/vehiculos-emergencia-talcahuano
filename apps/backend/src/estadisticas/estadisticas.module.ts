@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { EstadisticasService } from './estadisticas.service';
 import { EstadisticasController } from './estadisticas.controller';
 

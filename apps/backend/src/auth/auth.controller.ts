@@ -13,7 +13,7 @@ export class AuthController {
 
   /**
    * GET /auth/me
-   * Devuelve los datos del usuario autenticado (útil para mobile al arrancar).
+   * Devuelve los datos del usuario autenticado (Ãºtil para mobile al arrancar).
    * El guard inyecta req.user desde el JWT.
    */
   @Get('me')

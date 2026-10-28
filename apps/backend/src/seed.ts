@@ -113,7 +113,7 @@ async function seed() {
   // Contraseña para todos: Password123
   const hash = await bcrypt.hash('Password123', 10);
   const usuarioRepo = ds.getRepository(Usuario);
-  const [admin, capitan1, mecanico1, bombero1, bombero2, bombero3] = await usuarioRepo.save([
+  const [_admin, capitan1, mecanico1, bombero1, bombero2, _bombero3] = await usuarioRepo.save([
     usuarioRepo.create({
       rut: '11111111-1', nombre: 'Ana', apellidos: 'Soto Pérez',
       email: 'admin@bomberos-talcahuano.cl',
@@ -184,7 +184,7 @@ async function seed() {
 
   // ─── GRIFO ────────────────────────────────────────────────────────────────
   const grifoRepo = ds.getRepository(Grifo);
-  const [grifo1, grifo2, grifo3, grifo4] = await grifoRepo.save([
+  const [grifo1, _grifo2, grifo3, _grifo4] = await grifoRepo.save([
     grifoRepo.create({
       coordenadas: { type: 'Point', coordinates: [-73.1150, -36.7200] },
       direccion: 'Av. Colón 1200, Talcahuano',
@@ -293,7 +293,7 @@ async function seed() {
 
   // ─── MANTENCION ───────────────────────────────────────────────────────────
   const mantencionRepo = ds.getRepository(Mantencion);
-  const [mant1, mant2, mant3] = await mantencionRepo.save([
+  const [mant1, mant2, _mant3] = await mantencionRepo.save([
     // Mantención finalizada (mecánico interno)
     mantencionRepo.create({
       tipo_mantencion: TipoMantencion.PREVENTIVA,

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+﻿import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/useAuth';
 import {
   listarMantenciones,
@@ -574,7 +574,8 @@ export function MantencionesPage() {
               No hay registros de mantenciones con los filtros actuales.
             </p>
           ) : (
-            <table className="historial-table" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div className="table-responsive">
+            <table className="historial-table">
               <thead>
                 <tr>
                   <th>Código</th>
@@ -689,6 +690,7 @@ export function MantencionesPage() {
                 })}
               </tbody>
             </table>
+          </div>
           )}
         </>
       )}

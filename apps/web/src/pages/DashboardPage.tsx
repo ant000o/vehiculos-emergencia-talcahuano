@@ -137,7 +137,7 @@ export function DashboardPage() {
         Sesión activa como <strong>{ROLE_LABELS[user.rol]}</strong>.
       </p>
 
-      {/* HU-15: Banner Alerta de Mantención Próxima o Vencida */}
+      {/* Alertas de Mantenimiento Preventivo (Rutina cada 10.000 km) */}
       {alertas.length > 0 && (
         <div style={{
           backgroundColor: '#fffbeb',
@@ -148,13 +148,18 @@ export function DashboardPage() {
           marginBottom: 'var(--space-6)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.25rem' }}>⚠️</span>
-            <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
-              Alertas de Mantenimiento Preventivo (HU-15)
-            </strong>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
+                Alertas de Mantenimiento Preventivo (Rutina cada 10.000 km)
+              </strong>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 500 }}>
+              Notificación activa para vehículos a ≤ 3.000 km de su próximo mantenimiento
+            </span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {alertas.map((a) => (
@@ -164,7 +169,7 @@ export function DashboardPage() {
                   backgroundColor: a.nivel_alerta === 'critica' ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
                   color: a.nivel_alerta === 'critica' ? '#b91c1c' : '#92400e',
                   border: `1px solid ${a.nivel_alerta === 'critica' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.25)'}`,
-                  padding: '4px 10px',
+                  padding: '5px 12px',
                   borderRadius: '999px',
                   fontSize: '0.8125rem',
                   fontWeight: 500,
@@ -173,14 +178,14 @@ export function DashboardPage() {
                   gap: '6px'
                 }}
               >
-                <strong>{a.patente}</strong> ({a.marca} {a.modelo}): {a.motivo_alerta} — {Number(a.kilometraje).toLocaleString('es-CL')} km
+                <strong>{a.patente}</strong> ({a.marca} {a.modelo}): {a.motivo_alerta} — Odómetro: {Number(a.kilometraje).toLocaleString('es-CL')} km
               </span>
             ))}
           </div>
         </div>
       )}
 
-            {/* Indicadores KPI - 8 tarjetas operativas en tiempo real */}
+      {/* Indicadores KPI - 8 tarjetas operativas en tiempo real */}
       <div className="dashboard__kpis">
         {/* Bomberos Operativos */}
         <div className="dashboard__kpi-card">
@@ -294,7 +299,8 @@ export function DashboardPage() {
               )}
             </div>
             
-            <table className="dashboard__table">
+            <div className="table-responsive">
+              <table className="dashboard__table">
               <thead>
                 <tr>
                   <th>Patente</th>
@@ -322,6 +328,7 @@ export function DashboardPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* HU-24: Resumen de Tiempos de Reparación y Estadía en Taller */}
@@ -330,7 +337,8 @@ export function DashboardPage() {
               <h3 className="dashboard__card-title">Resumen de Tiempos de Reparación y Estadía en Taller (HU-24)</h3>
             </div>
             
-            <table className="dashboard__table">
+            <div className="table-responsive">
+              <table className="dashboard__table">
               <thead>
                 <tr>
                   <th>Patente</th>
@@ -364,6 +372,7 @@ export function DashboardPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </>
       )}

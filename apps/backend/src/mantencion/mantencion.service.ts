@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+﻿﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Mantencion } from './entities/mantencion.entity';
@@ -44,6 +44,22 @@ export class MantencionService {
     } else if (dto.estado_mantencion === EstadoMantencion.EN_PROCESO) {
       await this.vehiculoRepo.update(dto.id_vehiculo, { estado_operativo: EstadoVehiculo.EN_MANTENCION });
     }
+    return saved;
+  }
+
+  /** Crea una mantención automática por intervalo de km (sin validar mecánico/taller). */
+  async createAutomatica(data: {
+    tipo_mantencion: any;
+    id_vehiculo: number;
+    kilometraje: number;
+    descripcion_falla: string;
+    estado_mantencion: any;
+    taller_externo: string;
+  }) {
+    const entity = this.repo.create(data as any);
+    const saved = await this.repo.save(entity);
+    // Poner el vehículo en mantencion
+    await this.vehiculoRepo.update(data.id_vehiculo, { estado_operativo: EstadoVehiculo.EN_MANTENCION });
     return saved;
   }
 

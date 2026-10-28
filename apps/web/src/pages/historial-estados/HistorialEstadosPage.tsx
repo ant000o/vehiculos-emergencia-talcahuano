@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { listarVehiculos, type Vehiculo } from '../../services/vehiculos';
 import { listarRegistros, crearRegistroOperatividad, type RegistroOperatividad } from '../../services/registroOperatividad';
@@ -364,7 +364,8 @@ export function HistorialEstadosPage() {
             </p>
           ) : (
             <>
-              <table className="historial-table">
+              <div className="table-responsive">
+                <table className="historial-table">
                 <thead>
                   <tr>
                     <th>Fecha y Hora</th>
@@ -398,6 +399,7 @@ export function HistorialEstadosPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
 
               <div className="historial-page__paginacion">
                 <button

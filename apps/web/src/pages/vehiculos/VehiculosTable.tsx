@@ -23,39 +23,56 @@ export function VehiculosTable({ vehiculos, companias, onEditar }: VehiculosTabl
   }
 
   return (
-    <table className="vehiculos-table">
-      <thead>
-        <tr>
-          <th>Patente</th>
-          <th>Marca / Modelo</th>
-          <th>Año</th>
-          <th>Kilometraje</th>
-          <th>Estado</th>
-          <th>Compañía</th>
-          {onEditar && <th aria-label="Acciones"></th>}
-        </tr>
-      </thead>
-      <tbody>
-        {vehiculos.map((v) => (
-          <tr key={v.id_vehiculo}>
-            <td className="vehiculos-table__patente">{v.patente}</td>
-            <td>{v.marca} {v.modelo}</td>
-            <td>{v.anio}</td>
-            <td>{Number(v.kilometraje).toLocaleString('es-CL')} km</td>
-            <td>
-              <span className={`vehiculos-table__badge is-${v.estado_operativo}`}>
-                {ESTADO_LABEL[v.estado_operativo]}
-              </span>
-            </td>
-            <td>{nombreCompania(v.id_compania)}</td>
-            {onEditar && (
-              <td className="vehiculos-table__actions">
-                <button onClick={() => onEditar(v)}>Editar</button>
-              </td>
-            )}
+    <div className="table-responsive">
+      <table className="vehiculos-table">
+        <thead>
+          <tr>
+            <th>Patente</th>
+            <th>Marca / Modelo</th>
+            <th>Año</th>
+            <th>Kilometraje</th>
+            <th>Próx. Mantención</th>
+            <th>Estado</th>
+            <th>Compañía</th>
+            {onEditar && <th aria-label="Acciones"></th>}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {vehiculos.map((v) => {
+            const kmActual = Number(v.kilometraje ?? 0);
+            const proxKm = v.proxima_mantencion ?? (kmActual + 10000);
+
+            return (
+              <tr key={v.id_vehiculo}>
+                <td className="vehiculos-table__patente">{v.patente}</td>
+                <td>{v.marca} {v.modelo}</td>
+                <td>{v.anio}</td>
+                <td>
+                  <span className="vehiculos-table__km">
+                    {kmActual.toLocaleString('es-CL')} km
+                  </span>
+                </td>
+                <td>
+                  <span className="vehiculos-table__prox-km">
+                    {Number(proxKm).toLocaleString('es-CL')} km
+                  </span>
+                </td>
+                <td>
+                  <span className={`vehiculos-table__badge is-${v.estado_operativo}`}>
+                    {ESTADO_LABEL[v.estado_operativo]}
+                  </span>
+                </td>
+                <td>{nombreCompania(v.id_compania)}</td>
+                {onEditar && (
+                  <td className="vehiculos-table__actions">
+                    <button onClick={() => onEditar(v)}>Editar</button>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }

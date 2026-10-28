@@ -24,7 +24,7 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
   const response = await fetch(`${API_URL}/auth/login`, {

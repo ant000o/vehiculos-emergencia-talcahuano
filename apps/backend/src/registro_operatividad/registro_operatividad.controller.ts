@@ -1,5 +1,7 @@
-﻿import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/types/jwt-payload.type';
 import { RegistroOperatividadService } from './registro_operatividad.service';
 import { CreateRegistroOperatividadDto } from './dto/create-registro_operatividad.dto';
 import { UpdateRegistroOperatividadDto } from './dto/update-registro_operatividad.dto';
@@ -10,7 +12,14 @@ export class RegistroOperatividadController {
   constructor(private readonly service: RegistroOperatividadService) {}
 
   @Post()
-  create(@Body() dto: CreateRegistroOperatividadDto) { return this.service.create(dto); }
+  create(
+    @Body() dto: CreateRegistroOperatividadDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    // S5: Asignar id_usuario de forma segura desde el JWT validado
+    dto.id_usuario = user.sub;
+    return this.service.create(dto);
+  }
 
   /** GET /registros-operatividad?id_vehiculo=2 */
   @Get()

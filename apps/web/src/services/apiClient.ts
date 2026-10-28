@@ -4,7 +4,7 @@
  * y el formato de error que devuelve NestJS (whitelist + class-validator).
  */
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 export class ApiError extends Error {}
 

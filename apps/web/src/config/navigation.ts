@@ -1,4 +1,4 @@
-﻿import type { Rol } from '../services/auth';
+import type { Rol } from '../services/auth';
 
 export interface NavItem {
   label: string;
@@ -16,7 +16,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Mantenciones', path: '/mantenciones', roles: ['administrador', 'mecanico', 'capitan'] },
   { label: 'Mapa de Despacho', path: '/mapa', roles: ['administrador', 'capitan'] },
   { label: 'Usuarios', path: '/usuarios', roles: ['administrador'] },
-  { label: 'VehÃ­culos', path: '/vehiculos', roles: ['administrador', 'bombero', 'capitan', 'mecanico'] },
+  { label: 'Vehículos', path: '/vehiculos', roles: ['administrador', 'bombero', 'capitan', 'mecanico'] },
 ];
 
 export const ROLE_LABELS: Record<Rol, string> = {

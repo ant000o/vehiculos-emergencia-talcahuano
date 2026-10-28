@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 /**
@@ -116,36 +116,58 @@ export class EstadisticasService {
     `);
   }
 
-  /** Alertas de mantención preventiva próxima o vencida (HU-15) */
+      /** Alertas de mantencion preventiva proxima o vencida (ciclo de 10.000 km) */
   async getAlertasMantencion() {
-    return this.dataSource.query(`
+    return this.dataSource.query(`      WITH vehiculo_info AS (
+        SELECT
+          v.id_vehiculo,
+          v.patente,
+          v.marca,
+          v.modelo,
+          COALESCE(v.kilometraje, 0)::int AS kilometraje,
+          v.estado_operativo,
+          MAX(m.fecha_ingreso) AS ultima_mantencion,
+          COALESCE(MAX(m.kilometraje), 0)::int AS km_ultima_mantencion
+        FROM vehiculo v
+        LEFT JOIN mantencion m ON m.id_vehiculo = v.id_vehiculo
+        GROUP BY v.id_vehiculo, v.patente, v.marca, v.modelo, v.kilometraje, v.estado_operativo
+      ),
+      calculo_ciclo AS (
+        SELECT
+          vi.*,
+          CASE
+            WHEN vi.km_ultima_mantencion > 0 THEN vi.km_ultima_mantencion + 10000
+            ELSE ((FLOOR(vi.kilometraje / 10000.0) + 1)::int * 10000)
+          END AS proximo_km_mantencion
+        FROM vehiculo_info vi
+      )
       SELECT
-        v.id_vehiculo,
-        v.patente,
-        v.marca,
-        v.modelo,
-        v.kilometraje,
-        v.estado_operativo,
-        MAX(m.fecha_ingreso) AS ultima_mantencion,
+        cc.id_vehiculo,
+        cc.patente,
+        cc.marca,
+        cc.modelo,
+        cc.kilometraje,
+        cc.estado_operativo,
+        cc.ultima_mantencion,
+        cc.proximo_km_mantencion,
+        (cc.proximo_km_mantencion - cc.kilometraje) AS km_restantes,
         CASE
-          WHEN v.kilometraje >= 10000 THEN 'Kilometraje crítico (≥ 10.000 km)'
-          WHEN v.kilometraje >= 5000 THEN 'Inspección preventiva sugerida (≥ 5.000 km)'
-          WHEN MAX(m.fecha_ingreso) IS NULL THEN 'Sin registro de mantención histórica'
-          ELSE 'Revisión periódica requerida'
+          WHEN cc.kilometraje >= cc.proximo_km_mantencion
+            THEN 'Mantencion de rutina requerida (limite alcanzado: ' || cc.proximo_km_mantencion || ' km)'
+          WHEN (cc.proximo_km_mantencion - cc.kilometraje) <= 3000
+            THEN 'Proxima mantencion en ' || (cc.proximo_km_mantencion - cc.kilometraje) || ' km (a los ' || cc.proximo_km_mantencion || ' km)'
+          ELSE 'Revision preventiva requerida'
         END AS motivo_alerta,
         CASE
-          WHEN v.kilometraje >= 10000 THEN 'critica'
+          WHEN cc.kilometraje >= cc.proximo_km_mantencion THEN 'critica'
           ELSE 'advertencia'
         END AS nivel_alerta
-      FROM vehiculo v
-      LEFT JOIN mantencion m ON m.id_vehiculo = v.id_vehiculo
-      WHERE v.kilometraje >= 5000 OR m.fecha_ingreso IS NULL
-      GROUP BY v.id_vehiculo, v.patente, v.marca, v.modelo, v.kilometraje, v.estado_operativo
-      ORDER BY v.kilometraje DESC
+      FROM calculo_ciclo cc
+      WHERE cc.kilometraje >= (cc.proximo_km_mantencion - 3000)
+      ORDER BY (cc.proximo_km_mantencion - cc.kilometraje) ASC, cc.kilometraje DESC
     `);
   }
 
-    /** KPIs operativos en tiempo real: bomberos, flota, grifos y repuestos criticos */
   async getKpisOperativos() {
     const res = await this.dataSource.query(`
       SELECT

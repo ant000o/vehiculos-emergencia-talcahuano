@@ -67,7 +67,7 @@ export class UsuarioService {
     // Si se envía una nueva contraseña, la hasheamos antes de guardar
     if ((dto as any).password) {
       const password_hash = await bcrypt.hash((dto as any).password, 10);
-      const { password, ...rest } = dto as any;
+      const { password: _password, ...rest } = dto as any;
       Object.assign(usuario, { ...rest, password_hash });
     } else {
       Object.assign(usuario, dto);

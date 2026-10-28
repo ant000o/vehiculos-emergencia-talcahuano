@@ -16,6 +16,7 @@ export interface Vehiculo {
   estado_operativo: EstadoVehiculo;
   id_compania: number;
   coordenadas?: any;
+  proxima_mantencion?: number;
 }
 
 export interface PaginatedVehiculos {
@@ -25,7 +26,8 @@ export interface PaginatedVehiculos {
 }
 
 export const listarVehiculos = (params?: { estado?: string; q?: string }) => {
-  const url = new URL(import.meta.env.VITE_API_URL + '/vehiculos');
+  const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+  const url = new URL(`${baseUrl}/vehiculos`);
   if (params?.estado) url.searchParams.append('estado', params.estado);
   if (params?.q) url.searchParams.append('q', params.q);
   return apiClient.get<PaginatedVehiculos>(url.pathname + url.search).then(r => r.data);

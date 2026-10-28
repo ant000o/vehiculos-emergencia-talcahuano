@@ -47,6 +47,22 @@ export class MantencionService {
     return saved;
   }
 
+  /** Crea una mantención automática por intervalo de km (sin validar mecánico/taller). */
+  async createAutomatica(data: {
+    tipo_mantencion: any;
+    id_vehiculo: number;
+    kilometraje: number;
+    descripcion_falla: string;
+    estado_mantencion: any;
+    taller_externo: string;
+  }) {
+    const entity = this.repo.create(data as any);
+    const saved = await this.repo.save(entity);
+    // Poner el vehículo en mantencion
+    await this.vehiculoRepo.update(data.id_vehiculo, { estado_operativo: EstadoVehiculo.EN_MANTENCION });
+    return saved;
+  }
+
   findAll(opts: { id_vehiculo?: number; estado?: EstadoMantencion; tipo?: TipoMantencion } = {}) {
     const where: any = {};
     if (opts.id_vehiculo) where.id_vehiculo = opts.id_vehiculo;

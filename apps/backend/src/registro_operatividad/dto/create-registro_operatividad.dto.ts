@@ -28,7 +28,8 @@ export class CreateRegistroOperatividadDto {
   observaciones?: string;
 
   @IsInt()
-  id_usuario: number;
+  @IsOptional()
+  id_usuario?: number;
 
   @IsInt()
   id_vehiculo: number;

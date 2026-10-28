@@ -28,46 +28,48 @@ export function UsuariosTable({
   }
 
   return (
-    <table className="usuarios-table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>RUT</th>
-          <th>Correo</th>
-          <th>Rol</th>
-          <th>Compañía</th>
-          <th>Estado</th>
-          <th aria-label="Acciones"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {usuarios.map((u) => (
-          <tr key={u.id_usuario}>
-            <td>{u.nombre} {u.apellidos}</td>
-            <td>{u.rut}</td>
-            <td>{u.email}</td>
-            <td>{nombreRol(u.id_rol)}</td>
-            <td>{nombreCompania(u.id_compania)}</td>
-            <td>
-              <span
-                className={
-                  u.estado_activo
-                    ? 'usuarios-table__badge is-active'
-                    : 'usuarios-table__badge is-inactive'
-                }
-              >
-                {u.estado_activo ? 'Activo' : 'Deshabilitado'}
-              </span>
-            </td>
-            <td className="usuarios-table__actions">
-              <button onClick={() => onEditar(u)}>Editar</button>
-              <button onClick={() => onCambiarEstado(u)}>
-                {u.estado_activo ? 'Deshabilitar' : 'Habilitar'}
-              </button>
-            </td>
+    <div className="table-responsive">
+      <table className="usuarios-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>RUT</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Compañía</th>
+            <th>Estado</th>
+            <th aria-label="Acciones"></th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {usuarios.map((u) => (
+            <tr key={u.id_usuario}>
+              <td>{u.nombre} {u.apellidos}</td>
+              <td style={{ whiteSpace: 'nowrap' }}>{u.rut}</td>
+              <td>{u.email}</td>
+              <td>{nombreRol(u.id_rol)}</td>
+              <td>{nombreCompania(u.id_compania)}</td>
+              <td>
+                <span
+                  className={
+                    u.estado_activo
+                      ? 'usuarios-table__badge is-active'
+                      : 'usuarios-table__badge is-inactive'
+                  }
+                >
+                  {u.estado_activo ? 'Activo' : 'Deshabilitado'}
+                </span>
+              </td>
+              <td className="usuarios-table__actions">
+                <button onClick={() => onEditar(u)}>Editar</button>
+                <button onClick={() => onCambiarEstado(u)}>
+                  {u.estado_activo ? 'Deshabilitar' : 'Habilitar'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

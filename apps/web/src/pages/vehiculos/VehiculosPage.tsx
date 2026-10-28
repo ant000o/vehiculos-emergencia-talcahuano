@@ -98,7 +98,7 @@ export function VehiculosPage() {
   return (
     <div className="vehiculos-page">
       <div className="vehiculos-page__header">
-        <h1 className="vehiculos-page__title">Vehículos</h1>
+        <h1 className="vehiculos-page__title">Veh&iacute;culos</h1>
         {esAdmin && vista.modo === 'lista' && (
           <button
             className="vehiculos-page__nuevo"

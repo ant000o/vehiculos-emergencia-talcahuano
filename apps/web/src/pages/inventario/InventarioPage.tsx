@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+﻿import { useEffect, useState, type FormEvent } from 'react';
 import {
   listarArticulos,
   listarMovimientos,
@@ -172,7 +172,8 @@ export function InventarioPage() {
             </label>
           </div>
 
-          <table className="inventario-table">
+          <div className="table-responsive">
+            <table className="inventario-table">
             <thead>
               <tr>
                 <th>Código</th>
@@ -213,12 +214,14 @@ export function InventarioPage() {
               )}
             </tbody>
           </table>
+          </div>
         </>
       )}
 
       {/* Vista de Movimientos (Kardex) */}
       {pestana === 'kardex' && (
-        <table className="inventario-table">
+        <div className="table-responsive">
+          <table className="inventario-table">
           <thead>
             <tr>
               <th>Fecha y Hora</th>
@@ -260,6 +263,7 @@ export function InventarioPage() {
             )}
           </tbody>
         </table>
+        </div>
       )}
 
       {/* Modal para Ingresar Stock */}

@@ -21,9 +21,17 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user: JwtPayload = request.user;
 
-    if (!user || !rolesRequeridos.includes(user.nombre_rol)) {
+    if (!user) {
+      throw new ForbiddenException('Token inválido');
+    }
+
+    // El payload del JWT usa nombre_rol (ej: "administrador").
+    const userRole = user.nombre_rol ?? (user as any).rol;
+
+    if (!userRole || !rolesRequeridos.includes(userRole)) {
       throw new ForbiddenException('No tienes permisos para realizar esta acción');
     }
+
     return true;
   }
 }

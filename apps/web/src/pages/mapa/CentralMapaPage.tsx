@@ -131,14 +131,17 @@ export function CentralMapaPage() {
     });
   });
 
-  // Capitanes disponibles (rol = 2)
+  // Capitanes disponibles.
+  // F5: antes se filtraba por id_rol === 2, que depende del orden en que el
+  // seed crea los roles — se rompe apenas cambie ese orden o se agregue un
+  // rol nuevo (ej: "Central"). Ahora se compara por nombre_rol.
   const capitanesDisponibles = usuarios.filter(
-    (u) => u.estado_activo && u.id_rol === 2 && !idsUsuariosEnEmergencia.has(u.id_usuario)
+    (u) => u.estado_activo && u.rol?.nombre_rol === 'capitan' && !idsUsuariosEnEmergencia.has(u.id_usuario)
   );
 
-  // Bomberos / Conductores disponibles (rol = 3)
+  // Bomberos / Conductores disponibles.
   const bomberosDisponibles = usuarios.filter(
-    (u) => u.estado_activo && u.id_rol === 3 && !idsUsuariosEnEmergencia.has(u.id_usuario)
+    (u) => u.estado_activo && u.rol?.nombre_rol === 'bombero' && !idsUsuariosEnEmergencia.has(u.id_usuario)
   );
 
   const toggleBrigadista = (id: number) => {

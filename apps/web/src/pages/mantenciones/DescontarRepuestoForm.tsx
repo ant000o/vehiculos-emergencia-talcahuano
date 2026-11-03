@@ -26,18 +26,24 @@ export function DescontarRepuestoForm() {
 
   useEffect(() => {
     async function cargar() {
-      const [listaMantenciones, listaArticulos, listaDetalles] = await Promise.all([
-        listarMantenciones(),
-        listarArticulos(),
-        listarDetallesMantencion(),
-      ]);
-      const abiertas = listaMantenciones.filter((m) => ESTADOS_ABIERTOS.has(m.estado_mantencion));
-      setMantenciones(abiertas);
-      setArticulos(listaArticulos);
-      setDetalles(listaDetalles);
-      setIdMantencion(abiertas[0]?.id_mantencion ?? null);
-      setIdArticulo(listaArticulos[0]?.id_articulo ?? null);
-      setIsLoading(false);
+      try {
+        const [listaMantenciones, listaArticulos, listaDetalles] = await Promise.all([
+          listarMantenciones(),
+          listarArticulos(),
+          listarDetallesMantencion(),
+        ]);
+        const abiertas = listaMantenciones.filter((m) => ESTADOS_ABIERTOS.has(m.estado_mantencion));
+        setMantenciones(abiertas);
+        setArticulos(listaArticulos);
+        setDetalles(listaDetalles);
+        setIdMantencion(abiertas[0]?.id_mantencion ?? null);
+        setIdArticulo(listaArticulos[0]?.id_articulo ?? null);
+      } catch (err) {
+        // F15: si fallaba, el formulario quedaba pegado en "Cargando…" para siempre.
+        setError(err instanceof Error ? err.message : 'No se pudieron cargar los datos del formulario.');
+      } finally {
+        setIsLoading(false);
+      }
     }
     cargar();
   }, []);

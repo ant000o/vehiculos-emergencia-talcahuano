@@ -21,6 +21,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!response.ok) {
+    // F15: un token vencido/ inválido dejaba la app pegada en lo que sea que
+    // estuviera mostrando (sin redirigir a /login) hasta que alguien
+    // recargara a mano. Si el backend dice 401, limpiamos la sesión y
+    // mandamos al login de inmediato.
+    if (response.status === 401 && !path.startsWith('/auth/login')) {
+      localStorage.removeItem('accessToken');
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.assign('/login');
+      }
+    }
+
     const cuerpo = await response.json().catch(() => null);
     // class-validator puede devolver un array de mensajes (uno por campo inválido).
     const mensaje = Array.isArray(cuerpo?.message)

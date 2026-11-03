@@ -24,19 +24,27 @@ export function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Carga inicial: usuarios + catálogos de roles y compañías para los <select>.
   useEffect(() => {
     async function cargarDatos() {
-      const [listaUsuarios, listaRoles, listaCompanias] = await Promise.all([
-        listarUsuarios(),
-        listarRoles(),
-        listarCompanias(),
-      ]);
-      setUsuarios(listaUsuarios);
-      setRoles(listaRoles);
-      setCompanias(listaCompanias);
-      setIsLoading(false);
+      try {
+        const [listaUsuarios, listaRoles, listaCompanias] = await Promise.all([
+          listarUsuarios(),
+          listarRoles(),
+          listarCompanias(),
+        ]);
+        setUsuarios(listaUsuarios);
+        setRoles(listaRoles);
+        setCompanias(listaCompanias);
+      } catch (err) {
+        // F15: antes, si alguna de las 3 llamadas fallaba, la página se
+        // quedaba en "Cargando usuarios…" para siempre.
+        setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los usuarios.');
+      } finally {
+        setIsLoading(false);
+      }
     }
     cargarDatos();
   }, []);
@@ -87,6 +95,10 @@ export function UsuariosPage() {
 
   if (isLoading) {
     return <p>Cargando usuarios…</p>;
+  }
+
+  if (loadError) {
+    return <p className="usuarios-form__alert" role="alert">{loadError}</p>;
   }
 
   return (

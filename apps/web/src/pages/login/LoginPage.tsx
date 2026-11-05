@@ -24,7 +24,7 @@ export function LoginPage() {
     if (!email.trim()) errors.email = 'Ingresa tu correo institucional.';
     else if (!validarEmail(email)) errors.email = 'Ingresa un correo válido.';
     if (!password) errors.password = 'Ingresa tu contraseña.';
-    else if (password.length < 6) errors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    else if (password.length < 8) errors.password = 'La contraseña debe tener al menos 8 caracteres.';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -79,7 +79,8 @@ export function LoginPage() {
             Backend real, usuarios de prueba (clave <code>Password123</code> para todos):<br />
             <code>admin@bomberos-talcahuano.cl</code> ·{' '}
             <code>bombero1@bomberos-talcahuano.cl</code> ·{' '}
-            <code>mecanico@bomberos-talcahuano.cl</code> (rol real: capitán)
+            <code>capitan1@bomberos-talcahuano.cl</code> ·{' '}
+            <code>mecanico1@bomberos-talcahuano.cl</code>
           </p>
         </form>
       </main>

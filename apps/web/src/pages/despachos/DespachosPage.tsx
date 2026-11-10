@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { listarDespachos, cambiarEstadoDespacho, type DespachoEmergencia } from '../../services/despachos';
 import { useAuth } from '../../context/useAuth';
+import { MapaEmergenciaMini } from '../../components/MapaEmergenciaMini';
+import { emojiEmergencia } from '../../utils/emergencia';
 import './despachos.css';
 
 const ESTADOS_CONFIG: Record<string, { label: string; bg: string; text: string; border: string }> = {
@@ -23,6 +25,14 @@ const ROL_LABELS: Record<string, string> = {
  * invierno) quedaba marcado con la fecha del día siguiente. Esta versión
  * arma la clave YYYY-MM-DD con la hora LOCAL del navegador.
  */
+/** Normaliza la coordenada del despacho a [lat, lng] (el backend la entrega ya convertida). */
+function coordenadasDespacho(d: DespachoEmergencia): [number, number] | null {
+  const c = d.coordenada_destino;
+  const par = Array.isArray(c) ? c : c?.coordinates;
+  if (!par || par.length < 2 || !Number.isFinite(par[0]) || !Number.isFinite(par[1])) return null;
+  return [par[0], par[1]];
+}
+
 function fechaLocalISO(fecha: string | Date): string {
   const d = new Date(fecha);
   const year = d.getFullYear();
@@ -145,7 +155,7 @@ export function DespachosPage() {
         <div className="despacho-card__header">
           <div>
             <div className="despacho-card__id">Despacho #{d.id_despacho}</div>
-            <h3 className="despacho-card__tipo">{d.tipo_emergencia}</h3>
+            <h3 className="despacho-card__tipo">{emojiEmergencia(d.tipo_emergencia)} {d.tipo_emergencia}</h3>
           </div>
           <span
             className="despacho-card__badge"
@@ -158,6 +168,16 @@ export function DespachosPage() {
             {estadoCfg.label}
           </span>
         </div>
+
+        {coordenadasDespacho(d) && (
+          <div className="despacho-card__mapa">
+            <MapaEmergenciaMini
+              lat={coordenadasDespacho(d)![0]}
+              lng={coordenadasDespacho(d)![1]}
+              tipoEmergencia={d.tipo_emergencia}
+            />
+          </div>
+        )}
 
         <div className="despacho-card__body">
           <div className="despacho-card__row">

@@ -196,3 +196,38 @@
   color: var(--color-navy-900);
   white-space: nowrap;
 }
+
+/* HU-24: selector de rango de fechas del reporte de gastos */
+.exportar-gastos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.exportar-gastos__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-ink-600);
+}
+
+.exportar-gastos__campo input {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-900);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.exportar-gastos__mensaje {
+  flex-basis: 100%;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+}
+
+.exportar-gastos__mensaje--error { color: var(--color-red-700); }
+.exportar-gastos__mensaje--ok { color: var(--color-success); }

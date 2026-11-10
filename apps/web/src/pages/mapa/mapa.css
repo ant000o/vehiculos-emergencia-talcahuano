@@ -1,8 +1,122 @@
-﻿.mapa-container {
+.mapa-container {
   height: calc(100vh - 120px);
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   margin-top: 16px;
+}
+
+/* HU-20: marcador de emergencia con emoji */
+.emergencia-pin {
+  background: transparent;
+  border: none;
+}
+
+.emergencia-pin span {
+  display: block;
+  font-size: 30px;
+  line-height: 36px;
+  text-align: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+/* HU-20: panel para fijar la emergencia (dirección + tipo) */
+.emergencia-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.emergencia-panel__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 220px;
+}
+
+.emergencia-panel__campo--direccion {
+  flex: 1 1 320px;
+}
+
+.emergencia-panel__campo label {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink-900);
+}
+
+.emergencia-panel__fila {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.emergencia-panel input,
+.emergencia-panel select {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.emergencia-panel input:focus-visible,
+.emergencia-panel select:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.emergencia-panel button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+  padding: 9px var(--space-4);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-navy-900);
+}
+
+.emergencia-panel button:hover:not(:disabled) {
+  border-color: var(--color-navy-500);
+}
+
+.emergencia-panel button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emergencia-panel .emergencia-panel__despachar {
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
+  color: var(--color-white);
+}
+
+.emergencia-panel .emergencia-panel__despachar:hover:not(:disabled) {
+  background: var(--color-red-700);
+  border-color: var(--color-red-700);
+}
+
+.emergencia-panel__mensaje {
+  flex-basis: 100%;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+}
+
+.emergencia-panel__mensaje--error {
+  color: var(--color-red-700);
 }

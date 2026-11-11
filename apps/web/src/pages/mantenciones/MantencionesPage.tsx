@@ -58,12 +58,6 @@ export function MantencionesPage() {
       setMantenciones(mants);
       setVehiculos(vehs);
       setArticulos(arts.sort((a, b) => a.id_articulo - b.id_articulo));
-      if (!formIdVehiculo && vehs.length > 0) {
-        setFormIdVehiculo(vehs[0].id_vehiculo);
-        if (vehs[0].kilometraje) {
-          setFormKilometraje(Number(vehs[0].kilometraje));
-        }
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -389,9 +383,12 @@ export function MantencionesPage() {
               <select
                 id="vehiculo-select"
                 value={formIdVehiculo}
-                onChange={(e) => handleCambiarVehiculo(Number(e.target.value))}
+                onChange={(e) =>
+                  e.target.value === '' ? setFormIdVehiculo('') : handleCambiarVehiculo(Number(e.target.value))
+                }
                 required
               >
+                <option value="" disabled>Selecciona vehículo a intervenir…</option>
                 {vehiculos.map((v) => (
                   <option key={v.id_vehiculo} value={v.id_vehiculo}>
                     {v.patente} — {v.marca} {v.modelo} (Estado actual: {v.estado_operativo}{v.kilometraje ? ` | Odómetro: ${Number(v.kilometraje).toLocaleString('es-CL')} km` : ''})

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ExportarGastosCSV } from '../components/ExportarGastosCSV';
 import { useAuth } from '../context/useAuth';
-import { ROLE_LABELS } from '../config/navigation';
 import { 
   obtenerDashboard, 
   obtenerMantencionesPorMes, 
@@ -133,9 +132,6 @@ export function DashboardPage() {
       <h1 className="dashboard__title">
         Hola, {user.nombre}
       </h1>
-      <p className="dashboard__subtitle">
-        Sesión activa como <strong>{ROLE_LABELS[user.rol]}</strong>.
-      </p>
 
       {/* Alertas de Mantenimiento Preventivo (Rutina cada 10.000 km) */}
       {alertas.length > 0 && (
@@ -332,7 +328,7 @@ export function DashboardPage() {
           {/* HU-24: Resumen de Tiempos de Reparación y Estadía en Taller */}
           <div className="dashboard__card" style={{ marginTop: 'var(--space-6)' }}>
             <div className="dashboard__card-header">
-              <h3 className="dashboard__card-title">Resumen de Tiempos de Reparación y Estadía en Taller (HU-24)</h3>
+              <h3 className="dashboard__card-title">Resumen de Tiempos de Reparación y Estadía en Taller</h3>
             </div>
             
             <div className="table-responsive">

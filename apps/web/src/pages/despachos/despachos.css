@@ -339,3 +339,10 @@
   font-size: 2.5rem;
   margin-bottom: var(--space-2);
 }
+/* HU-28: mapa con el punto de la emergencia dentro de la tarjeta */
+.despacho-card__mapa {
+  border-bottom: 1px solid var(--color-border);
+  line-height: 0;
+  position: relative;
+  z-index: 0;
+}

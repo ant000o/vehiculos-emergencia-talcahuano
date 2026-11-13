@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './mapa.css';
@@ -10,6 +10,8 @@ import { crearDespacho, type DespachoEmergencia, listarDespachos } from '../../s
 import { listarUsuarios, type Usuario } from '../../services/usuarios';
 import { listarGrifos, type Grifo } from '../../services/grifos';
 import { Modal } from '../../components/Modal';
+import { geocodificarDireccion } from '../../services/geocoding';
+import { TIPOS_EMERGENCIA, emojiEmergencia, iconoEmojiEmergencia } from '../../utils/emergencia';
 
 // Fix icono defecto de Leaflet en React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,16 +19,6 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Icono personalizado para siniestro / emergencia
-const iconoEmergencia = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
 });
 
 // Icono personalizado para grifos
@@ -39,18 +31,6 @@ const iconoGrifo = new L.Icon({
   shadowSize: [32, 32],
 });
 
-const TIPOS_EMERGENCIA = [
-  '10-0 (Incendio Estructural)',
-  '10-1 (Incendio de Vehículo)',
-  '10-2 (Pastizal / Forestal)',
-  '10-3 (Rescate Vehicular / Accidente)',
-  '10-4 (Rescate de Personas)',
-  '10-5 (Materiales Peligrosos / HazMat)',
-  '10-6 (Fuga de Gas)',
-  '10-7 (Eléctrico / Transformador)',
-  '10-8 (Derrumbe o Estructura Colapsada)',
-];
-
 // Componente para capturar clicks en el mapa (HU-19)
 function MapClickInterceptor({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
@@ -58,6 +38,15 @@ function MapClickInterceptor({ onMapClick }: { onMapClick: (lat: number, lng: nu
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
+  return null;
+}
+
+// Mueve el mapa al punto encontrado al buscar una dirección (HU-20).
+function CentrarMapa({ punto }: { punto: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (punto) map.flyTo(punto, Math.max(map.getZoom(), 16));
+  }, [punto, map]);
   return null;
 }
 
@@ -77,6 +66,15 @@ export function CentralMapaPage() {
   const [brigadistasSeleccionados, setBrigadistasSeleccionados] = useState<number[]>([]);
   const [grifoSeleccionado, setGrifoSeleccionado] = useState<number | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // HU-20: dirección escrita -> coordenadas
+  const [direccionTexto, setDireccionTexto] = useState('');
+  const [buscandoDireccion, setBuscandoDireccion] = useState(false);
+  const [errorDireccion, setErrorDireccion] = useState<string | null>(null);
+  const [centrarEn, setCentrarEn] = useState<[number, number] | null>(null);
+
+  const emojiTipo = emojiEmergencia(tipoEmergencia);
+  const iconoPunto = useMemo(() => iconoEmojiEmergencia(emojiTipo), [emojiTipo]);
 
   const cargarDatos = () => {
     Promise.all([
@@ -98,19 +96,50 @@ export function CentralMapaPage() {
     cargarDatos();
   }, []);
 
+  // HU-20: un clic en el mapa fija (o ajusta) el punto de la emergencia.
+  // Los recursos se asignan después, con el botón "Despachar recursos".
   const handleMapClick = (lat: number, lng: number) => {
     setCoordsEmergencia([lat, lng]);
-    setModalAbierto(true);
+  };
+
+  const handleBuscarDireccion = async () => {
+    if (!direccionTexto.trim()) {
+      setErrorDireccion('Escribe una dirección para buscarla.');
+      return;
+    }
+    setBuscandoDireccion(true);
+    setErrorDireccion(null);
+    try {
+      const resultado = await geocodificarDireccion(direccionTexto);
+      if (!resultado) {
+        setErrorDireccion('No se encontró esa dirección. Revisa el texto o haz clic en el mapa para fijar el punto.');
+        return;
+      }
+      const punto: [number, number] = [resultado.lat, resultado.lng];
+      setCoordsEmergencia(punto);
+      setCentrarEn(punto);
+    } catch (err) {
+      setErrorDireccion(err instanceof Error ? err.message : 'No se pudo buscar la dirección.');
+    } finally {
+      setBuscandoDireccion(false);
+    }
   };
 
   const handleCerrarModal = () => {
     setModalAbierto(false);
-    setCoordsEmergencia(null);
     setVehiculoSeleccionado('');
     setCapitanSeleccionado('');
     setConductorSeleccionado('');
     setBrigadistasSeleccionados([]);
     setGrifoSeleccionado('');
+  };
+
+  // Deja el mapa listo para registrar otra emergencia.
+  const limpiarEmergencia = () => {
+    setCoordsEmergencia(null);
+    setDireccionTexto('');
+    setErrorDireccion(null);
+    setCentrarEn(null);
   };
 
   // Despachos actualmente activos (en_curso)
@@ -197,6 +226,7 @@ export function CentralMapaPage() {
 
       alert('¡Despacho formalizado y generado exitosamente! La orden de salida fue emitida.');
       handleCerrarModal();
+      limpiarEmergencia();
       cargarDatos();
     } catch (error) {
       console.error(error);
@@ -214,7 +244,7 @@ export function CentralMapaPage() {
             Mapa Central de Despacho y Flota
           </h1>
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink-600)', margin: 0, fontSize: '0.9375rem' }}>
-            Haz clic sobre cualquier punto del mapa para fijar una emergencia y formalizar la orden de salida con la unidad, capitán y tripulación adecuada.
+            Busca la dirección o haz clic en el mapa para fijar el punto de la emergencia, elige su tipo y luego despacha la unidad, capitán y tripulación adecuada.
           </p>
         </div>
 
@@ -261,6 +291,63 @@ export function CentralMapaPage() {
         </div>
       </div>
 
+      <div className="emergencia-panel">
+        <div className="emergencia-panel__campo emergencia-panel__campo--direccion">
+          <label htmlFor="direccion-emergencia">Dirección de la emergencia</label>
+          <div className="emergencia-panel__fila">
+            <input
+              id="direccion-emergencia"
+              type="text"
+              value={direccionTexto}
+              placeholder="Ej: Colón 1234"
+              onChange={(e) => setDireccionTexto(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleBuscarDireccion();
+                }
+              }}
+            />
+            <button type="button" onClick={handleBuscarDireccion} disabled={buscandoDireccion}>
+              {buscandoDireccion ? 'Buscando…' : 'Buscar'}
+            </button>
+          </div>
+        </div>
+
+        <div className="emergencia-panel__campo">
+          <label htmlFor="tipo-emergencia">Tipo de emergencia</label>
+          <select
+            id="tipo-emergencia"
+            value={tipoEmergencia}
+            onChange={(e) => setTipoEmergencia(e.target.value)}
+          >
+            {TIPOS_EMERGENCIA.map((tipo) => (
+              <option key={tipo} value={tipo}>
+                {emojiEmergencia(tipo)} {tipo}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="button"
+          className="emergencia-panel__despachar"
+          disabled={!coordsEmergencia}
+          onClick={() => setModalAbierto(true)}
+        >
+          Despachar recursos →
+        </button>
+
+        {errorDireccion && (
+          <p className="emergencia-panel__mensaje emergencia-panel__mensaje--error" role="alert">{errorDireccion}</p>
+        )}
+        {coordsEmergencia && !errorDireccion && (
+          <p className="emergencia-panel__mensaje">
+            {emojiTipo} Punto fijado: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}. Puedes ajustarlo haciendo clic en otro lugar del mapa.
+          </p>
+        )}
+      </div>
+
       <div className="mapa-container">
         <MapContainer center={[-36.7196, -73.1168]} zoom={13} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -269,6 +356,7 @@ export function CentralMapaPage() {
           />
           
           <MapClickInterceptor onMapClick={handleMapClick} />
+          <CentrarMapa punto={centrarEn} />
 
           {/* Renderizar toda la flota en el mapa */}
           {vehiculos.map((v) => {
@@ -331,11 +419,12 @@ export function CentralMapaPage() {
             );
           })}
 
-          {/* Marcador de emergencia activo solo si el modal está abierto o hay coordenadas activas */}
-          {modalAbierto && coordsEmergencia && (
-            <Marker position={coordsEmergencia} icon={iconoEmergencia}>
+          {/* Marcador de la emergencia, con el emoji de su tipo (HU-20) */}
+          {coordsEmergencia && (
+            <Marker position={coordsEmergencia} icon={iconoPunto}>
               <Popup>
-                <strong>Punto de Emergencia Seleccionado</strong><br />
+                <strong>{emojiTipo} {tipoEmergencia}</strong><br />
+                {direccionTexto.trim() && <>{direccionTexto.trim()}<br /></>}
                 Coordenadas: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}
               </Popup>
             </Marker>
@@ -348,34 +437,10 @@ export function CentralMapaPage() {
         <Modal onClose={handleCerrarModal} title="Despachar Emergencia (Orden de Salida)">
           <form onSubmit={handleDespachar} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', maxHeight: '75vh', overflowY: 'auto', paddingRight: '4px' }}>
             <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: 'var(--radius-sm)', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: 'var(--color-ink-700)' }}>
-              📍 <strong>Coordenadas del Siniestro:</strong> {coordsEmergencia?.[0].toFixed(5)}, {coordsEmergencia?.[1].toFixed(5)}
+              {emojiTipo} <strong>{tipoEmergencia}</strong><br />
+              📍 {direccionTexto.trim() ? `${direccionTexto.trim()} — ` : ''}{coordsEmergencia?.[0].toFixed(5)}, {coordsEmergencia?.[1].toFixed(5)}
             </div>
 
-            {/* Tipo de Emergencia */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
-              <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-ink-900)' }}>
-                Tipo de Emergencia
-              </label>
-              <select
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.875rem',
-                  padding: '8px 10px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-white)',
-                  color: 'var(--color-ink-900)',
-                }}
-                value={tipoEmergencia}
-                onChange={(e) => setTipoEmergencia(e.target.value)}
-                required
-              >
-                {TIPOS_EMERGENCIA.map((tipo) => (
-                  <option key={tipo} value={tipo}>{tipo}</option>
-                ))}
-              </select>
-            </div>
-            
             {/* Asignar Vehículo */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
               <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-ink-900)' }}>

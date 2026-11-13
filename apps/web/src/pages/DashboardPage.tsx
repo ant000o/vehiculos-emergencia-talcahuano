@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ExportarGastosCSV } from '../components/ExportarGastosCSV';
 import { useAuth } from '../context/useAuth';
 import { ROLE_LABELS } from '../config/navigation';
 import { 
@@ -8,7 +9,6 @@ import {
   obtenerTiemposReparacion,
   obtenerAlertasMantencion,
   obtenerKpisOperativos,
-  exportarGastosCSV,
   type ResumenDashboard,
   type MantencionPorMes,
   type VehiculoMasMantenido,
@@ -293,9 +293,7 @@ export function DashboardPage() {
             <div className="dashboard__card-header">
               <h3 className="dashboard__card-title">Top Vehículos con Mayor Gasto de Mantención</h3>
               {user.rol === 'administrador' && (
-                <button className="dashboard__btn-exportar" onClick={exportarGastosCSV}>
-                  ↓ Exportar a CSV
-                </button>
+                <ExportarGastosCSV />
               )}
             </div>
             

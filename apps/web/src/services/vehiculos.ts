@@ -1,4 +1,4 @@
-﻿import { apiClient } from './apiClient';
+import { apiClient } from './apiClient';
 import { listarCompanias, type CompaniaOption } from './usuarios';
 
 export type { CompaniaOption };
@@ -25,12 +25,33 @@ export interface PaginatedVehiculos {
   page: number;
 }
 
-export const listarVehiculos = (params?: { estado?: string; q?: string }) => {
-  const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-  const url = new URL(`${baseUrl}/vehiculos`);
-  if (params?.estado) url.searchParams.append('estado', params.estado);
-  if (params?.q) url.searchParams.append('q', params.q);
-  return apiClient.get<PaginatedVehiculos>(url.pathname + url.search).then(r => r.data);
+/**
+ * Trae TODOS los vehículos que calcen con el filtro, recorriendo todas las
+ * páginas que haga falta (F4: antes solo se traía la página 1 con límite 50
+ * y el resto de la flota desaparecía de mapa/formularios/historial).
+ */
+export const listarVehiculos = async (params?: { estado?: string; q?: string }) => {
+  const LIMITE_POR_PAGINA = 100; // tope que ya aplica el backend (Math.min(100, ...))
+
+  function construirQuery(page: number): string {
+    const search = new URLSearchParams();
+    if (params?.estado) search.set('estado', params.estado);
+    if (params?.q) search.set('q', params.q);
+    search.set('page', String(page));
+    search.set('limit', String(LIMITE_POR_PAGINA));
+    return `/vehiculos?${search.toString()}`;
+  }
+
+  const primera = await apiClient.get<PaginatedVehiculos>(construirQuery(1));
+  const todos = [...primera.data];
+
+  const totalPaginas = Math.ceil(primera.total / LIMITE_POR_PAGINA);
+  for (let page = 2; page <= totalPaginas; page++) {
+    const siguiente = await apiClient.get<PaginatedVehiculos>(construirQuery(page));
+    todos.push(...siguiente.data);
+  }
+
+  return todos;
 };
 
 export const crearVehiculo = (body: unknown) => apiClient.post<Vehiculo>('/vehiculos', body);

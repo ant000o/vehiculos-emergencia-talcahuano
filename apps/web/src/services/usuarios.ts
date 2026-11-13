@@ -22,6 +22,11 @@ export interface Usuario {
   apellidos: string;
   email: string;
   id_rol: number;
+  // El backend ya manda esta relación en GET /usuarios (findAll carga
+  // { rol: true }); la tipamos para no tener que adivinar el rol por
+  // id_rol fijo (F5 — frágil si cambia el orden del seed o se agrega
+  // un rol nuevo, como "Central").
+  rol?: RolOption;
   id_compania: number;
   estado_activo: boolean;
 }

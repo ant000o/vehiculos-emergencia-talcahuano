@@ -34,17 +34,26 @@ export function GrifosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function cargarDatos() {
+  async function cargarDatos() {
+    try {
       const [listaGrifos, listaCompanias] = await Promise.all([
         listarGrifos(),
         listarCompanias(),
       ]);
       setGrifos(listaGrifos);
       setCompanias(listaCompanias);
+      setLoadError(null);
+    } catch (err) {
+      // F15: si fallaba, la página quedaba pegada en "Cargando grifos…" para siempre.
+      setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los grifos.');
+    } finally {
       setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     cargarDatos();
   }, []);
 
@@ -52,8 +61,14 @@ export function GrifosPage() {
     setIsSaving(true);
     setFormError(null);
     try {
-      const nuevo = await crearGrifo(values);
-      setGrifos((prev) => [...prev, nuevo]);
+      await crearGrifo(values);
+      // F1: el POST devuelve las coordenadas sin pasar por fromPostGIS
+      // (quedan en [lng, lat] en vez de [lat, lng]), así que si agregábamos
+      // la respuesta cruda a la lista, "Ver ubicación" del grifo recién
+      // creado dibujaba el marcador en el lugar equivocado hasta recargar.
+      // Volvemos a pedir la lista completa (ya convertida) en vez de confiar
+      // en la respuesta del POST — mismo patrón que usa VehiculosPage.
+      await cargarDatos();
       setVista({ modo: 'lista' });
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'No se pudo registrar el grifo.');
@@ -76,6 +91,10 @@ export function GrifosPage() {
 
   if (isLoading) {
     return <p>Cargando grifos…</p>;
+  }
+
+  if (loadError) {
+    return <p className="grifos-page__alert" role="alert">{loadError}</p>;
   }
 
   return (

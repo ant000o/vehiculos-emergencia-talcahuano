@@ -17,6 +17,20 @@ const ROL_LABELS: Record<string, string> = {
   jefe_despacho: 'Jefe de Despacho',
 };
 
+/**
+ * F10: antes se usaba toISOString().slice(0,10), que da la fecha en UTC.
+ * En Chile (UTC-3) un despacho después de las 21:00 (20:00 en horario de
+ * invierno) quedaba marcado con la fecha del día siguiente. Esta versión
+ * arma la clave YYYY-MM-DD con la hora LOCAL del navegador.
+ */
+function fechaLocalISO(fecha: string | Date): string {
+  const d = new Date(fecha);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function DespachosPage() {
   const { user } = useAuth();
   const [despachos, setDespachos] = useState<DespachoEmergencia[]>([]);
@@ -70,7 +84,7 @@ export function DespachosPage() {
     return despachos.filter((d) => {
       // Filtro por fecha (YYYY-MM-DD)
       if (filtroFecha) {
-        const fechaDespacho = new Date(d.fecha_hora_despacho).toISOString().slice(0, 10);
+        const fechaDespacho = fechaLocalISO(d.fecha_hora_despacho);
         if (fechaDespacho !== filtroFecha) return false;
       }
 

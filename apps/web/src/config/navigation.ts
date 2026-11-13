@@ -6,10 +6,11 @@ export interface NavItem {
   roles: Rol[];
 }
 
-// Orden: "Inicio" primero, y el resto ordenado alfabÃ©ticamente de la A a la Z.
+// Orden: "Inicio" primero, y el resto ordenado alfabéticamente de la A a la Z.
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Inicio', path: '/', roles: ['administrador', 'bombero', 'capitan', 'mecanico'] },
-  { label: 'Despachos', path: '/despachos', roles: ['administrador', 'bombero', 'capitan', 'mecanico'] },
+  // HU-28: el perfil Mecánico no ve el panel de despachos.
+  { label: 'Despachos', path: '/despachos', roles: ['administrador', 'bombero', 'capitan'] },
   { label: 'Grifos', path: '/grifos', roles: ['administrador', 'capitan', 'mecanico', 'bombero'] },
   { label: 'Historial de Estados', path: '/historial-estados', roles: ['administrador', 'mecanico', 'bombero', 'capitan'] },
   { label: 'Inventario', path: '/inventario', roles: ['administrador', 'mecanico', 'capitan'] },
@@ -22,6 +23,6 @@ export const NAV_ITEMS: NavItem[] = [
 export const ROLE_LABELS: Record<Rol, string> = {
   administrador: 'Administrador',
   bombero: 'Bombero / Conductor',
-  capitan: 'CapitÃ¡n / Comandancia',
-  mecanico: 'MecÃ¡nico',
+  capitan: 'Capitán / Comandancia',
+  mecanico: 'Mecánico',
 };

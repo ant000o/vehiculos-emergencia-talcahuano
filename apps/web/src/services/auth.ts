@@ -3,6 +3,8 @@
  * Roles reales confirmados en la BD: administrador, bombero, capitan, mecanico.
  */
 
+import { disconnectSocket } from './socket';
+
 export type Rol = 'administrador' | 'bombero' | 'capitan' | 'mecanico';
 
 export interface LoginCredentials {
@@ -84,4 +86,7 @@ export async function obtenerUsuarioActual(): Promise<AuthUser | null> {
 
 export function logout(): void {
   localStorage.removeItem('accessToken');
+  // F16: si no se desconecta, el siguiente usuario que inicia sesión en el
+  // mismo navegador hereda la conexión (y las notificaciones) del anterior.
+  disconnectSocket();
 }

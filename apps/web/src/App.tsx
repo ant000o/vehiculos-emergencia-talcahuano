@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -28,7 +28,15 @@ function App() {
             }
           >
             <Route index element={<DashboardPage />} />
-            <Route path="despachos" element={<DespachosPage />} />
+            {/* HU-28: solo la interfaz; falta reforzar esto también en el backend (despacho_emergencia.controller.ts no tiene @Roles). */}
+            <Route
+              path="despachos"
+              element={
+                <ProtectedRoute roles={['administrador', 'bombero', 'capitan']}>
+                  <DespachosPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="vehiculos" element={<VehiculosPage />} />
             
             {/* Historial de Estados (incluye registro de estado integrado) */}
@@ -40,7 +48,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* RedirecciÃ³n para compatibilidad si alguien accede a /registrar-estado */}
+            {/* Redirección para compatibilidad si alguien accede a /registrar-estado */}
             <Route path="registrar-estado" element={<Navigate to="/historial-estados" replace />} />
 
             <Route

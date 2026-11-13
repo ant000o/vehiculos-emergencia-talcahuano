@@ -9,7 +9,7 @@ import {
   type CompaniaOption,
   type EstadoVehiculo,
 } from '../../services/vehiculos';
-import { VehiculosTable } from './VehiculosTable';
+import { VehiculosCards } from './VehiculosCards';
 import { VehiculoForm } from './VehiculoForm';
 import './vehiculos.css';
 
@@ -38,16 +38,25 @@ export function VehiculosPage() {
 
   // HU-12 y HU-13: Filtro y Búsqueda
   const [q, setQ] = useState('');
+  const [qDebounced, setQDebounced] = useState('');
   const [estado, setEstado] = useState<EstadoVehiculo | ''>('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Espera a que el usuario deje de escribir antes de consultar al backend.
+  useEffect(() => {
+    const t = setTimeout(() => setQDebounced(q), 300);
+    return () => clearTimeout(t);
+  }, [q]);
 
   const cargarVehiculos = () => {
     setIsLoading(true);
-    listarVehiculos(estado ? { estado, q } : { q })
+    listarVehiculos(estado ? { estado, q: qDebounced } : { q: qDebounced })
       .then((res) => {
         setVehiculos(res as unknown as Vehiculo[]);
+        setLoadError(null);
       })
       .catch((err) => {
-        console.error(err);
+        setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los vehículos.');
       })
       .finally(() => {
         setIsLoading(false);
@@ -60,7 +69,7 @@ export function VehiculosPage() {
 
   useEffect(() => {
     cargarVehiculos();
-  }, [estado, q]);
+  }, [estado, qDebounced]);
 
   async function handleCrear(values: VehiculoFormValues) {
     setIsSaving(true);
@@ -98,7 +107,14 @@ export function VehiculosPage() {
   return (
     <div className="vehiculos-page">
       <div className="vehiculos-page__header">
-        <h1 className="vehiculos-page__title">Veh&iacute;culos</h1>
+        <div>
+          <h1 className="vehiculos-page__title">Vehículos</h1>
+          {vista.modo === 'lista' && !loadError && (
+            <p className="vehiculos-page__contador">
+              {vehiculos.length} {vehiculos.length === 1 ? 'unidad' : 'unidades'}
+            </p>
+          )}
+        </div>
         {esAdmin && vista.modo === 'lista' && (
           <button
             className="vehiculos-page__nuevo"
@@ -134,10 +150,12 @@ export function VehiculosPage() {
             </select>
           </div>
 
-          {isLoading ? (
-            <p style={{ color: 'var(--color-ink-600)', fontFamily: 'var(--font-body)' }}>Cargando vehículos…</p>
+          {loadError ? (
+            <p className="vehiculos-form__alert" role="alert">{loadError}</p>
+          ) : isLoading && vehiculos.length === 0 ? (
+            <p className="vehiculos-page__vacio">Cargando vehículos…</p>
           ) : (
-            <VehiculosTable
+            <VehiculosCards
               vehiculos={vehiculos}
               companias={companias}
               onEditar={

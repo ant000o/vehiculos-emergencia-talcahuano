@@ -41,9 +41,6 @@ export function HistorialEstadosPage() {
       if (!idVehiculo && listaVehiculos.length > 0) {
         setIdVehiculo(listaVehiculos[0].id_vehiculo);
       }
-      if (!idVehiculoRegistro && listaVehiculos.length > 0) {
-        setIdVehiculoRegistro(listaVehiculos[0].id_vehiculo);
-      }
     } catch (err) {
       console.error('Error al cargar historial:', err);
     } finally {
@@ -194,9 +191,10 @@ export function HistorialEstadosPage() {
               <select
                 id="vehiculo-reg"
                 value={idVehiculoRegistro ?? ''}
-                onChange={(e) => setIdVehiculoRegistro(Number(e.target.value))}
+                onChange={(e) => setIdVehiculoRegistro(e.target.value === '' ? null : Number(e.target.value))}
                 required
               >
+                <option value="" disabled>Selecciona vehículo a inspeccionar…</option>
                 {vehiculos.map((v) => (
                   <option key={v.id_vehiculo} value={v.id_vehiculo}>
                     {v.patente} — {v.marca} {v.modelo}

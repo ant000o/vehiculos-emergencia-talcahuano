@@ -4,6 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { NAV_ITEMS, ROLE_LABELS } from '../config/navigation';
 import { getSocket } from '../services/socket';
 import { ToastAlertaGrave } from '../components/ToastAlertaGrave';
+import { NavIcon } from './NavIcon';
 import './AppLayout.css';
 
 interface NotificacionItem {
@@ -120,7 +121,8 @@ export function AppLayout() {
                 isActive ? 'app-layout__nav-link is-active' : 'app-layout__nav-link'
               }
             >
-              {item.label}
+              <NavIcon path={item.path} />
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
@@ -130,10 +132,15 @@ export function AppLayout() {
       <div className="app-layout__content-wrapper">
         <header className="app-layout__topbar">
           <div className="app-layout__user">
-            <span className="app-layout__user-name">{user?.nombre}</span>
-            <span className="app-layout__user-role">
-              {user ? ROLE_LABELS[user.rol] : ''}
+            <span className="app-layout__avatar" aria-hidden="true">
+              {`${user?.nombre?.[0] ?? ''}${user?.apellidos?.[0] ?? ''}`.toUpperCase()}
             </span>
+            <div className="app-layout__user-text">
+              <span className="app-layout__user-name">{user?.nombre} {user?.apellidos}</span>
+              <span className="app-layout__user-role">
+                {user ? ROLE_LABELS[user.rol] : ''}
+              </span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -156,7 +163,7 @@ export function AppLayout() {
                   fontSize: '0.875rem',
                   color: 'var(--color-navy-900)',
                 }}
-                title="Centro de Notificaciones en Vivo"
+                title="Notificaciones"
               >
                 <span>🔔</span>
                 <span style={{ fontWeight: 600 }}>Notificaciones</span>
@@ -203,7 +210,7 @@ export function AppLayout() {
                     }}
                   >
                     <strong style={{ fontFamily: 'var(--font-display)', fontSize: '0.9375rem', color: 'var(--color-navy-900)' }}>
-                      Notificaciones en Vivo
+                      Notificaciones
                     </strong>
                     {notificaciones.length > 0 && (
                       <button
@@ -226,10 +233,7 @@ export function AppLayout() {
                     {notificaciones.length === 0 ? (
                       <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--color-ink-600)', fontSize: '0.875rem' }}>
                         <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📭</div>
-                        No hay notificaciones recientes.<br />
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-400)' }}>
-                          El WebSocket está escuchando en tiempo real.
-                        </span>
+                        No hay notificaciones recientes.
                       </div>
                     ) : (
                       notificaciones.map((n) => (
@@ -257,6 +261,7 @@ export function AppLayout() {
                     )}
                   </div>
 
+                  {import.meta.env.DEV && (
                   <div style={{ padding: '10px 16px', borderTop: '1px solid var(--color-border)', backgroundColor: '#fafafa', textAlign: 'center' }}>
                     <button
                       type="button"
@@ -273,6 +278,7 @@ export function AppLayout() {
                       ⚡ Simular alerta de prueba en vivo
                     </button>
                   </div>
+                  )}
                 </div>
               )}
             </div>

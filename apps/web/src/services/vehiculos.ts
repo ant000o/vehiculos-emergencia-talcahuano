@@ -17,6 +17,8 @@ export interface Vehiculo {
   id_compania: number;
   coordenadas?: any;
   proxima_mantencion?: number;
+  /** Foto del vehículo. Pendiente en backend/BD; mientras tanto la tarjeta usa una ilustración. */
+  imagen_url?: string | null;
 }
 
 export interface PaginatedVehiculos {

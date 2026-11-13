@@ -12,10 +12,13 @@
 }
 
 .app-layout__sidebar {
-  background-color: var(--color-navy-900);
+  background: linear-gradient(180deg, var(--color-navy-900) 0%, var(--color-navy-950) 100%);
   display: flex;
   flex-direction: column;
   padding: var(--space-6) 0;
+  box-shadow: 2px 0 8px rgba(10, 22, 40, 0.18);
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 760px) {
@@ -42,8 +45,11 @@
 
 .app-layout__brand-eyebrow {
   font-family: var(--font-body);
-  font-size: 0.75rem;
-  color: var(--color-red-600);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f87171;
 }
 
 .app-layout__brand-title {
@@ -70,15 +76,25 @@
 }
 
 .app-layout__nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md);
   border-left: 3px solid transparent;
   transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.app-layout__nav-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
 }
 
 .app-layout__nav-link:hover {
@@ -86,8 +102,13 @@
   color: var(--color-white);
 }
 
+.app-layout__nav-link.is-active .app-layout__nav-icon {
+  color: #f87171;
+  opacity: 1;
+}
+
 .app-layout__nav-link.is-active {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.1);
   color: var(--color-white);
   border-left-color: var(--color-red-600);
 }
@@ -105,11 +126,33 @@
   padding: var(--space-4) var(--space-6);
   background-color: var(--color-white);
   border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .app-layout__user {
   display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-layout__user-text {
+  display: flex;
   flex-direction: column;
+}
+
+.app-layout__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-navy-900);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: 0.03em;
 }
 
 .app-layout__user-name {

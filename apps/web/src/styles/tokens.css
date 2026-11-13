@@ -1,11 +1,12 @@
 :root {
+  --color-navy-950: #0a1628;
   --color-navy-900: #0f1f38;
   --color-navy-700: #16294a;
   --color-navy-800: #122342;
   --color-navy-500: #1f3a63;
   --color-red-600: #c1272d;
   --color-red-700: #9e1f24;
-  --color-paper: #f7f7f4;
+  --color-paper: #f3f5f8;
   --color-white: #ffffff;
   --color-ink-900: #14181f;
   --color-ink-800: #1f2530;

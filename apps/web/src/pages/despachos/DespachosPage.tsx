@@ -119,7 +119,7 @@ export function DespachosPage() {
     });
   }, [despachos, filtroFecha, filtroTexto, filtroEstado]);
 
-  const esAdminOCapitan = user?.rol === 'administrador' || user?.rol === 'capitan';
+  const puedeOperarDespachos = user?.rol === 'central' || user?.rol === 'administrador';
 
   const formatFechaHora = (fechaStr: string) => {
     try {
@@ -237,8 +237,8 @@ export function DespachosPage() {
           </div>
         </div>
 
-        {/* Acciones para Comandancia / Admin */}
-        {esAdminOCapitan && (
+        {/* Acciones de Despacho (Solo Central y Administrador pueden operar/finalizar) */}
+        {puedeOperarDespachos ? (
           <div className="despacho-card__actions">
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {d.estado_emergencia === 'en_curso' && (
@@ -272,6 +272,12 @@ export function DespachosPage() {
               )}
             </div>
           </div>
+        ) : (
+          <div className="despacho-card__actions" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-500)', fontStyle: 'italic' }}>
+              👁️ Modo monitoreo (gestión exclusiva de Central)
+            </span>
+          </div>
         )}
       </div>
     );
@@ -283,11 +289,13 @@ export function DespachosPage() {
         <div>
           <h1 className="despachos__title">Panel de Despachos de Emergencia</h1>
           <p className="despachos__subtitle">
-            Monitorea en tiempo real los despachos activos y consulta el histórico detallado por día.
+            {puedeOperarDespachos
+              ? 'Control operativo y coordinación de despachos de emergencia en tiempo real.'
+              : 'Monitoreo y supervisión institucional de despachos activos e histórico de emergencias.'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button
             onClick={cargarDespachos}
             className="despachos__btn-clear"
@@ -295,7 +303,7 @@ export function DespachosPage() {
           >
             🔄 Actualizar
           </button>
-          {esAdminOCapitan && (
+          {puedeOperarDespachos ? (
             <Link
               to="/mapa"
               style={{
@@ -313,6 +321,26 @@ export function DespachosPage() {
               }}
             >
               🗺️ Nuevo Despacho en Mapa
+            </Link>
+          ) : (
+            <Link
+              to="/mapa"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontFamily: 'var(--font-body)',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                color: 'var(--color-navy-900)',
+                backgroundColor: 'var(--color-white)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 16px',
+                textDecoration: 'none',
+              }}
+            >
+              🗺️ Ver Mapa de Flota
             </Link>
           )}
         </div>

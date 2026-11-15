@@ -28,11 +28,11 @@ function App() {
             }
           >
             <Route index element={<DashboardPage />} />
-            {/* HU-28: solo la interfaz; falta reforzar esto también en el backend (despacho_emergencia.controller.ts no tiene @Roles). */}
+            {/* Despachos: Central opera; Comandancia/Capitán y Bomberos monitorean */}
             <Route
               path="despachos"
               element={
-                <ProtectedRoute roles={['administrador', 'bombero', 'capitan']}>
+                <ProtectedRoute roles={['administrador', 'central', 'capitan', 'bombero']}>
                   <DespachosPage />
                 </ProtectedRoute>
               }
@@ -74,7 +74,7 @@ function App() {
             <Route
               path="mapa"
               element={
-                <ProtectedRoute roles={['administrador', 'capitan']}>
+                <ProtectedRoute roles={['administrador', 'central', 'capitan', 'bombero']}>
                   <CentralMapaPage />
                 </ProtectedRoute>
               }
@@ -83,7 +83,7 @@ function App() {
             <Route
               path="usuarios"
               element={
-                <ProtectedRoute roles={['administrador']}>
+                <ProtectedRoute roles={['administrador', 'capitan']}>
                   <UsuariosPage />
                 </ProtectedRoute>
               }

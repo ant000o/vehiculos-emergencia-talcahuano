@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import type { CompaniaOption, EstadoVehiculo, Vehiculo } from '../../services/vehiculos';
+import { formatoNombreCompania } from '../../services/usuarios';
 
 interface VehiculoFormValues {
   patente: string;
@@ -127,6 +128,7 @@ export function VehiculoForm({
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
             aria-invalid={Boolean(errors.anio)}
+            placeholder={`Ej: ${ANIO_ACTUAL}`}
           />
           {errors.anio && <span className="vehiculos-form__error">{errors.anio}</span>}
         </div>
@@ -140,6 +142,7 @@ export function VehiculoForm({
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
             aria-invalid={Boolean(errors.marca)}
+            placeholder="Ej: Ford"
           />
           {errors.marca && <span className="vehiculos-form__error">{errors.marca}</span>}
         </div>
@@ -151,6 +154,7 @@ export function VehiculoForm({
             value={modelo}
             onChange={(e) => setModelo(e.target.value)}
             aria-invalid={Boolean(errors.modelo)}
+            placeholder="Ej: Ranger"
           />
           {errors.modelo && <span className="vehiculos-form__error">{errors.modelo}</span>}
         </div>
@@ -190,8 +194,8 @@ export function VehiculoForm({
           onChange={(e) => setIdCompania(Number(e.target.value))}
         >
           {companias.map((c) => (
-            <option key={c.id_compania} value={c.id_compania}>
-              {c.nombre}
+            <option key={c.id_compania} value={c.id_compania} title={c.nombre}>
+              {formatoNombreCompania(c.nombre)}
             </option>
           ))}
         </select>

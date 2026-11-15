@@ -5,7 +5,7 @@
 
 import { disconnectSocket } from './socket';
 
-export type Rol = 'administrador' | 'bombero' | 'capitan' | 'mecanico';
+export type Rol = 'administrador' | 'bombero' | 'capitan' | 'mecanico' | 'central';
 
 export interface LoginCredentials {
   email: string;

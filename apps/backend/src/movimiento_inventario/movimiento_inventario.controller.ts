@@ -11,7 +11,7 @@ import { CreateMovimientoInventarioDto } from './dto/create-movimiento_inventari
 export class MovimientoInventarioController {
   constructor(private readonly service: MovimientoInventarioService) {}
 
-  @Roles('administrador', 'mecanico', 'capitan')
+  @Roles('administrador')
   @Post()
   create(@Body() dto: CreateMovimientoInventarioDto) {
     return this.service.create(dto);

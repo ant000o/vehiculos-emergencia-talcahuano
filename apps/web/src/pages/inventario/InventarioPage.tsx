@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState, type FormEvent } from 'react';
+import { useAuth } from '../../context/useAuth';
 import {
   listarArticulos,
   listarMovimientos,
@@ -10,6 +11,9 @@ import { Modal } from '../../components/Modal';
 import './inventario.css';
 
 export function InventarioPage() {
+  const { user } = useAuth();
+  const esAdmin = user?.rol === 'administrador';
+
   const [articulos, setArticulos] = useState<ArticuloInventario[]>([]);
   const [movimientos, setMovimientos] = useState<MovimientoInventario[]>([]);
   const [pestana, setPestana] = useState<'articulos' | 'kardex'>('articulos');
@@ -85,6 +89,7 @@ export function InventarioPage() {
 
   const handleGuardarEntrada = async (e: FormEvent) => {
     e.preventDefault();
+    if (!esAdmin) return;
     if (!idArticuloSeleccionado || cantidadEntrada < 1) return;
 
     setIsSaving(true);
@@ -123,15 +128,17 @@ export function InventarioPage() {
           </p>
         </div>
 
-        <button
-          className="inventario-page__nuevo"
-          onClick={() => {
-            setErrorModal(null);
-            setModalAbierto(true);
-          }}
-        >
-          + Registrar Entrada de Stock
-        </button>
+        {esAdmin && (
+          <button
+            className="inventario-page__nuevo"
+            onClick={() => {
+              setErrorModal(null);
+              setModalAbierto(true);
+            }}
+          >
+            + Registrar Entrada de Stock
+          </button>
+        )}
       </div>
 
       {/* Tarjetas resumen */}

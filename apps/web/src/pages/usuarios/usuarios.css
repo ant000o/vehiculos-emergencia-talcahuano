@@ -49,6 +49,57 @@
   }
 }
 
+/* Filtros y buscador de usuarios */
+.usuarios-page__filtros {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.usuarios-page__filtro-input,
+.usuarios-page__filtro-select {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  transition: border-color 0.15s ease;
+}
+
+.usuarios-page__filtro-input:focus-visible,
+.usuarios-page__filtro-select:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.usuarios-page__filtro-input {
+  flex: 1;
+  min-width: 260px;
+}
+
+.usuarios-page__filtro-select {
+  min-width: 180px;
+  max-width: 240px;
+  width: auto;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .usuarios-page__filtros {
+    flex-direction: column;
+  }
+  .usuarios-page__filtro-input,
+  .usuarios-page__filtro-select {
+    width: 100%;
+  }
+}
+
 /* Tabla de Usuarios */
 .usuarios-table {
   width: 100%;
@@ -131,7 +182,7 @@
 
 /* Formulario */
 .usuarios-form {
-  max-width: 560px;
+  max-width: 620px;
   width: 100%;
   background: var(--color-white);
   border: 1px solid var(--color-border);
@@ -198,6 +249,14 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.usuarios-form__field select {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .usuarios-form__field input:focus-visible,

@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import type { RolOption, CompaniaOption, Usuario } from '../../services/usuarios';
+import { formatoNombreCompania, type RolOption, type CompaniaOption, type Usuario } from '../../services/usuarios';
+import { ROLE_LABELS } from '../../config/navigation';
+import type { Rol } from '../../services/auth';
 
 interface UsuarioFormValues {
   rut: string;
@@ -110,6 +112,7 @@ export function UsuarioForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={Boolean(errors.email)}
+            placeholder="Ej: juan.perez@bomberos-talcahuano.cl"
           />
           {errors.email && <span className="usuarios-form__error">{errors.email}</span>}
         </div>
@@ -123,6 +126,7 @@ export function UsuarioForm({
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             aria-invalid={Boolean(errors.nombre)}
+            placeholder="Ej: Juan"
           />
           {errors.nombre && <span className="usuarios-form__error">{errors.nombre}</span>}
         </div>
@@ -134,6 +138,7 @@ export function UsuarioForm({
             value={apellidos}
             onChange={(e) => setApellidos(e.target.value)}
             aria-invalid={Boolean(errors.apellidos)}
+            placeholder="Ej: Pérez González"
           />
           {errors.apellidos && <span className="usuarios-form__error">{errors.apellidos}</span>}
         </div>
@@ -159,7 +164,7 @@ export function UsuarioForm({
           <select id="rol" value={idRol} onChange={(e) => setIdRol(Number(e.target.value))}>
             {roles.map((r) => (
               <option key={r.id_rol} value={r.id_rol}>
-                {r.nombre_rol}
+                {ROLE_LABELS[r.nombre_rol as Rol] ?? (r.nombre_rol.charAt(0).toUpperCase() + r.nombre_rol.slice(1))}
               </option>
             ))}
           </select>
@@ -173,8 +178,8 @@ export function UsuarioForm({
             onChange={(e) => setIdCompania(Number(e.target.value))}
           >
             {companias.map((c) => (
-              <option key={c.id_compania} value={c.id_compania}>
-                {c.nombre}
+              <option key={c.id_compania} value={c.id_compania} title={c.nombre}>
+                {formatoNombreCompania(c.nombre)}
               </option>
             ))}
           </select>

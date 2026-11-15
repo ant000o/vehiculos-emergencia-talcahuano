@@ -12,6 +12,7 @@ import { listarGrifos, type Grifo } from '../../services/grifos';
 import { Modal } from '../../components/Modal';
 import { geocodificarDireccion } from '../../services/geocoding';
 import { TIPOS_EMERGENCIA, emojiEmergencia, iconoEmojiEmergencia } from '../../utils/emergencia';
+import { useAuth } from '../../context/useAuth';
 
 // Fix icono defecto de Leaflet en React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -78,6 +79,9 @@ function CentrarMapa({ punto }: { punto: [number, number] | null }) {
 }
 
 export function CentralMapaPage() {
+  const { user } = useAuth();
+  const puedeDespachar = user?.rol === 'central' || user?.rol === 'administrador';
+
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [todosDespachos, setTodosDespachos] = useState<DespachoEmergencia[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -125,9 +129,10 @@ export function CentralMapaPage() {
     cargarDatos();
   }, []);
 
-  // HU-20: un clic en el mapa fija (o ajusta) el punto de la emergencia.
+  // HU-20: un clic en el mapa fija (o ajusta) el punto de la emergencia (solo Central/Admin).
   // Los recursos se asignan después, con el botón "Despachar recursos".
   const handleMapClick = (lat: number, lng: number) => {
+    if (!puedeDespachar) return;
     if (isClearingRef.current) return;
     isUpdatingCoordsRef.current = true;
     setCoordsEmergencia([lat, lng]);
@@ -329,101 +334,122 @@ export function CentralMapaPage() {
               boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
             }}
           >
-            ← Volver al Inicio
+            Volver al Inicio
           </Link>
         </div>
       </div>
 
-      <div className="emergencia-panel">
-        <div className="emergencia-panel__campo emergencia-panel__campo--direccion">
-          <label htmlFor="direccion-emergencia">Dirección de la emergencia</label>
-          <div className="emergencia-panel__fila">
-            <input
-              id="direccion-emergencia"
-              type="text"
-              value={direccionTexto}
-              placeholder="Ej: Colón 1234"
-              onChange={(e) => setDireccionTexto(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleBuscarDireccion();
-                }
-              }}
-            />
-            <button type="button" onClick={handleBuscarDireccion} disabled={buscandoDireccion}>
-              {buscandoDireccion ? 'Buscando…' : 'Buscar'}
-            </button>
+      {puedeDespachar ? (
+        <div className="emergencia-panel">
+          <div className="emergencia-panel__campo emergencia-panel__campo--direccion">
+            <label htmlFor="direccion-emergencia">Dirección de la emergencia</label>
+            <div className="emergencia-panel__fila">
+              <input
+                id="direccion-emergencia"
+                type="text"
+                value={direccionTexto}
+                placeholder="Ej: Colón 1234"
+                onChange={(e) => setDireccionTexto(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleBuscarDireccion();
+                  }
+                }}
+              />
+              <button type="button" onClick={handleBuscarDireccion} disabled={buscandoDireccion}>
+                {buscandoDireccion ? 'Buscando…' : 'Buscar'}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="emergencia-panel__campo">
-          <label htmlFor="tipo-emergencia">Tipo de emergencia</label>
-          <select
-            id="tipo-emergencia"
-            value={tipoEmergencia}
-            onChange={(e) => setTipoEmergencia(e.target.value)}
-          >
-            {TIPOS_EMERGENCIA.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {emojiEmergencia(tipo)} {tipo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          type="button"
-          className="emergencia-panel__despachar"
-          disabled={!coordsEmergencia}
-          onClick={() => setModalAbierto(true)}
-        >
-          Despachar recursos →
-        </button>
-
-        {errorDireccion && (
-          <p className="emergencia-panel__mensaje emergencia-panel__mensaje--error" role="alert">{errorDireccion}</p>
-        )}
-        {coordsEmergencia && !errorDireccion && (
-          <div
-            className="emergencia-panel__mensaje"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '8px',
-            }}
-          >
-            <span>
-              {emojiTipo} Punto fijado: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}. Puedes ajustarlo haciendo clic en otro lugar del mapa.
-            </span>
-            <button
-              type="button"
-              onClick={limpiarEmergencia}
-              style={{
-                background: 'rgba(0, 0, 0, 0.08)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--color-ink-700)',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: 'bold',
-                flexShrink: 0,
-                lineHeight: 1,
-              }}
-              title="Quitar punto marcado (✕)"
-              aria-label="Quitar punto marcado"
+          <div className="emergencia-panel__campo">
+            <label htmlFor="tipo-emergencia">Tipo de emergencia</label>
+            <select
+              id="tipo-emergencia"
+              value={tipoEmergencia}
+              onChange={(e) => setTipoEmergencia(e.target.value)}
             >
-              ✕
-            </button>
+              {TIPOS_EMERGENCIA.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {emojiEmergencia(tipo)} {tipo}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-      </div>
+
+          <button
+            type="button"
+            className="emergencia-panel__despachar"
+            disabled={!coordsEmergencia}
+            onClick={() => setModalAbierto(true)}
+          >
+            Despachar recursos 
+          </button>
+
+          {errorDireccion && (
+            <p className="emergencia-panel__mensaje emergencia-panel__mensaje--error" role="alert">{errorDireccion}</p>
+          )}
+          {coordsEmergencia && !errorDireccion && (
+            <div
+              className="emergencia-panel__mensaje"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}
+            >
+              <span>
+                {emojiTipo} Punto fijado: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}. Puedes ajustarlo haciendo clic en otro lugar del mapa.
+              </span>
+              <button
+                type="button"
+                onClick={limpiarEmergencia}
+                style={{
+                  background: 'rgba(0, 0, 0, 0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--color-ink-700)',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold',
+                  flexShrink: 0,
+                  lineHeight: 1,
+                }}
+                title="Quitar punto marcado (✕)"
+                aria-label="Quitar punto marcado"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mapa-banner-monitoreo">
+          <div className="mapa-banner-monitoreo__content">
+            <span className="mapa-banner-monitoreo__icon">🛡️</span>
+            <div>
+              <strong>Modo Supervisión y Monitoreo de Flota en Tiempo Real</strong>
+              <p>
+                Visualización de unidades en servicio y grifos de apoyo en Talcahuano.
+                La emisión y coordinación de despachos de emergencia está reservada a la <strong>Central de Despacho y Alarmas</strong>.
+              </p>
+            </div>
+          </div>
+          <div className="mapa-banner-monitoreo__leyenda">
+            <span className="mapa-leyenda-item">🚨 En Despacho</span>
+            <span className="mapa-leyenda-item">🚒 Operativo</span>
+            <span className="mapa-leyenda-item">🔧 Mantención</span>
+            <span className="mapa-leyenda-item">🚰 Grifos</span>
+          </div>
+        </div>
+      )}
 
       <div className="mapa-container">
         <MapContainer center={[-36.7196, -73.1168]} zoom={13} style={{ height: '100%', width: '100%' }}>

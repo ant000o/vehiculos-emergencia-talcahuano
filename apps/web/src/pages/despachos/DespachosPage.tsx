@@ -355,10 +355,10 @@ export function DespachosPage() {
           </div>
 
           <div className="despachos__filter-group" style={{ flex: '1 1 220px' }}>
-            <label className="despachos__filter-label">Buscar por Tipo, Patente, Personal</label>
+            <label className="despachos__filter-label">Buscar por Patente</label>
             <input
               type="text"
-              placeholder="Ej: Fuego, BBBB11, Carlos..."
+              placeholder="Ej: BBBB11"
               className="despachos__input"
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}

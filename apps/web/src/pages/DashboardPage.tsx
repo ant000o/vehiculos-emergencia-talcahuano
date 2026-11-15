@@ -130,7 +130,7 @@ export function DashboardPage() {
   return (
     <div className="dashboard">
       <h1 className="dashboard__title">
-        Hola, {user.nombre}
+        Hola, {user.nombre} {user.apellidos}
       </h1>
 
       {/* Alertas de Mantenimiento Preventivo (Rutina cada 10.000 km) */}
@@ -150,12 +150,9 @@ export function DashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.25rem' }}>⚠️</span>
               <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
-                Alertas de Mantenimiento Preventivo (Rutina cada 10.000 km)
+                Alertas de Mantenimiento Preventivo
               </strong>
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 500 }}>
-              Notificación activa para vehículos a ≤ 3.000 km de su próximo mantenimiento
-            </span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {alertas.map((a) => (
@@ -174,7 +171,7 @@ export function DashboardPage() {
                   gap: '6px'
                 }}
               >
-                <strong>{a.patente}</strong> ({a.marca} {a.modelo}): {a.motivo_alerta} — Odómetro: {Number(a.kilometraje).toLocaleString('es-CL')} km
+                <strong>{a.patente}</strong> ({a.marca} {a.modelo}): {a.motivo_alerta} — Kilometros: {Number(a.kilometraje).toLocaleString('es-CL')} km
               </span>
             ))}
           </div>
@@ -215,7 +212,7 @@ export function DashboardPage() {
         <div className="dashboard__kpi-card">
           <span className="dashboard__kpi-label">Flota en Mantención</span>
           <p className="dashboard__kpi-value" style={{ color: kpis?.flota_en_mantencion ? '#c2410c' : undefined }}>{kpis?.flota_en_mantencion ?? 0}</p>
-          <span className="dashboard__kpi-desc">Vehículos en taller</span>
+          <span className="dashboard__kpi-desc">Vehículos en taller mecanico</span>
         </div>
 
         {/* Grifos Operativos */}
@@ -236,7 +233,7 @@ export function DashboardPage() {
         <div className="dashboard__kpi-card">
           <span className="dashboard__kpi-label">Repuestos Críticos</span>
           <p className="dashboard__kpi-value" style={{ color: kpis?.repuestos_criticos ? '#b45309' : undefined }}>{kpis?.repuestos_criticos ?? 0}</p>
-          <span className="dashboard__kpi-desc">Artículos con stock ≤ 5</span>
+          <span className="dashboard__kpi-desc">Artículos con stock inferior a 5</span>
         </div>
       </div>
 

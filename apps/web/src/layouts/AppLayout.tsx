@@ -5,6 +5,7 @@ import { NAV_ITEMS, ROLE_LABELS } from '../config/navigation';
 import { getSocket } from '../services/socket';
 import { ToastAlertaGrave } from '../components/ToastAlertaGrave';
 import { NavIcon } from './NavIcon';
+import escudoBombero from '../public/escudo_bombero.png';
 import './AppLayout.css';
 
 interface NotificacionItem {
@@ -20,6 +21,7 @@ export function AppLayout() {
   const [alerta, setAlerta] = useState<string | null>(null);
   const [notificaciones, setNotificaciones] = useState<NotificacionItem[]>([]);
   const [panelAbierto, setPanelAbierto] = useState(false);
+  const [menuMobileAbierto, setMenuMobileAbierto] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,11 +106,26 @@ export function AppLayout() {
     <div className="app-layout">
       {alerta && <ToastAlertaGrave mensaje={alerta} onClose={() => setAlerta(null)} />}
 
+      {/* Overlay de fondo en mobile al abrir el menú */}
+      {menuMobileAbierto && (
+        <div
+          className="app-layout__mobile-backdrop"
+          onClick={() => setMenuMobileAbierto(false)}
+        />
+      )}
+
       {/* SIDEBAR */}
-      <aside className="app-layout__sidebar">
+      <aside className={`app-layout__sidebar ${menuMobileAbierto ? 'is-mobile-open' : ''}`}>
         <div className="app-layout__brand">
-          <span className="app-layout__brand-eyebrow">Bomberos</span>
-          <span className="app-layout__brand-title">TALCAHUANO</span>
+          <img
+            src={escudoBombero}
+            alt="Escudo Cuerpo de Bomberos de Talcahuano"
+            className="app-layout__brand-logo"
+          />
+          <div className="app-layout__brand-text">
+            <span className="app-layout__brand-eyebrow">Cuerpo de Bomberos</span>
+            <span className="app-layout__brand-title">TALCAHUANO</span>
+          </div>
         </div>
 
         <nav className="app-layout__nav">
@@ -117,6 +134,7 @@ export function AppLayout() {
               key={item.path}
               to={item.path}
               end={item.path === '/'}
+              onClick={() => setMenuMobileAbierto(false)}
               className={({ isActive }) =>
                 isActive ? 'app-layout__nav-link is-active' : 'app-layout__nav-link'
               }
@@ -131,15 +149,26 @@ export function AppLayout() {
       {/* CONTENT WRAPPER */}
       <div className="app-layout__content-wrapper">
         <header className="app-layout__topbar">
-          <div className="app-layout__user">
-            <span className="app-layout__avatar" aria-hidden="true">
-              {`${user?.nombre?.[0] ?? ''}${user?.apellidos?.[0] ?? ''}`.toUpperCase()}
-            </span>
-            <div className="app-layout__user-text">
-              <span className="app-layout__user-name">{user?.nombre} {user?.apellidos}</span>
-              <span className="app-layout__user-role">
-                {user ? ROLE_LABELS[user.rol] : ''}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button
+              type="button"
+              className="app-layout__mobile-toggle"
+              onClick={() => setMenuMobileAbierto(!menuMobileAbierto)}
+              aria-label="Abrir o cerrar menú de navegación"
+            >
+              {menuMobileAbierto ? '✕' : '☰'}
+            </button>
+
+            <div className="app-layout__user">
+              <span className="app-layout__avatar" aria-hidden="true">
+                {`${user?.nombre?.[0] ?? ''}${user?.apellidos?.[0] ?? ''}`.toUpperCase()}
               </span>
+              <div className="app-layout__user-text">
+                <span className="app-layout__user-name">{user?.nombre} {user?.apellidos}</span>
+                <span className="app-layout__user-role">
+                  {user ? ROLE_LABELS[user.rol] : ''}
+                </span>
+              </div>
             </div>
           </div>
 

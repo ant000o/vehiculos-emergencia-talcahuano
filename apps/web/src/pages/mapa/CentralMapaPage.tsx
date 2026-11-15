@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -21,20 +21,47 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Icono personalizado para grifos
-const iconoGrifo = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [20, 32],
-  iconAnchor: [10, 32],
-  popupAnchor: [1, -28],
-  shadowSize: [32, 32],
+// Icono emoji para grifos 🚰
+const iconoGrifo = L.divIcon({
+  html: `<span style="font-size:26px;line-height:30px;display:block;text-align:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.45))">🚰</span>`,
+  className: '',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
 });
+
+// Icono emoji para vehículos según estado 🚒
+function iconoVehiculo(estadoOperativo: string, enDespacho: boolean): L.DivIcon {
+  const emoji = enDespacho
+    ? '🚨'
+    : estadoOperativo === 'operativo'
+    ? '🚒'
+    : estadoOperativo === 'en_mantencion'
+    ? '🔧'
+    : '🚒';
+  return L.divIcon({
+    html: `<span style="font-size:28px;line-height:32px;display:block;text-align:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">${emoji}</span>`,
+    className: '',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+}
 
 // Componente para capturar clicks en el mapa (HU-19)
 function MapClickInterceptor({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
     click(e) {
+      const originalTarget = e.originalEvent?.target as HTMLElement | null;
+      if (
+        originalTarget &&
+        (originalTarget.closest('.leaflet-popup') ||
+         originalTarget.closest('button') ||
+         originalTarget.closest('.leaflet-control') ||
+         originalTarget.closest('.leaflet-marker-icon'))
+      ) {
+        return;
+      }
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
@@ -72,6 +99,8 @@ export function CentralMapaPage() {
   const [buscandoDireccion, setBuscandoDireccion] = useState(false);
   const [errorDireccion, setErrorDireccion] = useState<string | null>(null);
   const [centrarEn, setCentrarEn] = useState<[number, number] | null>(null);
+  const isUpdatingCoordsRef = useRef(false);
+  const isClearingRef = useRef(false);
 
   const emojiTipo = emojiEmergencia(tipoEmergencia);
   const iconoPunto = useMemo(() => iconoEmojiEmergencia(emojiTipo), [emojiTipo]);
@@ -99,7 +128,12 @@ export function CentralMapaPage() {
   // HU-20: un clic en el mapa fija (o ajusta) el punto de la emergencia.
   // Los recursos se asignan después, con el botón "Despachar recursos".
   const handleMapClick = (lat: number, lng: number) => {
+    if (isClearingRef.current) return;
+    isUpdatingCoordsRef.current = true;
     setCoordsEmergencia([lat, lng]);
+    setTimeout(() => {
+      isUpdatingCoordsRef.current = false;
+    }, 200);
   };
 
   const handleBuscarDireccion = async () => {
@@ -116,8 +150,12 @@ export function CentralMapaPage() {
         return;
       }
       const punto: [number, number] = [resultado.lat, resultado.lng];
+      isUpdatingCoordsRef.current = true;
       setCoordsEmergencia(punto);
       setCentrarEn(punto);
+      setTimeout(() => {
+        isUpdatingCoordsRef.current = false;
+      }, 200);
     } catch (err) {
       setErrorDireccion(err instanceof Error ? err.message : 'No se pudo buscar la dirección.');
     } finally {
@@ -132,14 +170,19 @@ export function CentralMapaPage() {
     setConductorSeleccionado('');
     setBrigadistasSeleccionados([]);
     setGrifoSeleccionado('');
+    limpiarEmergencia();
   };
 
   // Deja el mapa listo para registrar otra emergencia.
   const limpiarEmergencia = () => {
+    isClearingRef.current = true;
     setCoordsEmergencia(null);
     setDireccionTexto('');
     setErrorDireccion(null);
     setCentrarEn(null);
+    setTimeout(() => {
+      isClearingRef.current = false;
+    }, 400);
   };
 
   // Despachos actualmente activos (en_curso)
@@ -237,7 +280,7 @@ export function CentralMapaPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1200 }}>
+    <div className="central-mapa-page" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 'var(--space-4)' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy-900)', margin: '0 0 var(--space-1)' }}>
@@ -342,9 +385,43 @@ export function CentralMapaPage() {
           <p className="emergencia-panel__mensaje emergencia-panel__mensaje--error" role="alert">{errorDireccion}</p>
         )}
         {coordsEmergencia && !errorDireccion && (
-          <p className="emergencia-panel__mensaje">
-            {emojiTipo} Punto fijado: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}. Puedes ajustarlo haciendo clic en otro lugar del mapa.
-          </p>
+          <div
+            className="emergencia-panel__mensaje"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+            }}
+          >
+            <span>
+              {emojiTipo} Punto fijado: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}. Puedes ajustarlo haciendo clic en otro lugar del mapa.
+            </span>
+            <button
+              type="button"
+              onClick={limpiarEmergencia}
+              style={{
+                background: 'rgba(0, 0, 0, 0.08)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-ink-700)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: 'bold',
+                flexShrink: 0,
+                lineHeight: 1,
+              }}
+              title="Quitar punto marcado (✕)"
+              aria-label="Quitar punto marcado"
+            >
+              ✕
+            </button>
+          </div>
         )}
       </div>
 
@@ -374,7 +451,7 @@ export function CentralMapaPage() {
               : { bg: '#FEE2E2', text: '#B91C1C', label: 'Fuera de Servicio' };
 
             return (
-              <Marker key={`veh-${v.id_vehiculo}`} position={pos}>
+              <Marker key={`veh-${v.id_vehiculo}`} position={pos} icon={iconoVehiculo(v.estado_operativo, enDespacho)}>
                 <Popup>
                   <div style={{ minWidth: 160 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
@@ -421,11 +498,61 @@ export function CentralMapaPage() {
 
           {/* Marcador de la emergencia, con el emoji de su tipo (HU-20) */}
           {coordsEmergencia && (
-            <Marker position={coordsEmergencia} icon={iconoPunto}>
+            <Marker
+              position={coordsEmergencia}
+              icon={iconoPunto}
+              eventHandlers={{
+                popupclose: () => {
+                  // Si el usuario cierra el popup del marcador con la 'x' de Leaflet
+                  if (!isUpdatingCoordsRef.current && !modalAbierto) {
+                    limpiarEmergencia();
+                  }
+                },
+              }}
+            >
               <Popup>
-                <strong>{emojiTipo} {tipoEmergencia}</strong><br />
-                {direccionTexto.trim() && <>{direccionTexto.trim()}<br /></>}
-                Coordenadas: {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}
+                <div style={{ textAlign: 'center', minWidth: '150px' }}>
+                  <strong>{emojiTipo} {tipoEmergencia}</strong><br />
+                  {direccionTexto.trim() && <>{direccionTexto.trim()}<br /></>}
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {coordsEmergencia[0].toFixed(5)}, {coordsEmergencia[1].toFixed(5)}
+                  </span>
+                  <div style={{ marginTop: '8px', borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
+                    <button
+                      type="button"
+                      ref={(node) => {
+                        if (node) {
+                          node.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            limpiarEmergencia();
+                          };
+                          node.onmousedown = (e) => e.stopPropagation();
+                          node.ontouchstart = (e) => e.stopPropagation();
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        limpiarEmergencia();
+                      }}
+                      style={{
+                        background: '#fee2e2',
+                        color: '#b91c1c',
+                        border: '1px solid #fecaca',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '6px 12px',
+                        fontSize: '0.8125rem',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        width: '100%',
+                        display: 'block',
+                      }}
+                    >
+                      ✕ Quitar punto
+                    </button>
+                  </div>
+                </div>
               </Popup>
             </Marker>
           )}

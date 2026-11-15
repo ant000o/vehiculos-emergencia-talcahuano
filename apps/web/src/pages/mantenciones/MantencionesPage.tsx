@@ -209,7 +209,7 @@ export function MantencionesPage() {
   }
 
   return (
-    <div className="mantenciones-page" style={{ maxWidth: 1100 }}>
+    <div className="mantenciones-page" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto' }}>
       {/* CABECERA */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 'var(--space-6)' }}>
         <div>
@@ -217,7 +217,7 @@ export function MantencionesPage() {
             Gestión de Mantenciones
           </h1>
           <p style={{ color: 'var(--color-ink-600)', fontFamily: 'var(--font-body)', margin: '4px 0 0', fontSize: '0.9375rem' }}>
-            Control de mantenciones preventivas, correctivas, revisiones técnicas y emergencias de la flota.
+            Control de mantenciones preventivas, correctivas y emergencias de la flota.
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export function MantencionesPage() {
 
       {/* FORMULARIO DE NUEVA MANTENCIÓN */}
       {modo === 'crear' ? (
-        <div style={{ maxWidth: 650, background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-6)' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-6)', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy-900)', margin: '0 0 var(--space-4)', fontSize: '1.25rem' }}>
             Nueva Orden de Mantención
           </h2>
@@ -296,7 +296,7 @@ export function MantencionesPage() {
                   />
                   <strong style={{ color: '#15803d', fontSize: '0.875rem' }}>🟢 Preventiva</strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-600)', marginTop: '2px' }}>
-                    Prevención periódica (filtros, aceite)
+                    Prevención periódica
                   </span>
                 </label>
 
@@ -321,7 +321,7 @@ export function MantencionesPage() {
                   />
                   <strong style={{ color: '#a16207', fontSize: '0.875rem' }}>🟡 Correctiva</strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-600)', marginTop: '2px' }}>
-                    Cuando le toca arreglo por desgaste
+                    Mantención por desgaste
                   </span>
                 </label>
 
@@ -346,7 +346,7 @@ export function MantencionesPage() {
                   />
                   <strong style={{ color: '#1d4ed8', fontSize: '0.875rem' }}>🔵 Revisión</strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-600)', marginTop: '2px' }}>
-                    Revisión anual / técnica general
+                    Revisión anual 
                   </span>
                 </label>
 
@@ -371,7 +371,7 @@ export function MantencionesPage() {
                   />
                   <strong style={{ color: '#b91c1c', fontSize: '0.875rem' }}>🔴 Emergencia</strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-600)', marginTop: '2px' }}>
-                    Falla crítica urgente (inoperativo)
+                    Falla crítica urgente
                   </span>
                 </label>
               </div>
@@ -399,13 +399,13 @@ export function MantencionesPage() {
 
             {/* Falla o Detalle */}
             <div className="mantenciones-form__field" style={{ maxWidth: '100%' }}>
-              <label htmlFor="descripcion-m">Descripción del trabajo o falla detectada</label>
+              <label htmlFor="descripcion-m">Descripción del trabajo y/o falla detectada</label>
               <textarea
                 id="descripcion-m"
                 rows={3}
                 value={formDescripcion}
                 onChange={(e) => setFormDescripcion(e.target.value)}
-                placeholder="Ej: mantención de 50.000 km, cambio de correas, o falla en bomba de agua..."
+                placeholder="Ej: mantención de 10.000 km, cambio de correas, o falla en bomba de agua..."
                 required
               />
             </div>
@@ -518,7 +518,7 @@ export function MantencionesPage() {
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-ink-900)' }}>
-                Tipo:
+                Filtrar por tipo de mantención:
               </label>
               <select
                 style={{
@@ -532,10 +532,10 @@ export function MantencionesPage() {
                 value={filtroTipo}
                 onChange={(e) => setFiltroTipo(e.target.value as TipoMantencion | '')}
               >
-                <option value="">Todos los tipos</option>
+                <option value="">Todas</option>
                 <option value="preventiva">Preventiva (planificada)</option>
                 <option value="correctiva">Correctiva (por desgaste)</option>
-                <option value="revision">Revisión (anual / técnica)</option>
+                <option value="revision">Revisión (anual)</option>
                 <option value="emergencia">Emergencia (crítica)</option>
               </select>
             </div>
@@ -556,7 +556,7 @@ export function MantencionesPage() {
                 value={filtroEstado}
                 onChange={(e) => setFiltroEstado(e.target.value as EstadoMantencion | '')}
               >
-                <option value="">Todos los estados</option>
+                <option value="">Todos </option>
                 <option value="en_proceso">En proceso</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="finalizada">Finalizada</option>

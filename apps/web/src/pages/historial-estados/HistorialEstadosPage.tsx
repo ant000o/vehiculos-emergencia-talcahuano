@@ -117,7 +117,7 @@ export function HistorialEstadosPage() {
   }
 
   return (
-    <div className="historial-page" style={{ maxWidth: 1100 }}>
+    <div className="historial-page" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 'var(--space-6)' }}>
         <div>
           <h1 className="historial-page__title">Historial de Estados y Operatividad</h1>
@@ -174,7 +174,7 @@ export function HistorialEstadosPage() {
 
       {/* MODO REGISTRAR ESTADO */}
       {modo === 'registrar' ? (
-        <div style={{ maxWidth: 540, background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-6)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-6)', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy-900)', margin: '0 0 var(--space-4)', fontSize: '1.25rem' }}>
             Nueva Inspección de Operatividad
           </h2>
@@ -298,7 +298,7 @@ export function HistorialEstadosPage() {
         <>
           <div style={{ display: 'flex', gap: 'var(--space-6)', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 'var(--space-6)' }}>
             <div className="historial-page__field" style={{ margin: 0, minWidth: 280 }}>
-              <label htmlFor="vehiculo">Filtrar por Vehículo</label>
+              <label htmlFor="vehiculo">Seleccionar un Vehículo</label>
               <select
                 id="vehiculo"
                 value={idVehiculo ?? ''}
@@ -407,7 +407,7 @@ export function HistorialEstadosPage() {
                   ← Anterior
                 </button>
                 <span>
-                  Página {pagina} de {totalPaginas} ({registrosDelVehiculo.length} registros)
+                  Página {pagina} de {totalPaginas}
                 </span>
                 <button
                   disabled={pagina === totalPaginas}

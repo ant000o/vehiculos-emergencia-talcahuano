@@ -141,7 +141,7 @@ export function UsuarioForm({
 
       {!esEdicion && (
         <div className="usuarios-form__field">
-          <label htmlFor="password">Contraseña inicial</label>
+          <label htmlFor="password">Contraseña</label>
           <input
             id="password"
             type="password"

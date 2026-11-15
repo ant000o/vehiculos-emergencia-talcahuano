@@ -59,7 +59,7 @@ export function GrifoForm({ companias, isSaving, serverError, onSubmit, onCancel
       )}
 
       <div className="grifos-form__field">
-        <label htmlFor="direccion">Dirección (opcional)</label>
+        <label htmlFor="direccion">Dirección</label>
         <input
           id="direccion"
           value={direccion}

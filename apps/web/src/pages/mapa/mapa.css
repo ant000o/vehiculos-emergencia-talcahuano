@@ -1,10 +1,11 @@
 .mapa-container {
-  height: calc(100vh - 120px);
+  height: clamp(500px, 68vh, 850px);
   width: 100%;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: 0 4px 16px rgba(15, 31, 56, 0.08);
   margin-top: 16px;
+  border: 1px solid var(--color-border);
 }
 
 /* HU-20: marcador de emergencia con emoji */

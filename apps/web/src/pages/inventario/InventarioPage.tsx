@@ -13,7 +13,7 @@ export function InventarioPage() {
   const [articulos, setArticulos] = useState<ArticuloInventario[]>([]);
   const [movimientos, setMovimientos] = useState<MovimientoInventario[]>([]);
   const [pestana, setPestana] = useState<'articulos' | 'kardex'>('articulos');
-  const [filtroCritico, setFiltroCritico] = useState(false);
+  const [filtroStock, setFiltroStock] = useState<'todos' | 'por_reponer' | 'criticos'>('todos');
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal para Entrada de Stock
@@ -51,14 +51,37 @@ export function InventarioPage() {
     cargarDatos();
   }, []);
 
-  const articulosCriticos = articulos.filter((a) => a.stock_actual <= 5);
-  const articulosFiltrados = filtroCritico ? articulosCriticos : articulos;
+  // Regla de negocio: stock mínimo / aceptable es 10 unidades
+  const STOCK_MINIMO_ACEPTABLE = 10;
 
-  // Valor estimado de compra de reposición (alcanzar stock seguro de 10 unidades por artículo crítico)
-  const costoTotalCompraSugerida = articulosCriticos.reduce(
-    (acc, a) => acc + Math.max(0, 10 - a.stock_actual) * Number(a.costo_unitario_actual),
+  // Semáforo:
+  // <= 6: Crítico (rojo)
+  // 7 a 9: Bajo (amarillo)
+  // >= 10: Aceptable / Óptimo (verde)
+  const articulosCriticos = articulos.filter((a) => a.stock_actual <= 6);
+  const articulosPorReponer = articulos.filter((a) => a.stock_actual < STOCK_MINIMO_ACEPTABLE);
+
+  // Total de unidades faltantes para alcanzar stock aceptable en toda la bodega
+  const totalUnidadesFaltantes = articulos.reduce(
+    (acc, a) => acc + Math.max(0, STOCK_MINIMO_ACEPTABLE - a.stock_actual),
     0,
   );
+
+  const articulosFiltrados = articulos.filter((a) => {
+    if (filtroStock === 'criticos') return a.stock_actual <= 6;
+    if (filtroStock === 'por_reponer') return a.stock_actual < STOCK_MINIMO_ACEPTABLE;
+    return true;
+  });
+
+  function renderEstadoStock(stock: number) {
+    if (stock <= 6) {
+      return <span className="inventario-badge is-critico">⚠️ Crítico</span>;
+    }
+    if (stock < STOCK_MINIMO_ACEPTABLE) {
+      return <span className="inventario-badge is-bajo">⚡ Bajo</span>;
+    }
+    return <span className="inventario-badge is-ok">✓ Aceptable</span>;
+  }
 
   const handleGuardarEntrada = async (e: FormEvent) => {
     e.preventDefault();
@@ -121,17 +144,23 @@ export function InventarioPage() {
         </div>
 
         <div style={{ background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '16px 20px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#b91c1c', textTransform: 'uppercase' }}>En Stock Crítico / Faltantes (≤ 5)</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#b91c1c', textTransform: 'uppercase' }}>En Stock Crítico (≤ 6)</span>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, margin: '4px 0 0', color: '#dc2626' }}>
             {articulosCriticos.length}
           </p>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-500)', display: 'block', marginTop: '2px' }}>
+            Riesgo de quiebre de stock
+          </span>
         </div>
 
         <div style={{ background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '16px 20px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0369a1', textTransform: 'uppercase' }}>Costo Compra Sugerida (Faltantes)</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0369a1', textTransform: 'uppercase' }}>Unidades por Reponer</span>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, margin: '4px 0 0', color: '#0284c7' }}>
-            ${costoTotalCompraSugerida.toLocaleString('es-CL')}
+            {totalUnidadesFaltantes}
           </p>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-500)', display: 'block', marginTop: '2px' }}>
+            Mín. aceptable: {STOCK_MINIMO_ACEPTABLE} u.
+          </span>
         </div>
 
         <div style={{ background: 'var(--color-white)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '16px 20px' }}>
@@ -161,15 +190,34 @@ export function InventarioPage() {
       {/* Vista de Artículos */}
       {pestana === 'articulos' && (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-body)', fontSize: '0.875rem', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={filtroCritico}
-                onChange={(e) => setFiltroCritico(e.target.checked)}
-              />
-              <strong>Mostrar solo artículos con stock crítico / faltantes (≤ 5 unidades)</strong>
-            </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label htmlFor="filtro-stock" style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-700)' }}>
+                Filtrar por nivel de stock:
+              </label>
+              <select
+                id="filtro-stock"
+                value={filtroStock}
+                onChange={(e) => setFiltroStock(e.target.value as 'todos' | 'por_reponer' | 'criticos')}
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.875rem',
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-white)',
+                  color: 'var(--color-ink-900)',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="todos">Todos los artículos ({articulos.length})</option>
+                <option value="por_reponer">Requieren reposición. ({articulosPorReponer.length})</option>
+                <option value="criticos">Solo stock crítico. ({articulosCriticos.length})</option>
+              </select>
+            </div>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink-500)' }}>
+              Mostrando {articulosFiltrados.length} de {articulos.length} artículos
+            </span>
           </div>
 
           <div className="table-responsive">
@@ -180,34 +228,52 @@ export function InventarioPage() {
                 <th>Nombre del Repuesto / Artículo</th>
                 <th>Stock Actual</th>
                 <th>Estado Stock</th>
-                <th>Costo Unitario Actual</th>
+                <th>Costo Unitario</th>
+                <th>Faltante para Stock mín</th>
               </tr>
             </thead>
             <tbody>
               {articulosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', color: 'var(--color-ink-400)', padding: 'var(--space-6)' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', color: 'var(--color-ink-400)', padding: 'var(--space-6)' }}>
                     No se encontraron artículos con el criterio seleccionado.
                   </td>
                 </tr>
               ) : (
                 articulosFiltrados.map((art) => {
-                  const esCritico = art.stock_actual <= 5;
+                  const faltantes = Math.max(0, STOCK_MINIMO_ACEPTABLE - art.stock_actual);
+                  const costoFaltante = faltantes * Number(art.costo_unitario_actual);
+                  const colorStock = art.stock_actual <= 6 ? '#b91c1c' : art.stock_actual < STOCK_MINIMO_ACEPTABLE ? '#b45309' : '#15803d';
+
                   return (
                     <tr key={art.id_articulo}>
                       <td><strong>#{art.id_articulo}</strong></td>
                       <td style={{ fontWeight: 500 }}>{art.nombre_articulo}</td>
                       <td>
-                        <strong style={{ fontSize: '1rem', color: esCritico ? '#b91c1c' : '#15803d' }}>
+                        <strong style={{ fontSize: '1rem', color: colorStock }}>
                           {art.stock_actual}
                         </strong> u.
                       </td>
                       <td>
-                        <span className={`inventario-badge ${esCritico ? 'is-critico' : 'is-ok'}`}>
-                          {esCritico ? '⚠️ Stock Crítico' : '✓ Disponible'}
-                        </span>
+                        {renderEstadoStock(art.stock_actual)}
                       </td>
                       <td>${Number(art.costo_unitario_actual).toLocaleString('es-CL')}</td>
+                      <td>
+                        {faltantes > 0 ? (
+                          <div>
+                            <strong style={{ color: art.stock_actual <= 6 ? '#b91c1c' : '#b45309' }}>
+                              Faltan {faltantes} unidades.
+                            </strong>
+                            <div style={{ fontSize: '0.8125rem', color: 'var(--color-ink-600)', marginTop: '2px' }}>
+                              ${costoFaltante.toLocaleString('es-CL')} estimado
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#15803d', fontSize: '0.875rem', fontWeight: 500 }}>
+                            Completo
+                          </span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })

@@ -70,11 +70,12 @@ async function seed() {
 
   // ─── ROL ─────────────────────────────────────────────────────────────────
   const rolRepo = ds.getRepository(Rol);
-  const [rolAdmin, rolCapitan, rolBombero, rolMecanico] = await rolRepo.save([
+  const [rolAdmin, rolCapitan, rolBombero, rolMecanico, rolCentral] = await rolRepo.save([
     rolRepo.create({ nombre_rol: 'administrador', descripcion: 'Acceso total al sistema' }),
-    rolRepo.create({ nombre_rol: 'capitan',       descripcion: 'Jefe de compañía, gestiona despachos y mantenciones' }),
+    rolRepo.create({ nombre_rol: 'capitan',       descripcion: 'Jefe de compañía y Comandancia, supervisa flota y operaciones' }),
     rolRepo.create({ nombre_rol: 'bombero',        descripcion: 'Personal operativo en terreno' }),
     rolRepo.create({ nombre_rol: 'mecanico',       descripcion: 'Realiza y supervisa mantenciones de vehículos' }),
+    rolRepo.create({ nombre_rol: 'central',        descripcion: 'Operador de Central de Despacho y Alarmas, emite y coordina despachos' }),
   ]);
   console.log('✅ Roles creados.');
 
@@ -144,6 +145,12 @@ async function seed() {
       email: 'bombero3@bomberos-talcahuano.cl',
       password_hash: hash, id_rol: rolBombero.id_rol, id_compania: comp2.id_compania,
       estado_activo: false, // usuario inactivo para probar el guard de auth
+    }),
+    usuarioRepo.create({
+      rut: '77777777-7', nombre: 'Operador', apellidos: 'Central de Alarmas',
+      email: 'central@bomberos-talcahuano.cl',
+      password_hash: hash, id_rol: rolCentral.id_rol, id_compania: comp1.id_compania,
+      estado_activo: true,
     }),
   ]);
   console.log('✅ Usuarios creados.');

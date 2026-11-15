@@ -11,7 +11,7 @@ import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dt
 export class DespachoEmergenciaController {
   constructor(private readonly service: DespachoEmergenciaService) {}
 
-  @Roles('administrador', 'capitan')
+  @Roles('administrador', 'central')
   @Post()
   create(@Body() dto: CreateDespachoEmergenciaDto) {
     return this.service.create(dto);
@@ -27,7 +27,7 @@ export class DespachoEmergenciaController {
     return this.service.findOne(id);
   }
 
-  @Roles('administrador', 'capitan')
+  @Roles('administrador', 'central')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDespachoEmergenciaDto) {
     return this.service.update(id, dto);

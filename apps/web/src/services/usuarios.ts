@@ -15,6 +15,19 @@ export interface CompaniaOption {
   nombre: string;
 }
 
+/**
+ * Devuelve un nombre limpio y legible para selectores y filtros,
+ * evitando que textos muy extensos se corten o desborden la pantalla.
+ * Ej: "Primera Compañía de Bomberos de Talcahuano" -> "Primera Compañía"
+ */
+export function formatoNombreCompania(nombre: string): string {
+  if (!nombre) return '';
+  return nombre
+    .replace(/\s+de Bomberos de Talcahuano/gi, '')
+    .replace(/\s+de Bomberos/gi, '')
+    .trim();
+}
+
 export interface Usuario {
   id_usuario: number;
   rut: string;

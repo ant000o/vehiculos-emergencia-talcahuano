@@ -1,22 +1,28 @@
 import type { Usuario, RolOption, CompaniaOption } from '../../services/usuarios';
+import { ROLE_LABELS } from '../../config/navigation';
+import type { Rol } from '../../services/auth';
 
 interface UsuariosTableProps {
   usuarios: Usuario[];
   roles: RolOption[];
   companias: CompaniaOption[];
-  onEditar: (usuario: Usuario) => void;
-  onCambiarEstado: (usuario: Usuario) => void;
+  esAdmin?: boolean;
+  onEditar?: (usuario: Usuario) => void;
+  onCambiarEstado?: (usuario: Usuario) => void;
 }
 
 export function UsuariosTable({
   usuarios,
   roles,
   companias,
+  esAdmin = true,
   onEditar,
   onCambiarEstado,
 }: UsuariosTableProps) {
   function nombreRol(id_rol: number): string {
-    return roles.find((r) => r.id_rol === id_rol)?.nombre_rol ?? '—';
+    const rawRol = roles.find((r) => r.id_rol === id_rol)?.nombre_rol;
+    if (!rawRol) return '—';
+    return ROLE_LABELS[rawRol as Rol] ?? (rawRol.charAt(0).toUpperCase() + rawRol.slice(1));
   }
 
   function nombreCompania(id_compania: number): string {
@@ -24,7 +30,11 @@ export function UsuariosTable({
   }
 
   if (usuarios.length === 0) {
-    return <p className="usuarios-table__empty">No hay usuarios registrados todavía.</p>;
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-ink-500)', background: 'var(--color-white)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--color-border)' }}>
+        <p style={{ margin: 0, fontWeight: 500 }}>No se encontraron usuarios con los criterios de búsqueda seleccionados.</p>
+      </div>
+    );
   }
 
   return (
@@ -33,19 +43,19 @@ export function UsuariosTable({
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>RUT</th>
+            {esAdmin && <th>RUT</th>}
             <th>Correo</th>
-            <th>Rol</th>
+            <th>Cargo / Rol</th>
             <th>Compañía</th>
             <th>Estado</th>
-            <th aria-label="Acciones"></th>
+            {esAdmin && <th aria-label="Acciones"></th>}
           </tr>
         </thead>
         <tbody>
           {usuarios.map((u) => (
             <tr key={u.id_usuario}>
-              <td>{u.nombre} {u.apellidos}</td>
-              <td style={{ whiteSpace: 'nowrap' }}>{u.rut}</td>
+              <td><strong>{u.nombre} {u.apellidos}</strong></td>
+              {esAdmin && <td style={{ whiteSpace: 'nowrap' }}>{u.rut}</td>}
               <td>{u.email}</td>
               <td>{nombreRol(u.id_rol)}</td>
               <td>{nombreCompania(u.id_compania)}</td>
@@ -60,12 +70,16 @@ export function UsuariosTable({
                   {u.estado_activo ? 'Activo' : 'Deshabilitado'}
                 </span>
               </td>
-              <td className="usuarios-table__actions">
-                <button onClick={() => onEditar(u)}>Editar</button>
-                <button onClick={() => onCambiarEstado(u)}>
-                  {u.estado_activo ? 'Deshabilitar' : 'Habilitar'}
-                </button>
-              </td>
+              {esAdmin && (
+                <td className="usuarios-table__actions">
+                  {onEditar && <button onClick={() => onEditar(u)}>Editar</button>}
+                  {onCambiarEstado && (
+                    <button onClick={() => onCambiarEstado(u)}>
+                      {u.estado_activo ? 'Deshabilitar' : 'Habilitar'}
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

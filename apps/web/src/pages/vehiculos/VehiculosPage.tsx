@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import {
   listarVehiculos,
@@ -104,15 +104,37 @@ export function VehiculosPage() {
     }
   }
 
+  // Estadísticas rápidas de estado para Comandancia y Operaciones
+  const statsFlota = useMemo(() => {
+    const total = vehiculos.length;
+    const operativos = vehiculos.filter((v) => v.estado_operativo === 'operativo').length;
+    const mantencion = vehiculos.filter((v) => v.estado_operativo === 'en_mantencion').length;
+    const fuera = vehiculos.filter((v) => v.estado_operativo === 'fuera_de_servicio').length;
+    return { total, operativos, mantencion, fuera };
+  }, [vehiculos]);
+
   return (
     <div className="vehiculos-page">
       <div className="vehiculos-page__header">
         <div>
-          <h1 className="vehiculos-page__title">Vehículos</h1>
+          <h1 className="vehiculos-page__title">Vehículos de Emergencia</h1>
           {vista.modo === 'lista' && !loadError && (
-            <p className="vehiculos-page__contador">
-              {vehiculos.length} {vehiculos.length === 1 ? 'unidad' : 'unidades'}
-            </p>
+            <div className="vehiculos-page__stats">
+              <span className="vehiculos-stat-pill">
+                <strong>{statsFlota.total}</strong> {statsFlota.total === 1 ? 'unidad' : 'unidades'}
+              </span>
+              <span className="vehiculos-stat-pill is-operativo">
+                🟢 <strong>{statsFlota.operativos}</strong> operativos
+              </span>
+              <span className="vehiculos-stat-pill is-mantencion">
+                🟡 <strong>{statsFlota.mantencion}</strong> mantención
+              </span>
+              {statsFlota.fuera > 0 && (
+                <span className="vehiculos-stat-pill is-fuera">
+                  🔴 <strong>{statsFlota.fuera}</strong> fuera de servicio
+                </span>
+              )}
+            </div>
           )}
         </div>
         {esAdmin && vista.modo === 'lista' && (
@@ -131,22 +153,35 @@ export function VehiculosPage() {
       {vista.modo === 'lista' && (
         <>
           <div className="vehiculos-page__filtros">
-            <input
-              type="text"
-              className="vehiculos-page__filtro-input"
-              placeholder="Buscar por patente, marca o modelo..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
+            <div className="vehiculos-page__search-wrap">
+              <span className="vehiculos-page__search-icon">🔍</span>
+              <input
+                type="text"
+                className="vehiculos-page__filtro-input"
+                placeholder="Buscar por patente, marca o modelo..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+              {q && (
+                <button
+                  type="button"
+                  className="vehiculos-page__search-clear"
+                  onClick={() => setQ('')}
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
             <select
               className="vehiculos-page__filtro-select"
               value={estado}
               onChange={(e) => setEstado(e.target.value as EstadoVehiculo | '')}
             >
               <option value="">Todos los estados</option>
-              <option value="operativo">Operativo</option>
-              <option value="en_mantencion">En mantención</option>
-              <option value="fuera_de_servicio">Fuera de servicio</option>
+              <option value="operativo">🟢 Operativo</option>
+              <option value="en_mantencion">🟡 En mantención</option>
+              <option value="fuera_de_servicio">🔴 Fuera de servicio</option>
             </select>
           </div>
 

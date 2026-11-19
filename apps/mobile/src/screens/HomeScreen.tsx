@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,18 +14,11 @@ import { useRealtime } from '../context/RealtimeContext';
 import { listarDespachosEnCurso } from '../services/despacho.service';
 import { DespachoEmergencia } from '../types/despacho';
 import DespachoCard from '../components/DespachoCard';
+import MenuAjustes from '../components/MenuAjustes';
 import { esMecanico } from '../utils/roles';
 import { obtenerDashboard, obtenerAlertasMantencion } from '../services/estadisticas.service';
 import { DashboardEstadisticas, AlertaMantencion, ConteoPorEstado } from '../types/estadisticas';
 
-interface CardDef {
-  titulo: string;
-  descripcion: string;
-  emoji: string;
-  ruta: string;
-  disponible: boolean;
-  ocultoMecanico?: boolean;
-}
 
 function total(lista: ConteoPorEstado[] | undefined, ...estados: string[]): number {
   if (!lista) return 0;
@@ -43,46 +35,6 @@ interface StatDef {
   ruta?: string;
 }
 
-const CARDS: CardDef[] = [
-  {
-    titulo: 'Despachos',
-    descripcion: 'Emergencias en curso',
-    emoji: '🚨',
-    ruta: 'DespachosList',
-    disponible: true,
-    ocultoMecanico: true,
-  },
-  {
-    titulo: 'Vehículos',
-    descripcion: 'Estado operativo y revisión diaria',
-    emoji: '🚒',
-    ruta: 'VehiculosList',
-    disponible: true,
-  },
-  {
-    titulo: 'Mantenciones',
-    descripcion: 'Historial y registro de mantenciones',
-    emoji: '🔧',
-    ruta: 'MantencionesList',
-    disponible: false,
-  },
-  {
-    titulo: 'Grifos',
-    descripcion: 'Marcar estado de disponibilidad',
-    emoji: '💧',
-    ruta: 'GrifosList',
-    disponible: true,
-    ocultoMecanico: true,
-  },
-  {
-    titulo: 'Personal',
-    descripcion: 'Ver y gestionar cuentas de usuario',
-    emoji: '👥',
-    ruta: 'UsuariosList',
-    disponible: true,
-    ocultoMecanico: true,
-  },
-];
 
 export default function HomeScreen({ navigation }: any) {
   const { usuario, logout } = useAuth();
@@ -91,6 +43,7 @@ export default function HomeScreen({ navigation }: any) {
   const [refrescando, setRefrescando] = useState(false);
   const [despachos, setDespachos] = useState<DespachoEmergencia[]>([]);
   const { conectado, suscribir } = useRealtime();
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const mecanico = esMecanico(usuario?.rol);
 
   // Si una de las dos consultas falla, la otra igual se muestra (allSettled).
@@ -195,20 +148,17 @@ export default function HomeScreen({ navigation }: any) {
   }
 
   function abrirMenu() {
-    Alert.alert('Cuenta', undefined, [
-      { text: 'Mi perfil (próximamente)', onPress: () => {} },
-      { text: 'Cerrar sesión', style: 'destructive', onPress: logout },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    setMenuAbierto(true);
   }
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
       title: 'SIGEV',
-      headerStyle: { backgroundColor: '#fff' },
+      headerStyle: { backgroundColor: '#B91C1C' },
       headerShadowVisible: false,
-      headerTitleStyle: { color: '#B91C1C', fontWeight: '800' },
+      headerTintColor: '#fff',
+      headerTitleStyle: { color: '#fff', fontWeight: '800' },
       headerRight: () => (
         <TouchableOpacity style={styles.menuBoton} onPress={abrirMenu}>
           <Text style={styles.menuTexto}>⋮</Text>
@@ -262,24 +212,19 @@ export default function HomeScreen({ navigation }: any) {
             )}
           </>
         )}
-
-        <Text style={styles.seccion}>Accesos</Text>
-        <View style={styles.grid}>
-          {CARDS.filter((c) => !(c.ocultoMecanico && mecanico)).map((card) => (
-            <TouchableOpacity
-              key={card.titulo}
-              style={[styles.card, !card.disponible && styles.cardDeshabilitada]}
-              disabled={!card.disponible}
-              onPress={() => navigation.navigate(card.ruta)}
-            >
-              <Text style={styles.cardEmoji}>{card.emoji}</Text>
-              <Text style={styles.cardTitulo}>{card.titulo}</Text>
-              <Text style={styles.cardDescripcion}>{card.descripcion}</Text>
-              {!card.disponible && <Text style={styles.cardProximamente}>Próximamente</Text>}
-            </TouchableOpacity>
-          ))}
-        </View>
       </ScrollView>
+      <MenuAjustes
+        visible={menuAbierto}
+        onClose={() => setMenuAbierto(false)}
+        onLogout={() => {
+          setMenuAbierto(false);
+          logout();
+        }}
+        onNavigate={(ruta) => navigation.navigate(ruta)}
+        conectado={conectado}
+        despachosEnCurso={despachos.length}
+        usuario={usuario}
+      />
     </SafeAreaView>
   );
 }
@@ -298,19 +243,6 @@ const styles = StyleSheet.create({
   stat: { width: '31.5%', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 10 },
   statValor: { fontSize: 26, fontWeight: '800' },
   statEtiqueta: { fontSize: 11, fontWeight: '600', marginTop: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  card: {
-    width: '48%',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-  },
-  cardDeshabilitada: { opacity: 0.5 },
-  cardEmoji: { fontSize: 28, marginBottom: 8 },
-  cardTitulo: { fontSize: 16, fontWeight: '700', color: '#1F2937' },
-  cardDescripcion: { fontSize: 12, color: '#6B7280', marginTop: 4 },
-  cardProximamente: { fontSize: 11, color: '#B91C1C', fontWeight: '600', marginTop: 8 },
   menuBoton: { paddingHorizontal: 12, paddingVertical: 4 },
-  menuTexto: { fontSize: 24, fontWeight: '900', color: '#B91C1C' },
+  menuTexto: { fontSize: 26, fontWeight: '900', color: '#fff' },
 });

@@ -24,4 +24,6 @@ export interface Vehiculo {
     nombre: string;
   };
   coordenadas: Coordenadas | null;
+  proxima_mantencion?: number;
+  imagen_url?: string | null;
 }

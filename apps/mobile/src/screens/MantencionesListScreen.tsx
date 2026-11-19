@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { listarMantencionesDeVehiculo } from '../services/mantencion.service';
+import { listarMantencionesDeVehiculo, listarMantenciones } from '../services/mantencion.service';
 import { Mantencion, EstadoMantencion, TipoMantencion } from '../types/mantencion';
 import { Vehiculo } from '../types/vehiculo';
 
@@ -19,6 +19,7 @@ const TIPO_LABEL: Record<TipoMantencion, string> = {
   [TipoMantencion.PREVENTIVA]: 'Preventiva',
   [TipoMantencion.CORRECTIVA]: 'Correctiva (reactiva)',
   [TipoMantencion.REVISION]: 'Revisión',
+  [TipoMantencion.EMERGENCIA]: 'Emergencia',
 };
 
 const ESTADO_LABEL: Record<EstadoMantencion, string> = {
@@ -36,7 +37,8 @@ const ESTADO_COLOR: Record<EstadoMantencion, { bg: string; texto: string }> = {
 };
 
 export default function MantencionesListScreen({ route, navigation }: any) {
-  const vehiculo: Vehiculo = route.params.vehiculo;
+  // Si viene un vehículo se muestra su historial; si no, todas las mantenciones.
+  const vehiculo: Vehiculo | undefined = route.params?.vehiculo;
 
   const [mantenciones, setMantenciones] = useState<Mantencion[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -44,6 +46,10 @@ export default function MantencionesListScreen({ route, navigation }: any) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!vehiculo) {
+      navigation.setOptions({ title: 'Mantenciones' });
+      return;
+    }
     navigation.setOptions({
       title: `Mantenciones — ${vehiculo.patente}`,
       headerRight: () => (
@@ -61,7 +67,11 @@ export default function MantencionesListScreen({ route, navigation }: any) {
 
   async function cargarMantenciones() {
     try {
-      const data = await listarMantencionesDeVehiculo(vehiculo.id_vehiculo);
+      const data = vehiculo
+        ? await listarMantencionesDeVehiculo(vehiculo.id_vehiculo)
+        : (await listarMantenciones()).sort(
+            (a, b) => new Date(b.fecha_ingreso).getTime() - new Date(a.fecha_ingreso).getTime(),
+          );
       setMantenciones(data);
       setError(null);
     } catch {
@@ -100,7 +110,7 @@ export default function MantencionesListScreen({ route, navigation }: any) {
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} />}
         contentContainerStyle={mantenciones.length === 0 && styles.listaVacia}
         ListEmptyComponent={
-          <Text style={styles.vacioTexto}>Este vehículo no tiene mantenciones registradas.</Text>
+          <Text style={styles.vacioTexto}>{vehiculo ? 'Este vehículo no tiene mantenciones registradas.' : 'Aún no hay mantenciones registradas.'}</Text>
         }
         renderItem={({ item }) => {
           const colores = ESTADO_COLOR[item.estado_mantencion];
@@ -110,14 +120,22 @@ export default function MantencionesListScreen({ route, navigation }: any) {
               onPress={() => navigation.navigate('MantencionDetalle', { mantencion: item, vehiculo })}
             >
               <View style={styles.cardInfo}>
-                <Text style={styles.tipo}>{TIPO_LABEL[item.tipo_mantencion]}</Text>
+                <Text style={styles.tipo}>{TIPO_LABEL[item.tipo_mantencion] ?? item.tipo_mantencion}</Text>
                 <Text style={styles.detalle}>
+                  {!vehiculo && item.vehiculo?.patente ? `${item.vehiculo.patente} · ` : ''}
                   {new Date(item.fecha_ingreso).toLocaleDateString('es-CL')}
                   {item.usuarioMecanico
                     ? ` — ${item.usuarioMecanico.nombre} ${item.usuarioMecanico.apellidos}`
                     : item.taller_externo
-                      ? ` — ${item.taller_externo}`
+                      ? ` — ${
+                          item.taller_externo === 'Automatico'
+                            ? 'Automática (por kilometraje)'
+                            : item.taller_externo
+                        }`
                       : ''}
+                  {item.kilometraje != null
+                    ? ` · ${item.kilometraje.toLocaleString('es-CL')} km`
+                    : ''}
                 </Text>
                 {item.descripcion_falla ? (
                   <Text style={styles.descripcion} numberOfLines={1}>

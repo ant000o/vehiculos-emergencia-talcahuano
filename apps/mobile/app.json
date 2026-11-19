@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "SIGEV",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,13 +16,20 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "cl.bomberos.talcahuano.sigev"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "215e1348-1b91-48ac-af0c-693d26f14333"
+      }
+    },
+    "owner": "ignacia_reyes"
   }
 }

@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
@@ -16,11 +16,24 @@ import MantencionDetalleScreen from '../screens/MantencionDetalleScreen';
 import GrifosListScreen from '../screens/GrifosListScreen';
 import GrifoDetalleScreen from '../screens/GrifoDetalleScreen';
 import DespachosScreen from '../screens/DespachosScreen';
+import BarraInferior, { RUTAS_CON_BARRA } from '../components/BarraInferior';
 
 const Stack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef<any>();
 
 export default function RootNavigator() {
   const { usuario, cargando } = useAuth();
+  const [rutaActual, setRutaActual] = useState<string | undefined>(undefined);
+
+  function actualizarRuta() {
+    setRutaActual(navigationRef.getCurrentRoute()?.name);
+  }
+
+  function irAPestana(ruta: string) {
+    if (ruta === rutaActual) return;
+    // La pestaña pasa a ser la pantalla raíz (como las pestañas de Instagram).
+    navigationRef.reset({ index: 0, routes: [{ name: ruta }] });
+  }
 
   if (cargando) {
     return (
@@ -31,8 +44,16 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
+    <View style={{ flex: 1 }}>
+    <NavigationContainer ref={navigationRef} onReady={actualizarRuta} onStateChange={actualizarRuta}>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: '#B91C1C' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '800' },
+          headerShadowVisible: false,
+        }}
+      >
         {usuario ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
@@ -97,5 +118,9 @@ export default function RootNavigator() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    {usuario && rutaActual && RUTAS_CON_BARRA.includes(rutaActual) && (
+      <BarraInferior rol={usuario.rol} rutaActual={rutaActual} onSeleccionar={irAPestana} />
+    )}
+    </View>
   );
 }

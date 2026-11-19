@@ -11,6 +11,8 @@ export interface ArticuloInventario {
   costo_unitario_actual: number | string;
   id_categoria: number;
   categoria?: { id_categoria: number; nombre_categoria: string };
+  id_compania?: number;
+  compania?: { id_compania: number; nombre: string; numero_compania: number };
 }
 
 export interface MovimientoInventario {
@@ -21,6 +23,8 @@ export interface MovimientoInventario {
   observacion?: string | null;
   id_articulo: number;
   articulo?: ArticuloInventario;
+  id_usuario?: number;
+  usuario?: { id_usuario: number; nombre: string; apellidos: string; email: string };
 }
 
 export interface DetalleArticuloMantencion {
@@ -44,10 +48,26 @@ export interface CrearMovimientoInput {
   cantidad: number;
   id_articulo: number;
   observacion?: string;
+  id_usuario?: number;
 }
 
-export async function listarArticulos(): Promise<ArticuloInventario[]> {
-  return apiClient.get<ArticuloInventario[]>('/articulos-inventario');
+export interface ActualizarArticuloInput {
+  nombre_articulo?: string;
+  costo_unitario_actual?: number;
+  id_categoria?: number;
+  id_compania?: number;
+}
+
+export async function listarArticulos(id_compania?: number): Promise<ArticuloInventario[]> {
+  const query = id_compania ? `?id_compania=${id_compania}` : '';
+  return apiClient.get<ArticuloInventario[]>(`/articulos-inventario${query}`);
+}
+
+export async function actualizarArticulo(
+  id: number,
+  input: ActualizarArticuloInput,
+): Promise<ArticuloInventario> {
+  return apiClient.patch<ArticuloInventario>(`/articulos-inventario/${id}`, input);
 }
 
 export async function listarMovimientos(id_articulo?: number): Promise<MovimientoInventario[]> {

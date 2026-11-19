@@ -6,10 +6,12 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsuarioModule } from '../usuario/usuario.module';
+import { RbacService } from './services/rbac.service';
+import { RolesGuard } from './guards/roles.guard';
 
-// @Global() hace que PassportModule/JwtModule (los exports de abajo) queden
+// @Global() hace que PassportModule/JwtModule/RbacService (los exports de abajo) queden
 // disponibles en CUALQUIER otro módulo de la app sin tener que importarlos
-// uno por uno. Necesario porque JwtAuthGuard se usa en los 13 controllers.
+// uno por uno.
 @Global()
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { UsuarioModule } from '../usuario/usuario.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [JwtModule, PassportModule],
+  providers: [AuthService, JwtStrategy, RbacService, RolesGuard],
+  exports: [JwtModule, PassportModule, RbacService, RolesGuard],
 })
 export class AuthModule {}

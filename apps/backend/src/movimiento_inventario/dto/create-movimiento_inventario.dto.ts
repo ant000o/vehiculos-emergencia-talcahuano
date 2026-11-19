@@ -19,4 +19,8 @@ export class CreateMovimientoInventarioDto {
   @IsInt()
   @IsOptional()
   id_mantencion?: number;
+
+  @IsInt()
+  @IsOptional()
+  id_usuario?: number;
 }

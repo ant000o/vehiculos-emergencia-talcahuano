@@ -151,3 +151,5 @@ export interface KpisOperativos {
   repuestos_criticos: number;
 }
 export const obtenerKpisOperativos = () => api.get<KpisOperativos>('/estadisticas/kpis-operativos');
+export const obtenerKpisInicio = () =>
+  api.get<KpisOperativos>('/estadisticas/kpis-inicio');

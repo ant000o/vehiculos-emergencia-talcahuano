@@ -74,6 +74,14 @@ export class NotificacionesGateway implements OnGatewayConnection, OnGatewayDisc
   }
 
   /**
+   * Notificar cuando un despacho es controlado o finalizado.
+   */
+  emitDespachoActualizado(despacho: any) {
+    const payload = this.sanitizeData(despacho);
+    this.server.emit('despacho_actualizado', payload);
+  }
+
+  /**
    * HU-16: Notificar a central/oficial de una falla grave.
    */
   emitAlertaFallaGrave(vehiculo: any, observaciones: string = 'Vehículo reportado como Fuera de Servicio') {

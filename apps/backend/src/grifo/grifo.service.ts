@@ -20,10 +20,15 @@ export class GrifoService {
     return this.repo.save(entity);
   }
 
-  async findAll(estado?: EstadoGrifo) {
+  async findAll(estado?: EstadoGrifo, id_compania?: number) {
+    const where: any = {};
+    if (estado) where.estado_operativo = estado;
+    if (id_compania) where.id_compania = id_compania;
+
     const items = await this.repo.find({
-      where: estado ? { estado_operativo: estado } : undefined,
+      where: Object.keys(where).length > 0 ? where : undefined,
       relations: { compania: true },
+      order: { id_grifo: 'ASC' },
     });
     return items.map((g) => ({ ...g, coordenadas: fromPostGIS(g.coordenadas) }));
   }

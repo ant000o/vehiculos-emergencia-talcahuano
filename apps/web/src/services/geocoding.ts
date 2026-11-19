@@ -57,3 +57,53 @@ export async function geocodificarDireccion(texto: string): Promise<ResultadoGeo
     : `${limpio}, Talcahuano`;
   return (await consultar(conComuna)) ?? (conComuna !== limpio ? consultar(limpio) : null);
 }
+
+/**
+ * Geocodificación inversa: convierte coordenadas [lat, lng] a dirección legible
+ * al pinchar en el mapa de despacho.
+ */
+export async function geocodificarCoordenadas(lat: number, lng: number): Promise<string | null> {
+  const params = new URLSearchParams({
+    format: 'jsonv2',
+    lat: String(lat),
+    lon: String(lng),
+    'accept-language': 'es',
+  });
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    const datos = await response.json();
+    if (!datos) return null;
+
+    if (datos.address) {
+      const calle = datos.address.road || datos.address.pedestrian || datos.address.street || datos.name;
+      const numero = datos.address.house_number;
+      const sector = datos.address.neighbourhood || datos.address.suburb || datos.address.quarter;
+      const ciudad = datos.address.city || datos.address.town || 'Talcahuano';
+
+      if (calle) {
+        let direccion = calle;
+        if (numero) direccion += ` ${numero}`;
+        if (sector) direccion += `, ${sector}`;
+        if (ciudad && !sector?.toLowerCase().includes(ciudad.toLowerCase())) direccion += `, ${ciudad}`;
+        return direccion;
+      }
+    }
+
+    if (datos.display_name) {
+      const partes = datos.display_name.split(',');
+      return partes.slice(0, 3).join(',').trim();
+    }
+    return null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}

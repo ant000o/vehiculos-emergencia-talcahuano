@@ -15,9 +15,12 @@ interface MapaEmergenciaMiniProps {
  * ubicarse de un vistazo dentro de la tarjeta.
  */
 export function MapaEmergenciaMini({ lat, lng, tipoEmergencia, altura = 150 }: MapaEmergenciaMiniProps) {
+  const finalLat = Math.abs(lat) > 50 && Math.abs(lng) < 50 ? lng : lat;
+  const finalLng = Math.abs(lat) > 50 && Math.abs(lng) < 50 ? lat : lng;
+
   return (
     <MapContainer
-      center={[lat, lng]}
+      center={[finalLat, finalLng]}
       zoom={15}
       style={{ height: altura, width: '100%' }}
       zoomControl={false}
@@ -30,7 +33,7 @@ export function MapaEmergenciaMini({ lat, lng, tipoEmergencia, altura = 150 }: M
       attributionControl={false}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Marker position={[lat, lng]} icon={iconoEmojiEmergencia(emojiEmergencia(tipoEmergencia))} interactive={false} />
+      <Marker position={[finalLat, finalLng]} icon={iconoEmojiEmergencia(emojiEmergencia(tipoEmergencia))} interactive={false} />
     </MapContainer>
   );
 }

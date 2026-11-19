@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -15,6 +16,23 @@ import { listarVehiculos } from '../services/vehiculo.service';
 import { obtenerUltimosRegistrosPorVehiculo } from '../services/registroOperatividad.service';
 import { Vehiculo, EstadoVehiculo } from '../types/vehiculo';
 import { RegistroOperatividad } from '../types/registroOperatividad';
+
+const IMAGEN_REFERENCIAL = require('../../assets/carro-bomba.png');
+
+const PUNTO_ESTADO: Record<EstadoVehiculo, string> = {
+  [EstadoVehiculo.OPERATIVO]: '#15803D',
+  [EstadoVehiculo.EN_MANTENCION]: '#D97706',
+  [EstadoVehiculo.FUERA_DE_SERVICIO]: '#B91C1C',
+};
+
+function Dato({ etiqueta, valor, alerta }: { etiqueta: string; valor: string; alerta?: boolean }) {
+  return (
+    <View style={styles.dato}>
+      <Text style={styles.datoEtiqueta}>{etiqueta}</Text>
+      <Text style={[styles.datoValor, alerta && { color: '#B91C1C' }]}>{valor}</Text>
+    </View>
+  );
+}
 
 const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
   [EstadoVehiculo.OPERATIVO]: 'Operativo',
@@ -140,25 +158,51 @@ export default function VehiculosListScreen({ navigation }: any) {
               : 'No hay vehículos registrados.'}
           </Text>}
         renderItem={({ item }) => {
-          const colores = ESTADO_COLOR[item.estado_operativo];
+          const km = Number(item.kilometraje ?? 0);
+          const proxKm = item.proxima_mantencion ?? km + 10000;
+          const vencida = item.proxima_mantencion != null && km >= item.proxima_mantencion;
+          const fueraServicio = item.estado_operativo === EstadoVehiculo.FUERA_DE_SERVICIO;
           return (
             <TouchableOpacity
-              style={styles.card}
-              activeOpacity={0.6}
+              style={[styles.card, fueraServicio && styles.cardFuera]}
+              activeOpacity={0.8}
               onPress={() => navigation.navigate('VehiculoDetalle', { vehiculo: item })}
             >
-              <View style={styles.cardInfo}>
-                <Text style={styles.patente}>{item.patente}</Text>
-                <Text style={styles.detalle}>
-                  {item.marca} {item.modelo} — {item.anio}
-                </Text>
-                <Text style={styles.compania}>{item.compania.nombre}</Text>
-                <PuntosNiveles registro={ultimosRegistros.get(item.id_vehiculo)} />
+              <View style={styles.media}>
+                <Image
+                  source={item.imagen_url ? { uri: item.imagen_url } : IMAGEN_REFERENCIAL}
+                  style={styles.imagen}
+                  resizeMode="cover"
+                />
+                <View style={styles.estadoPildora}>
+                  <View style={[styles.estadoPunto, { backgroundColor: PUNTO_ESTADO[item.estado_operativo] }]} />
+                  <Text style={styles.estadoTexto}>{ESTADO_LABEL[item.estado_operativo]}</Text>
+                </View>
               </View>
-              <View style={[styles.badge, { backgroundColor: colores.bg }]}>
-                <Text style={[styles.badgeTexto, { color: colores.texto }]}>
-                  {ESTADO_LABEL[item.estado_operativo]}
-                </Text>
+
+              <View style={styles.cuerpo}>
+                <View style={styles.titulo}>
+                  <Text style={styles.patente}>{item.patente}</Text>
+                  <Text style={styles.modelo} numberOfLines={2}>
+                    {item.marca} {item.modelo}
+                  </Text>
+                </View>
+
+                <View style={styles.datos}>
+                  <Dato etiqueta="Año" valor={String(item.anio)} />
+                  <Dato etiqueta="Kilometraje" valor={`${km.toLocaleString('es-CL')} km`} />
+                  <Dato
+                    etiqueta="Próx. mantención"
+                    valor={`${Number(proxKm).toLocaleString('es-CL')} km`}
+                    alerta={vencida}
+                  />
+                  <Dato etiqueta="Compañía" valor={item.compania.nombre} />
+                </View>
+
+                <View style={styles.niveles}>
+                  <Text style={styles.nivelesEtiqueta}>Combustible · Agua · Aceite</Text>
+                  <PuntosNiveles registro={ultimosRegistros.get(item.id_vehiculo)} />
+                </View>
               </View>
             </TouchableOpacity>
           );
@@ -189,26 +233,60 @@ const styles = StyleSheet.create({
   listaContenido: { padding: 12 },
   listaVacia: { flex: 1, justifyContent: 'center' },
   vacioTexto: { textAlign: 'center', color: '#666' },
-  separador: { height: 10 },
+  separador: { height: 14 },
   card: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardFuera: { borderTopWidth: 4, borderTopColor: '#B91C1C' },
+  media: { height: 150, backgroundColor: '#0F1F38' },
+  imagen: { width: '100%', height: '100%' },
+  estadoPildora: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+  },
+  estadoPunto: { width: 8, height: 8, borderRadius: 4 },
+  estadoTexto: { fontSize: 11, fontWeight: '800', color: '#111827', textTransform: 'uppercase', letterSpacing: 0.4 },
+  cuerpo: { padding: 18 },
+  titulo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 18,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  cardInfo: { flex: 1, paddingRight: 10 },
-  patente: { fontSize: 20, fontWeight: '800', color: '#111827' },
-  detalle: { fontSize: 14, color: '#6B7280', marginTop: 4 },
-  compania: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
-  puntosFila: { flexDirection: 'row', gap: 6, marginTop: 8 },
+  patente: { fontSize: 26, fontWeight: '900', color: '#9F1B1B', letterSpacing: 0.5 },
+  modelo: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#4B5563',
+    textTransform: 'uppercase',
+    marginTop: 8,
+  },
+  datos: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 12 },
+  dato: { width: '50%', marginBottom: 12, paddingRight: 8 },
+  datoEtiqueta: { fontSize: 11, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' },
+  datoValor: { fontSize: 15, fontWeight: '800', color: '#111827', marginTop: 2 },
+  niveles: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  nivelesEtiqueta: { fontSize: 11, color: '#9CA3AF', fontWeight: '600' },
+  puntosFila: { flexDirection: 'row', gap: 6 },
   punto: { width: 10, height: 10, borderRadius: 5 },
-  badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
-  badgeTexto: { fontSize: 12, fontWeight: '700' },
 });

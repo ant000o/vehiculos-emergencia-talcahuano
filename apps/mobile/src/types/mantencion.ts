@@ -2,6 +2,7 @@ export enum TipoMantencion {
   PREVENTIVA = 'preventiva',
   CORRECTIVA = 'correctiva',
   REVISION = 'revision',
+  EMERGENCIA = 'emergencia',
 }
 
 export enum EstadoMantencion {
@@ -40,6 +41,7 @@ export interface Mantencion {
   fecha_ingreso: string;
   fecha_salida: string | null;
   descripcion_falla: string | null;
+  kilometraje?: number | null;
   costo_mano_obra: number;
   estado_mantencion: EstadoMantencion;
   id_vehiculo: number;
@@ -60,6 +62,7 @@ export interface Mantencion {
 export interface CreateMantencionPayload {
   tipo_mantencion: TipoMantencion;
   descripcion_falla?: string;
+  kilometraje?: number;
   id_vehiculo: number;
   id_usuario_mecanico?: number;
   taller_externo?: string;

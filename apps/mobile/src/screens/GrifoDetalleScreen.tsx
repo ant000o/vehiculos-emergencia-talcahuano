@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { actualizarEstadoGrifo } from '../services/grifo.service';
 import { Grifo, EstadoGrifo } from '../types/grifo';
+import { useAuth } from '../context/AuthContext';
+import { puedeActualizarGrifos } from '../utils/roles';
 
 const OPCIONES_ESTADO: { valor: EstadoGrifo; label: string }[] = [
   { valor: EstadoGrifo.OPERATIVO, label: 'Operativo' },
@@ -12,6 +14,8 @@ const OPCIONES_ESTADO: { valor: EstadoGrifo; label: string }[] = [
 
 export default function GrifoDetalleScreen({ route, navigation }: any) {
   const grifoInicial: Grifo = route.params.grifo;
+  const { usuario } = useAuth();
+  const puedeEditar = puedeActualizarGrifos(usuario?.rol);
 
   const [grifo, setGrifo] = useState<Grifo>(grifoInicial);
   const [estadoSeleccionado, setEstadoSeleccionado] = useState<EstadoGrifo>(grifoInicial.estado_operativo);
@@ -65,43 +69,55 @@ export default function GrifoDetalleScreen({ route, navigation }: any) {
         {error && <Text style={styles.error}>{error}</Text>}
         {exito && <Text style={styles.exito}>Estado actualizado correctamente.</Text>}
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitulo}>Estado del grifo</Text>
-          <View style={styles.opciones}>
-            {OPCIONES_ESTADO.map((op) => {
-              const seleccionado = estadoSeleccionado === op.valor;
-              return (
-                <TouchableOpacity
-                  key={op.valor}
-                  style={[styles.opcionCard, seleccionado && styles.opcionCardSeleccionada]}
-                  onPress={() => {
-                    setEstadoSeleccionado(op.valor);
-                    setExito(false);
-                  }}
-                >
-                  <Text style={[styles.opcionLabel, seleccionado && styles.opcionLabelSeleccionado]}>
-                    {op.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+        {puedeEditar ? (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.cardTitulo}>Estado del grifo</Text>
+              <View style={styles.opciones}>
+                {OPCIONES_ESTADO.map((op) => {
+                  const seleccionado = estadoSeleccionado === op.valor;
+                  return (
+                    <TouchableOpacity
+                      key={op.valor}
+                      style={[styles.opcionCard, seleccionado && styles.opcionCardSeleccionada]}
+                      onPress={() => {
+                        setEstadoSeleccionado(op.valor);
+                        setExito(false);
+                      }}
+                    >
+                      <Text style={[styles.opcionLabel, seleccionado && styles.opcionLabelSeleccionado]}>
+                        {op.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
 
-        <TouchableOpacity
-          style={[
-            styles.boton,
-            (!huboCambio || guardando) && styles.botonDeshabilitado,
-          ]}
-          onPress={handleActualizar}
-          disabled={!huboCambio || guardando}
-        >
-          {guardando ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.botonTexto}>Actualizar estado</Text>
-          )}
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.boton,
+                (!huboCambio || guardando) && styles.botonDeshabilitado,
+              ]}
+              onPress={handleActualizar}
+              disabled={!huboCambio || guardando}
+            >
+              {guardando ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botonTexto}>Actualizar estado</Text>
+              )}
+            </TouchableOpacity>
+          </>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.cardTitulo}>Estado del grifo</Text>
+            <Text style={styles.revision}>
+              {OPCIONES_ESTADO.find((o) => o.valor === grifo.estado_operativo)?.label ?? grifo.estado_operativo}
+              {' · '}Solo lectura para tu perfil.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -38,6 +38,7 @@ export default function MantencionFormScreen({ route, navigation }: any) {
 
   const [tipo, setTipo] = useState<TipoMantencion>(TipoMantencion.PREVENTIVA);
   const [descripcionFalla, setDescripcionFalla] = useState('');
+  const [kilometraje, setKilometraje] = useState('');
 
   const [modoResponsable, setModoResponsable] = useState<ModoResponsable>('mecanico');
   const [mecanicos, setMecanicos] = useState<Usuario[]>([]);
@@ -73,6 +74,12 @@ export default function MantencionFormScreen({ route, navigation }: any) {
     if (tipo === TipoMantencion.CORRECTIVA && !descripcionFalla.trim()) {
       return 'Describe la falla detectada para una mantención reactiva.';
     }
+    if (kilometraje.trim() !== '') {
+      const km = Number(kilometraje);
+      if (!Number.isInteger(km) || km < 0) {
+        return 'El kilometraje debe ser un número entero mayor o igual a 0.';
+      }
+    }
     if (modoResponsable === 'mecanico' && !idMecanico) {
       return 'Selecciona el mecánico responsable.';
     }
@@ -96,6 +103,7 @@ export default function MantencionFormScreen({ route, navigation }: any) {
         tipo_mantencion: tipo,
         id_vehiculo: vehiculo.id_vehiculo,
         ...(descripcionFalla.trim() !== '' && { descripcion_falla: descripcionFalla.trim() }),
+        ...(kilometraje.trim() !== '' && { kilometraje: Number(kilometraje) }),
         ...(modoResponsable === 'mecanico'
           ? { id_usuario_mecanico: idMecanico! }
           : { taller_externo: tallerExterno.trim() }),
@@ -144,6 +152,19 @@ export default function MantencionFormScreen({ route, navigation }: any) {
             multiline
             numberOfLines={4}
             placeholder="Ej: fuga de aceite en motor, freno trasero desgastado..."
+          />
+
+          <Text style={[styles.label, { marginTop: 20 }]}>Kilometraje al ingreso (opcional)</Text>
+          <TextInput
+            style={styles.input}
+            value={kilometraje}
+            onChangeText={(t) => setKilometraje(t.replace(/[^0-9]/g, ''))}
+            keyboardType="number-pad"
+            placeholder={
+              vehiculo.kilometraje != null
+                ? `Km actual en ficha: ${vehiculo.kilometraje.toLocaleString('es-CL')}`
+                : 'Ej: 45000'
+            }
           />
         </View>
 

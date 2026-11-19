@@ -5,6 +5,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Vehiculo, EstadoVehiculo } from '../types/vehiculo';
 import { RegistroOperatividad } from '../types/registroOperatividad';
 import { obtenerUltimoRegistroDeVehiculo } from '../services/registroOperatividad.service';
+import { useAuth } from '../context/AuthContext';
+import { puedeGestionarMantenciones } from '../utils/roles';
 
 const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
   [EstadoVehiculo.OPERATIVO]: 'Operativo',
@@ -48,6 +50,8 @@ function NivelFila({
 }
 
 export default function VehiculoDetalleScreen({ route, navigation }: any) {
+  const { usuario } = useAuth();
+  const verMantenciones = puedeGestionarMantenciones(usuario?.rol);
   const vehiculo: Vehiculo = route.params.vehiculo;
 
   const [ultimoRegistro, setUltimoRegistro] = useState<RegistroOperatividad | null>(null);
@@ -131,12 +135,14 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
           )}
         </View>
 
-        <TouchableOpacity
-          style={styles.botonSecundario}
-          onPress={() => navigation.navigate('MantencionesList', { vehiculo })}
-        >
-          <Text style={styles.botonSecundarioTexto}>Ver historial de mantenciones</Text>
-        </TouchableOpacity>
+        {verMantenciones && (
+          <TouchableOpacity
+            style={styles.botonSecundario}
+            onPress={() => navigation.navigate('MantencionesList', { vehiculo })}
+          >
+            <Text style={styles.botonSecundarioTexto}>Ver historial de mantenciones</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={styles.boton}

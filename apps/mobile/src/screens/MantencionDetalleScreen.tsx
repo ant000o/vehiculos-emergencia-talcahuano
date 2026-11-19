@@ -20,6 +20,7 @@ const TIPO_LABEL: Record<TipoMantencion, string> = {
   [TipoMantencion.PREVENTIVA]: 'Preventiva',
   [TipoMantencion.CORRECTIVA]: 'Correctiva (reactiva)',
   [TipoMantencion.REVISION]: 'Revisión',
+  [TipoMantencion.EMERGENCIA]: 'Emergencia',
 };
 
 const ESTADO_LABEL: Record<EstadoMantencion, string> = {
@@ -46,7 +47,7 @@ export default function MantencionDetalleScreen({ route, navigation }: any) {
   const [errorRepuesto, setErrorRepuesto] = useState<string | null>(null);
 
   useEffect(() => {
-    navigation.setOptions({ title: TIPO_LABEL[mantencion.tipo_mantencion] });
+    navigation.setOptions({ title: TIPO_LABEL[mantencion.tipo_mantencion] ?? mantencion.tipo_mantencion });
   }, [mantencion]);
 
   useEffect(() => {

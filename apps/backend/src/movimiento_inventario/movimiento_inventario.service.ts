@@ -28,6 +28,7 @@ export class MovimientoInventarioService {
       relations: {
         articulo: true,
         mantencion: true,
+        usuario: true,
       },
       order: {
         fecha_movimiento: 'DESC',
@@ -44,6 +45,7 @@ export class MovimientoInventarioService {
       relations: {
         articulo: true,
         mantencion: true,
+        usuario: true,
       },
     });
 

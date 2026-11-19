@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { ArticuloInventario } from '../../articulo_inventario/entities/articulo_inventario.entity';
 import { Mantencion } from '../../mantencion/entities/mantencion.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 import { TipoMovimiento } from '../../common/enums/estados.enum';
 
 // Tabla kardex: NO tiene updated_at en la BD (es un registro histórico inmutable).
@@ -34,6 +35,13 @@ export class MovimientoInventario {
   @ManyToOne(() => Mantencion, (mantencion) => mantencion.movimientos, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'id_mantencion' })
   mantencion: Mantencion;
+
+  @Column({ type: 'int', nullable: true })
+  id_usuario: number;
+
+  @ManyToOne(() => Usuario, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'id_usuario' })
+  usuario: Usuario;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   created_at: Date;

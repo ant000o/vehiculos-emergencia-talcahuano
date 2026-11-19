@@ -19,6 +19,10 @@ export class MantencionService {
     private readonly notificacionesGateway: NotificacionesGateway,
   ) {}
 
+  async findVehiculo(id: number) {
+    return this.vehiculoRepo.findOne({ where: { id_vehiculo: id } });
+  }
+
   async create(dto: CreateMantencionDto) {
     if ((dto.id_usuario_mecanico && dto.taller_externo) || (!dto.id_usuario_mecanico && !dto.taller_externo)) {
       throw new BadRequestException('Debe indicar exactamente uno: id_usuario_mecanico o taller_externo');
@@ -63,11 +67,12 @@ export class MantencionService {
     return saved;
   }
 
-  findAll(opts: { id_vehiculo?: number; estado?: EstadoMantencion; tipo?: TipoMantencion } = {}) {
+  findAll(opts: { id_vehiculo?: number; estado?: EstadoMantencion; tipo?: TipoMantencion; id_compania?: number } = {}) {
     const where: any = {};
     if (opts.id_vehiculo) where.id_vehiculo = opts.id_vehiculo;
     if (opts.estado) where.estado_mantencion = opts.estado;
     if (opts.tipo) where.tipo_mantencion = opts.tipo;
+    if (opts.id_compania) where.vehiculo = { id_compania: opts.id_compania };
     return this.repo.find({
       where: Object.keys(where).length ? where : undefined,
       relations: { vehiculo: true, usuarioMecanico: true, detalles_articulos: { articulo: true } },

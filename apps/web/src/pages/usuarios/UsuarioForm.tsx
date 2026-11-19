@@ -18,6 +18,9 @@ interface UsuarioFormProps {
   usuarioExistente?: Usuario;
   roles: RolOption[];
   companias: CompaniaOption[];
+  esAdmin?: boolean;
+  esAlcanceCompania?: boolean;
+  idCompaniaFija?: number;
   isSaving: boolean;
   serverError: string | null;
   onSubmit: (values: UsuarioFormValues) => void;
@@ -40,6 +43,9 @@ export function UsuarioForm({
   usuarioExistente,
   roles,
   companias,
+  esAdmin = false,
+  esAlcanceCompania = false,
+  idCompaniaFija,
   isSaving,
   serverError,
   onSubmit,
@@ -47,20 +53,29 @@ export function UsuarioForm({
 }: UsuarioFormProps) {
   const esEdicion = usuarioExistente !== undefined;
 
+  // Filtrar el rol Administrador si quien crea/edita no es Administrador
+  const rolesDisponibles = esAdmin
+    ? roles
+    : roles.filter((r) => r.nombre_rol.toLowerCase().trim() !== 'administrador');
+
   const [rut, setRut] = useState(usuarioExistente?.rut ?? '');
   const [nombre, setNombre] = useState(usuarioExistente?.nombre ?? '');
   const [apellidos, setApellidos] = useState(usuarioExistente?.apellidos ?? '');
   const [email, setEmail] = useState(usuarioExistente?.email ?? '');
   const [password, setPassword] = useState('');
-  const [idRol, setIdRol] = useState(usuarioExistente?.id_rol ?? roles[0]?.id_rol ?? 0);
-  const [idCompania, setIdCompania] = useState(
-    usuarioExistente?.id_compania ?? companias[0]?.id_compania ?? 0,
+  const [idRol, setIdRol] = useState(
+    usuarioExistente?.id_rol ?? rolesDisponibles[0]?.id_rol ?? 0,
   );
+  const [idCompania, setIdCompania] = useState(() => {
+    if (usuarioExistente?.id_compania) return usuarioExistente.id_compania;
+    if (esAlcanceCompania && idCompaniaFija) return idCompaniaFija;
+    return companias[0]?.id_compania ?? 0;
+  });
   const [errors, setErrors] = useState<FormErrors>({});
 
   function validar(): boolean {
     const nuevosErrores: FormErrors = {};
-    if (!rut.trim()) nuevosErrores.rut = 'Ingresa el RUT.';
+    if (esAdmin && !rut.trim()) nuevosErrores.rut = 'Ingresa el RUT.';
     if (!nombre.trim()) nuevosErrores.nombre = 'Ingresa el nombre.';
     if (!apellidos.trim()) nuevosErrores.apellidos = 'Ingresa los apellidos.';
     if (!email.trim()) nuevosErrores.email = 'Ingresa el correo.';
@@ -91,18 +106,20 @@ export function UsuarioForm({
       )}
 
       <div className="usuarios-form__row">
-        <div className="usuarios-form__field">
-          <label htmlFor="rut">RUT</label>
-          <input
-            id="rut"
-            value={rut}
-            onChange={(e) => setRut(e.target.value)}
-            placeholder="12345678-9 (sin puntos)"
-            maxLength={12}
-            aria-invalid={Boolean(errors.rut)}
-          />
-          {errors.rut && <span className="usuarios-form__error">{errors.rut}</span>}
-        </div>
+        {esAdmin && (
+          <div className="usuarios-form__field">
+            <label htmlFor="rut">RUT</label>
+            <input
+              id="rut"
+              value={rut}
+              onChange={(e) => setRut(e.target.value)}
+              placeholder="12345678-9 (sin puntos)"
+              maxLength={12}
+              aria-invalid={Boolean(errors.rut)}
+            />
+            {errors.rut && <span className="usuarios-form__error">{errors.rut}</span>}
+          </div>
+        )}
 
         <div className="usuarios-form__field">
           <label htmlFor="email">Correo institucional</label>
@@ -162,7 +179,7 @@ export function UsuarioForm({
         <div className="usuarios-form__field">
           <label htmlFor="rol">Rol</label>
           <select id="rol" value={idRol} onChange={(e) => setIdRol(Number(e.target.value))}>
-            {roles.map((r) => (
+            {rolesDisponibles.map((r) => (
               <option key={r.id_rol} value={r.id_rol}>
                 {ROLE_LABELS[r.nombre_rol as Rol] ?? (r.nombre_rol.charAt(0).toUpperCase() + r.nombre_rol.slice(1))}
               </option>
@@ -175,6 +192,7 @@ export function UsuarioForm({
           <select
             id="compania"
             value={idCompania}
+            disabled={esAlcanceCompania}
             onChange={(e) => setIdCompania(Number(e.target.value))}
           >
             {companias.map((c) => (

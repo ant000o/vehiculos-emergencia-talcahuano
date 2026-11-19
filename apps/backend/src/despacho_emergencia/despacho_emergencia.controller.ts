@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { DespachoEmergenciaService } from './despacho_emergencia.service';
 import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dto';
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
@@ -11,31 +22,37 @@ import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dt
 export class DespachoEmergenciaController {
   constructor(private readonly service: DespachoEmergenciaService) {}
 
-  @Roles('administrador', 'central')
+  @RequirePermission('despachos', 'create')
   @Post()
-  create(@Body() dto: CreateDespachoEmergenciaDto) {
-    return this.service.create(dto);
+  create(@Req() req: any, @Body() dto: CreateDespachoEmergenciaDto) {
+    return this.service.create(dto, req.user, req.rbacScope);
   }
 
+  @RequirePermission('despachos', 'view')
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Req() req: any) {
+    return this.service.findAll(req.rbacScope, req.user);
   }
 
+  @RequirePermission('despachos', 'view')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.service.findOne(id, req.rbacScope, req.user);
   }
 
-  @Roles('administrador', 'central')
+  @RequirePermission('despachos', 'update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDespachoEmergenciaDto) {
-    return this.service.update(id, dto);
+  update(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateDespachoEmergenciaDto,
+  ) {
+    return this.service.update(id, dto, req.rbacScope, req.user);
   }
 
-  @Roles('administrador')
+  @RequirePermission('despachos', 'delete')
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.service.remove(id);
+  remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.service.remove(id, req.rbacScope, req.user);
   }
 }

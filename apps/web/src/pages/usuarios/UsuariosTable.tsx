@@ -1,12 +1,12 @@
 import type { Usuario, RolOption, CompaniaOption } from '../../services/usuarios';
-import { ROLE_LABELS } from '../../config/navigation';
-import type { Rol } from '../../services/auth';
+import { obtenerEtiquetaRol } from '../../config/navigation';
 
 interface UsuariosTableProps {
   usuarios: Usuario[];
   roles: RolOption[];
   companias: CompaniaOption[];
   esAdmin?: boolean;
+  puedeEditar?: boolean;
   onEditar?: (usuario: Usuario) => void;
   onCambiarEstado?: (usuario: Usuario) => void;
 }
@@ -15,14 +15,17 @@ export function UsuariosTable({
   usuarios,
   roles,
   companias,
-  esAdmin = true,
+  esAdmin = false,
+  puedeEditar = false,
   onEditar,
   onCambiarEstado,
 }: UsuariosTableProps) {
+  const tieneAcciones = puedeEditar && (Boolean(onEditar) || Boolean(onCambiarEstado));
+
   function nombreRol(id_rol: number): string {
     const rawRol = roles.find((r) => r.id_rol === id_rol)?.nombre_rol;
     if (!rawRol) return '—';
-    return ROLE_LABELS[rawRol as Rol] ?? (rawRol.charAt(0).toUpperCase() + rawRol.slice(1));
+    return obtenerEtiquetaRol(rawRol);
   }
 
   function nombreCompania(id_compania: number): string {
@@ -48,14 +51,14 @@ export function UsuariosTable({
             <th>Cargo / Rol</th>
             <th>Compañía</th>
             <th>Estado</th>
-            {esAdmin && <th aria-label="Acciones"></th>}
+            {tieneAcciones && <th aria-label="Acciones">Acciones</th>}
           </tr>
         </thead>
         <tbody>
           {usuarios.map((u) => (
             <tr key={u.id_usuario}>
               <td><strong>{u.nombre} {u.apellidos}</strong></td>
-              {esAdmin && <td style={{ whiteSpace: 'nowrap' }}>{u.rut}</td>}
+              {esAdmin && <td style={{ whiteSpace: 'nowrap', fontFamily: 'monospace' }}>{u.rut || '—'}</td>}
               <td>{u.email}</td>
               <td>{nombreRol(u.id_rol)}</td>
               <td>{nombreCompania(u.id_compania)}</td>
@@ -70,7 +73,7 @@ export function UsuariosTable({
                   {u.estado_activo ? 'Activo' : 'Deshabilitado'}
                 </span>
               </td>
-              {esAdmin && (
+              {tieneAcciones && (
                 <td className="usuarios-table__actions">
                   {onEditar && <button onClick={() => onEditar(u)}>Editar</button>}
                   {onCambiarEstado && (

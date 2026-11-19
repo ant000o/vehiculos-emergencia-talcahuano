@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegistroOperatividad } from './entities/registro_operatividad.entity';
+import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
 import { CreateRegistroOperatividadDto } from './dto/create-registro_operatividad.dto';
 import { UpdateRegistroOperatividadDto } from './dto/update-registro_operatividad.dto';
-
 import { NotificacionesGateway } from '../notificaciones/notificaciones.gateway';
 
 @Injectable()
@@ -12,8 +12,14 @@ export class RegistroOperatividadService {
   constructor(
     @InjectRepository(RegistroOperatividad)
     private readonly repo: Repository<RegistroOperatividad>,
+    @InjectRepository(Vehiculo)
+    private readonly vehiculoRepo: Repository<Vehiculo>,
     private readonly notificacionesGateway: NotificacionesGateway,
   ) {}
+
+  async findVehiculo(idVehiculo: number) {
+    return this.vehiculoRepo.findOne({ where: { id_vehiculo: idVehiculo } });
+  }
 
   async create(dto: CreateRegistroOperatividadDto) {
     const saved = await this.repo.save(this.repo.create(dto));
@@ -29,16 +35,23 @@ export class RegistroOperatividadService {
     return saved;
   }
 
-  findAll(id_vehiculo?: number) {
+  findAll(opts: { id_vehiculo?: number; id_compania?: number } = {}) {
+    const where: any = {};
+    if (opts.id_vehiculo) where.id_vehiculo = opts.id_vehiculo;
+    if (opts.id_compania) where.vehiculo = { id_compania: opts.id_compania };
+
     return this.repo.find({
-      where: id_vehiculo ? { id_vehiculo } : undefined,
+      where: Object.keys(where).length ? where : undefined,
       relations: { usuario: true, vehiculo: true },
       order: { fecha_hora_registro: 'DESC' },
     });
   }
 
   async findOne(id: number) {
-    const item = await this.repo.findOne({ where: { id_registro: id }, relations: { usuario: true, vehiculo: true } });
+    const item = await this.repo.findOne({
+      where: { id_registro: id },
+      relations: { usuario: true, vehiculo: true },
+    });
     if (!item) throw new NotFoundException(`Registro con id ${id} no encontrado`);
     return item;
   }

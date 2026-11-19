@@ -24,9 +24,12 @@ interface MapaVistaUbicacionProps {
  * reubicarlo. Se usa en el modal "Ver ubicación" de la tabla de grifos.
  */
 export function MapaVistaUbicacion({ lat, lng }: MapaVistaUbicacionProps) {
+  const finalLat = Math.abs(lat) > 50 && Math.abs(lng) < 50 ? lng : lat;
+  const finalLng = Math.abs(lat) > 50 && Math.abs(lng) < 50 ? lat : lng;
+
   return (
     <MapContainer
-      center={[lat, lng]}
+      center={[finalLat, finalLng]}
       zoom={17}
       style={{ height: 320, width: '100%', borderRadius: 'var(--radius-sm)' }}
     >
@@ -34,7 +37,7 @@ export function MapaVistaUbicacion({ lat, lng }: MapaVistaUbicacionProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[lat, lng]} />
+      <Marker position={[finalLat, finalLng]} />
     </MapContainer>
   );
 }

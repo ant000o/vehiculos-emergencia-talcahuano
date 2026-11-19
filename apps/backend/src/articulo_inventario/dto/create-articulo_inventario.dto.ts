@@ -19,4 +19,8 @@ export class CreateArticuloInventarioDto {
 
   @IsInt()
   id_categoria: number;
+
+  @IsInt()
+  @IsOptional()
+  id_compania?: number;
 }

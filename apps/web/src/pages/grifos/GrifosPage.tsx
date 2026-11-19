@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/useAuth';
 import {
   listarGrifos,
   listarCompanias,
@@ -9,14 +10,28 @@ import {
 import { GrifosTable } from './GrifosTable';
 import { Modal } from '../../components/Modal';
 import { MapaVistaUbicacion } from './MapaVistaUbicacion';
+import { normalizarCoordenadas } from '../../utils/emergencia';
 import './grifos.css';
 
 export function GrifosPage() {
+  const { user, getScope } = useAuth();
+  const userRol = (user?.rol || '').toLowerCase().trim();
+  const esAdmin = userRol === 'administrador';
+  const scope = getScope('grifos');
+  const esAlcanceCompania = scope === 'COMPANY' && Boolean(user?.id_compania);
+  const puedeVerTodasCompanias = scope === 'GLOBAL' || esAdmin;
+
   const [grifos, setGrifos] = useState<Grifo[]>([]);
   const [companias, setCompanias] = useState<CompaniaOption[]>([]);
   const [grifoUbicacion, setGrifoUbicacion] = useState<Grifo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [q, setQ] = useState('');
+  const [estado, setEstado] = useState<EstadoGrifo | ''>('');
+  const [idCompania, setIdCompania] = useState<string>(() => {
+    return esAlcanceCompania && user?.id_compania ? String(user.id_compania) : '';
+  });
 
   async function cargarDatos() {
     try {
@@ -25,7 +40,11 @@ export function GrifosPage() {
         listarCompanias(),
       ]);
       setGrifos(listaGrifos);
-      setCompanias(listaCompanias);
+      setCompanias(
+        [...listaCompanias].sort(
+          (a, b) => (a.numero_compania ?? a.id_compania) - (b.numero_compania ?? b.id_compania),
+        ),
+      );
       setLoadError(null);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los grifos.');
@@ -38,10 +57,15 @@ export function GrifosPage() {
     cargarDatos();
   }, []);
 
-  const [q, setQ] = useState('');
-  const [estado, setEstado] = useState<EstadoGrifo | ''>('');
-
   const grifosFiltrados = grifos.filter((g) => {
+    // Si el alcance es COMPANY, acotado estrictamente a su propia compañía
+    if (esAlcanceCompania && user?.id_compania && g.id_compania !== user.id_compania) {
+      return false;
+    }
+    // Filtro por compañía seleccionada para alcance GLOBAL
+    if (idCompania && String(g.id_compania) !== idCompania) {
+      return false;
+    }
     const matchEstado = !estado || g.estado_operativo === estado;
     const matchQ =
       !q ||
@@ -62,7 +86,11 @@ export function GrifosPage() {
     <div className="grifos-page">
       <div className="grifos-page__header">
         <div>
-          <h1 className="grifos-page__title">Red de Grifos de Talcahuano</h1>
+          <h1 className="grifos-page__title">
+            {esAlcanceCompania && user?.compania
+              ? `Red de Grifos — ${user.compania}`
+              : 'Red de Grifos de Talcahuano'}
+          </h1>
           <p style={{ margin: 'var(--space-1) 0 0', fontFamily: 'var(--font-body)', fontSize: '0.875rem', color: 'var(--color-ink-500)' }}>
             Catálogo y geolocalización de grifos operativos y puntos de abastecimiento de agua para emergencias.
           </p>
@@ -77,6 +105,31 @@ export function GrifosPage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+
+        {/* Filtro de Compañía: visible solo si el alcance es GLOBAL */}
+        {puedeVerTodasCompanias && (
+          <select
+            className="grifos-page__filtro-select"
+            style={{
+              maxWidth: '220px',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
+            value={idCompania}
+            onChange={(e) => setIdCompania(e.target.value)}
+          >
+            <option value="">Todas las compañías</option>
+            {companias.map((c) => (
+              <option key={c.id_compania} value={c.id_compania} title={c.nombre}>
+                {c.numero_compania
+                  ? `${c.numero_compania}ª Cía. — ${c.nombre.replace(/^.*Compañía\s*/i, '')}`
+                  : c.nombre}
+              </option>
+            ))}
+          </select>
+        )}
+
         <select
           className="grifos-page__filtro-select"
           value={estado}
@@ -87,6 +140,25 @@ export function GrifosPage() {
           <option value="en_mantencion">En mantención</option>
           <option value="fuera_de_servicio">Fuera de servicio</option>
         </select>
+
+        {esAlcanceCompania && (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              backgroundColor: '#eff6ff',
+              color: '#1d4ed8',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              border: '1px solid #bfdbfe',
+            }}
+          >
+            🏢 {user?.compania || 'Mi Compañía'}
+          </span>
+        )}
       </div>
 
       <GrifosTable
@@ -95,17 +167,20 @@ export function GrifosPage() {
         onVerUbicacion={(grifo) => setGrifoUbicacion(grifo)}
       />
 
-      {grifoUbicacion && (
-        <Modal title={`Ubicación — Grifo #${grifoUbicacion.id_grifo}`} onClose={() => setGrifoUbicacion(null)}>
-          <MapaVistaUbicacion
-            lat={grifoUbicacion.coordenadas.coordinates[0]}
-            lng={grifoUbicacion.coordenadas.coordinates[1]}
-          />
-          <p className="grifos-page__ubicacion-direccion">
-            {grifoUbicacion.direccion ?? 'Sin dirección registrada'}
-          </p>
-        </Modal>
-      )}
+      {grifoUbicacion && (() => {
+        const coords = normalizarCoordenadas(grifoUbicacion.coordenadas) ?? [-36.7247, -73.1126];
+        return (
+          <Modal title={`Ubicación — Grifo #${grifoUbicacion.id_grifo}`} onClose={() => setGrifoUbicacion(null)}>
+            <MapaVistaUbicacion
+              lat={coords[0]}
+              lng={coords[1]}
+            />
+            <p className="grifos-page__ubicacion-direccion">
+              {grifoUbicacion.direccion ?? 'Sin dirección registrada'}
+            </p>
+          </Modal>
+        );
+      })()}
     </div>
   );
 }

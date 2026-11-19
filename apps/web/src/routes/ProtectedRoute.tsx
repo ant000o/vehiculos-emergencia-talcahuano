@@ -5,12 +5,18 @@ import type { Rol } from '../services/auth';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  /** Si se especifica, solo estos roles pueden acceder; el resto es redirigido al inicio. */
+  /** Módulo al que pertenece la ruta en el nuevo estándar RBAC */
+  modulo?: string;
+  /** Acción requerida (por defecto 'view') */
+  accion?: string;
+  /** Código o lista de códigos de permiso en la matriz RBAC de la BD (compatibilidad) */
+  permiso?: string | string[];
+  /** Si se especifica, roles que pueden acceder de forma complementaria */
   roles?: Rol[];
 }
 
-export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+export function ProtectedRoute({ children, modulo, accion = 'view', permiso, roles }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user, hasPermission, tienePermiso } = useAuth();
 
   if (isLoading) {
     return (
@@ -24,8 +30,42 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (roles && user && !roles.includes(user.rol)) {
-    return <Navigate to="/" replace />;
+  if (user) {
+    const userRolLower = (user.rol || '').toLowerCase().trim();
+    const esAdmin = userRolLower === 'administrador';
+
+    // Regla de Superadministrador universal
+    if (esAdmin) {
+      return <>{children}</>;
+    }
+
+    // 1. Verificación centralizada por Módulo y Acción
+    if (modulo) {
+      if (hasPermission(modulo, accion)) {
+        return <>{children}</>;
+      }
+      return <Navigate to="/" replace />;
+    }
+
+    // 2. Verificación por código específico (compatibilidad)
+    if (permiso) {
+      const tieneAcceso = Array.isArray(permiso)
+        ? permiso.some((p) => tienePermiso(p))
+        : tienePermiso(permiso);
+
+      if (tieneAcceso) {
+        return <>{children}</>;
+      }
+      return <Navigate to="/" replace />;
+    }
+
+    // 3. Fallback por roles
+    if (roles && roles.length > 0) {
+      if (roles.some((r) => r.toLowerCase().trim() === userRolLower)) {
+        return <>{children}</>;
+      }
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;

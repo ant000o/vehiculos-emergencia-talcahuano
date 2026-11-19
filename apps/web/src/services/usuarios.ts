@@ -13,6 +13,7 @@ export interface RolOption {
 export interface CompaniaOption {
   id_compania: number;
   nombre: string;
+  numero_compania?: number;
 }
 
 /**

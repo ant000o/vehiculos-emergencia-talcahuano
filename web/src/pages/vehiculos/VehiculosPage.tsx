@@ -5,32 +5,31 @@ import {
   crearVehiculo,
   editarVehiculo,
   listarCompanias,
+  listarTiposVehiculo,
   type Vehiculo,
+  type TipoVehiculo,
   type CompaniaOption,
   type EstadoVehiculo,
 } from '../../services/vehiculos';
 import { VehiculosCards } from './VehiculosCards';
-import { VehiculoForm } from './VehiculoForm';
+import { VehiculoForm, type VehiculoFormValues } from './VehiculoForm';
 import './vehiculos.css';
 
 type Vista = { modo: 'lista' } | { modo: 'crear' } | { modo: 'editar'; vehiculo: Vehiculo };
 
-interface VehiculoFormValues {
-  patente: string;
-  marca: string;
-  modelo: string;
-  anio: number;
-  kilometraje: number;
-  estado_operativo: EstadoVehiculo;
-  id_compania: number;
-}
-
 export function VehiculosPage() {
-  const { user } = useAuth();
-  const esAdmin = user?.rol === 'administrador';
+  const { user, hasPermission, getScope } = useAuth();
+  const userRol = (user?.rol || '').toLowerCase().trim();
+  const esAdmin = userRol === 'administrador';
+  const scope = getScope('vehiculos');
+  const esAlcanceCompania = scope === 'COMPANY' && Boolean(user?.id_compania);
+  const puedeVerTodasCompanias = scope === 'GLOBAL' || esAdmin;
+  const puedeCrearVehiculos = hasPermission('vehiculos', 'create') || esAdmin;
+  const puedeEditarVehiculos = hasPermission('vehiculos', 'update') || esAdmin;
 
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [companias, setCompanias] = useState<CompaniaOption[]>([]);
+  const [tiposVehiculo, setTiposVehiculo] = useState<TipoVehiculo[]>([]);
   const [vista, setVista] = useState<Vista>({ modo: 'lista' });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -40,13 +39,17 @@ export function VehiculosPage() {
   const [q, setQ] = useState('');
   const [qDebounced, setQDebounced] = useState('');
   const [estado, setEstado] = useState<EstadoVehiculo | ''>('');
+  const [idCompania, setIdCompania] = useState<string>('');
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Espera a que el usuario deje de escribir antes de consultar al backend.
   useEffect(() => {
-    const t = setTimeout(() => setQDebounced(q), 300);
-    return () => clearTimeout(t);
-  }, [q]);
+      if (esAlcanceCompania && user?.id_compania) {
+        setIdCompania(String(user.id_compania));
+      } else if (puedeVerTodasCompanias) {
+        setIdCompania('');
+      }
+    }, [esAlcanceCompania, puedeVerTodasCompanias, user?.id_compania]);
 
   const cargarVehiculos = () => {
     setIsLoading(true);
@@ -64,7 +67,10 @@ export function VehiculosPage() {
   };
 
   useEffect(() => {
-    listarCompanias().then(setCompanias).catch(console.error);
+    listarCompanias()
+      .then((comps) => setCompanias(comps.sort((a, b) => (a.numero_compania ?? a.id_compania) - (b.numero_compania ?? b.id_compania))))
+      .catch(console.error);
+    listarTiposVehiculo().then(setTiposVehiculo).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -104,20 +110,35 @@ export function VehiculosPage() {
     }
   }
 
+  // Filtrar vehículos por compañía según alcance RBAC (COMPANY vs GLOBAL)
+  const vehiculosFiltrados = useMemo(() => {
+    let lista = vehiculos;
+    if (esAlcanceCompania && user?.id_compania) {
+      lista = lista.filter((v) => v.id_compania === user.id_compania);
+    } else if (idCompania) {
+      lista = lista.filter((v) => String(v.id_compania) === idCompania);
+    }
+    return lista;
+  }, [vehiculos, esAlcanceCompania, user?.id_compania, idCompania]);
+
   // Estadísticas rápidas de estado para Comandancia y Operaciones
   const statsFlota = useMemo(() => {
-    const total = vehiculos.length;
-    const operativos = vehiculos.filter((v) => v.estado_operativo === 'operativo').length;
-    const mantencion = vehiculos.filter((v) => v.estado_operativo === 'en_mantencion').length;
-    const fuera = vehiculos.filter((v) => v.estado_operativo === 'fuera_de_servicio').length;
+    const total = vehiculosFiltrados.length;
+    const operativos = vehiculosFiltrados.filter((v) => v.estado_operativo === 'operativo').length;
+    const mantencion = vehiculosFiltrados.filter((v) => v.estado_operativo === 'en_mantencion').length;
+    const fuera = vehiculosFiltrados.filter((v) => v.estado_operativo === 'fuera_de_servicio').length;
     return { total, operativos, mantencion, fuera };
-  }, [vehiculos]);
+  }, [vehiculosFiltrados]);
 
   return (
     <div className="vehiculos-page">
       <div className="vehiculos-page__header">
         <div>
-          <h1 className="vehiculos-page__title">Vehículos de Emergencia</h1>
+          <h1 className="vehiculos-page__title">
+            {esAlcanceCompania && user?.compania
+              ? `Vehículos — ${user.compania}`
+              : 'Vehículos de Emergencia'}
+          </h1>
           {vista.modo === 'lista' && !loadError && (
             <div className="vehiculos-page__stats">
               <span className="vehiculos-stat-pill">
@@ -137,7 +158,7 @@ export function VehiculosPage() {
             </div>
           )}
         </div>
-        {esAdmin && vista.modo === 'lista' && (
+        {puedeCrearVehiculos && vista.modo === 'lista' && (
           <button
             className="vehiculos-page__nuevo"
             onClick={() => {
@@ -158,7 +179,7 @@ export function VehiculosPage() {
               <input
                 type="text"
                 className="vehiculos-page__filtro-input"
-                placeholder="Buscar por patente, marca o modelo..."
+                placeholder="Buscar por patente, nomenclatura, marca o modelo..."
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
@@ -173,6 +194,29 @@ export function VehiculosPage() {
                 </button>
               )}
             </div>
+
+            {/* Filtro de Compañía: visible solo si el rol/alcance es GLOBAL */}
+            {puedeVerTodasCompanias && (
+              <select
+                className="vehiculos-page__filtro-select"
+                style={{
+                  maxWidth: '220px',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                }}
+                value={idCompania}
+                onChange={(e) => setIdCompania(e.target.value)}
+              >
+                <option value="">Todas las compañías</option>
+                {companias.map((c) => (
+                  <option key={c.id_compania} value={c.id_compania}>
+                    {`${c.numero_compania}ª Cía. — ${c.nombre.replace(/^.*Compañía\s*/i, '')}`}
+                  </option>
+                ))}
+              </select>
+            )}
+
             <select
               className="vehiculos-page__filtro-select"
               value={estado}
@@ -191,10 +235,10 @@ export function VehiculosPage() {
             <p className="vehiculos-page__vacio">Cargando vehículos…</p>
           ) : (
             <VehiculosCards
-              vehiculos={vehiculos}
+              vehiculos={vehiculosFiltrados}
               companias={companias}
               onEditar={
-                esAdmin
+                puedeEditarVehiculos
                   ? (vehiculo) => {
                       setFormError(null);
                       setVista({ modo: 'editar', vehiculo });
@@ -209,6 +253,7 @@ export function VehiculosPage() {
       {vista.modo === 'crear' && (
         <VehiculoForm
           companias={companias}
+          tiposVehiculo={tiposVehiculo}
           isSaving={isSaving}
           serverError={formError}
           onSubmit={handleCrear}
@@ -220,6 +265,7 @@ export function VehiculosPage() {
         <VehiculoForm
           vehiculoExistente={vista.modo === 'editar' ? vista.vehiculo : undefined}
           companias={companias}
+          tiposVehiculo={tiposVehiculo}
           isSaving={isSaving}
           serverError={formError}
           onSubmit={(values) => handleEditar(vista.vehiculo.id_vehiculo, values)}

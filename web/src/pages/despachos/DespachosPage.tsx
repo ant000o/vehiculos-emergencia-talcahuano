@@ -19,12 +19,6 @@ const ROL_LABELS: Record<string, string> = {
   jefe_despacho: 'Jefe de Despacho',
 };
 
-/**
- * F10: antes se usaba toISOString().slice(0,10), que da la fecha en UTC.
- * En Chile (UTC-3) un despacho después de las 21:00 (20:00 en horario de
- * invierno) quedaba marcado con la fecha del día siguiente. Esta versión
- * arma la clave YYYY-MM-DD con la hora LOCAL del navegador.
- */
 /** Normaliza la coordenada del despacho a [lat, lng] (el backend la entrega ya convertida). */
 function coordenadasDespacho(d: DespachoEmergencia): [number, number] | null {
   const c = d.coordenada_destino;
@@ -42,15 +36,32 @@ function fechaLocalISO(fecha: string | Date): string {
 }
 
 export function DespachosPage() {
-  const { user } = useAuth();
   const [despachos, setDespachos] = useState<DespachoEmergencia[]>([]);
   const [cargando, setCargando] = useState(true);
   const [tabActiva, setTabActiva] = useState<'activos' | 'historico'>('activos');
-  
+
   // Filtros para el histórico
   const [filtroFecha, setFiltroFecha] = useState<string>('');
   const [filtroTexto, setFiltroTexto] = useState<string>('');
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
+
+  const { user, tienePermiso, hasPermission, getScope } = useAuth();
+  const userRol = (user?.rol || '').toLowerCase().trim();
+  const esAdmin = userRol === 'administrador';
+  const scope = getScope('despachos');
+
+  const puedeVerTodoElHistorico =
+    scope === 'GLOBAL' ||
+    scope === 'COMPANY' ||
+    esAdmin ||
+    userRol === 'central';
+
+  const puedeOperarDespachos =
+    hasPermission('despachos', 'update') ||
+    hasPermission('despachos', 'create') ||
+    esAdmin ||
+    userRol === 'central' ||
+    tienePermiso('despacho.gestionar');
 
   const cargarDespachos = async () => {
     try {
@@ -69,9 +80,10 @@ export function DespachosPage() {
   }, []);
 
   const handleCambiarEstado = async (id: number, nuevoEstado: string) => {
-    const confirmMsg = nuevoEstado === 'finalizada'
-      ? '¿Marcar este despacho como FINALIZADO? La unidad y personal volverán a estar operativos.'
-      : `¿Cambiar el estado del despacho a ${nuevoEstado}?`;
+    const confirmMsg =
+      nuevoEstado === 'finalizada'
+        ? '¿Marcar este despacho como FINALIZADO? La unidad y personal volverán a estar operativos.'
+        : `¿Cambiar el estado del despacho a ${nuevoEstado}?`;
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -84,42 +96,53 @@ export function DespachosPage() {
     }
   };
 
-  // Despachos activos (en_curso o controlada)
+  // Despachos activos (en_curso o controlada): visibles para TODOS los usuarios
   const despachosActivos = useMemo(() => {
-    return despachos.filter((d) => d.estado_emergencia === 'en_curso' || d.estado_emergencia === 'controlada');
+    return despachos.filter(
+      (d) => d.estado_emergencia === 'en_curso' || d.estado_emergencia === 'controlada',
+    );
   }, [despachos]);
+
+  // Base del histórico según jerarquía:
+  // Capitán hasta Comandante/Admin/Central ven todos; Bomberos solo los que participaron.
+  const despachosBaseHistorico = useMemo(() => {
+    if (puedeVerTodoElHistorico) {
+      return despachos;
+    }
+    if (!user?.id) {
+      return [];
+    }
+    return despachos.filter((d) =>
+      d.tripulacion?.some((t) => Number(t.id_usuario) === Number(user.id)),
+    );
+  }, [despachos, puedeVerTodoElHistorico, user?.id]);
 
   // Histórico con filtros (por fecha, texto y estado)
   const despachosHistorico = useMemo(() => {
-    return despachos.filter((d) => {
-      // Filtro por fecha (YYYY-MM-DD)
+    return despachosBaseHistorico.filter((d) => {
       if (filtroFecha) {
         const fechaDespacho = fechaLocalISO(d.fecha_hora_despacho);
         if (fechaDespacho !== filtroFecha) return false;
       }
 
-      // Filtro por estado
       if (filtroEstado !== 'todos' && d.estado_emergencia !== filtroEstado) {
         return false;
       }
 
-      // Filtro por texto (tipo emergencia, patente, compañía o personal)
       if (filtroTexto.trim()) {
         const query = filtroTexto.toLowerCase();
         const tipoMatch = d.tipo_emergencia?.toLowerCase().includes(query);
         const patenteMatch = d.vehiculo?.patente?.toLowerCase().includes(query);
         const companiaMatch = d.compania?.nombre?.toLowerCase().includes(query);
         const tripulacionMatch = d.tripulacion?.some((t) =>
-          `${t.usuario?.nombre} ${t.usuario?.apellidos}`.toLowerCase().includes(query)
+          `${t.usuario?.nombre} ${t.usuario?.apellidos}`.toLowerCase().includes(query),
         );
         return tipoMatch || patenteMatch || companiaMatch || tripulacionMatch;
       }
 
       return true;
     });
-  }, [despachos, filtroFecha, filtroTexto, filtroEstado]);
-
-  const puedeOperarDespachos = user?.rol === 'central' || user?.rol === 'administrador';
+  }, [despachosBaseHistorico, filtroFecha, filtroTexto, filtroEstado]);
 
   const formatFechaHora = (fechaStr: string) => {
     try {
@@ -150,12 +173,18 @@ export function DespachosPage() {
         ? 'despacho-card--controlado'
         : 'despacho-card--cancelado';
 
+    const participoUsuario = Boolean(
+      user?.id && d.tripulacion?.some((t) => Number(t.id_usuario) === Number(user.id)),
+    );
+
     return (
       <div key={d.id_despacho} className={`despacho-card ${cardClassModifier}`}>
         <div className="despacho-card__header">
           <div>
             <div className="despacho-card__id">Despacho #{d.id_despacho}</div>
-            <h3 className="despacho-card__tipo">{emojiEmergencia(d.tipo_emergencia)} {d.tipo_emergencia}</h3>
+            <h3 className="despacho-card__tipo">
+              {emojiEmergencia(d.tipo_emergencia)} {d.tipo_emergencia}
+            </h3>
           </div>
           <span
             className="despacho-card__badge"
@@ -182,7 +211,9 @@ export function DespachosPage() {
         <div className="despacho-card__body">
           <div className="despacho-card__row">
             <span className="despacho-card__icon">📅</span>
-            <span><strong>Fecha/Hora:</strong> {formatFechaHora(d.fecha_hora_despacho)}</span>
+            <span>
+              <strong>Fecha/Hora:</strong> {formatFechaHora(d.fecha_hora_despacho)}
+            </span>
           </div>
 
           <div className="despacho-card__row">
@@ -204,13 +235,18 @@ export function DespachosPage() {
 
           <div className="despacho-card__row">
             <span className="despacho-card__icon">🏢</span>
-            <span><strong>Compañía:</strong> {d.compania?.nombre || 'Central Talcahuano'}</span>
+            <span>
+              <strong>Compañía:</strong> {d.compania?.nombre || 'Central Talcahuano'}
+            </span>
           </div>
 
           {d.grifo && (
             <div className="despacho-card__row">
               <span className="despacho-card__icon">🚰</span>
-              <span><strong>Grifo de Apoyo:</strong> #{d.grifo.id_grifo} ({d.grifo.direccion || 'Asignado'})</span>
+              <span>
+                <strong>Grifo de Apoyo:</strong> #{d.grifo.id_grifo} (
+                {d.grifo.direccion || 'Asignado'})
+              </span>
             </div>
           )}
 
@@ -223,21 +259,32 @@ export function DespachosPage() {
             {d.tripulacion && d.tripulacion.length > 0 ? (
               <div className="despacho-card__crew-list">
                 {d.tripulacion.map((t, idx) => (
-                  <span key={`${d.id_despacho}-${t.id_usuario}-${t.rol_en_despacho || idx}`} className="despacho-card__crew-item">
-                    <span className="despacho-card__crew-role">[{ROL_LABELS[t.rol_en_despacho] || t.rol_en_despacho}]</span>
-                    <span>{t.usuario ? `${t.usuario.nombre} ${t.usuario.apellidos}` : `ID #${t.id_usuario}`}</span>
+                  <span
+                    key={`${d.id_despacho}-${t.id_usuario}-${t.rol_en_despacho || idx}`}
+                    className="despacho-card__crew-item"
+                  >
+                    <span className="despacho-card__crew-role">
+                      [{ROL_LABELS[t.rol_en_despacho] || t.rol_en_despacho}]
+                    </span>
+                    <span>
+                      {t.usuario
+                        ? `${t.usuario.nombre} ${t.usuario.apellidos}`
+                        : `ID #${t.id_usuario}`}
+                    </span>
                   </span>
                 ))}
               </div>
             ) : (
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-400)', fontStyle: 'italic' }}>
+              <span
+                style={{ fontSize: '0.75rem', color: 'var(--color-ink-400)', fontStyle: 'italic' }}
+              >
                 Sin personal registrado en este despacho
               </span>
             )}
           </div>
         </div>
 
-        {/* Acciones de Despacho (Solo Central y Administrador pueden operar/finalizar) */}
+        {/* Acciones de Despacho */}
         {puedeOperarDespachos ? (
           <div className="despacho-card__actions">
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -273,9 +320,14 @@ export function DespachosPage() {
             </div>
           </div>
         ) : (
-          <div className="despacho-card__actions" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+          <div
+            className="despacho-card__actions"
+            style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}
+          >
             <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-500)', fontStyle: 'italic' }}>
-              👁️ Modo monitoreo (gestión exclusiva de Central)
+              {participoUsuario
+                ? '🎖️ Participaste en este despacho'
+                : '👁️ Modo monitoreo (gestión exclusiva de Central)'}
             </span>
           </div>
         )}
@@ -291,7 +343,7 @@ export function DespachosPage() {
           <p className="despachos__subtitle">
             {puedeOperarDespachos
               ? 'Control operativo y coordinación de despachos de emergencia en tiempo real.'
-              : 'Monitoreo y supervisión institucional de despachos activos e histórico de emergencias.'}
+              : 'Monitoreo de emergencias activas en curso e histórico de despachos.'}
           </p>
         </div>
 
@@ -362,9 +414,9 @@ export function DespachosPage() {
           className={`despachos__tab-btn ${tabActiva === 'historico' ? 'despachos__tab-btn--active' : ''}`}
           onClick={() => setTabActiva('historico')}
         >
-          📜 Histórico de Despachos
+          📜 {puedeVerTodoElHistorico ? 'Histórico de Despachos' : 'Mi Histórico de Despachos'}
           <span className="despachos__tab-badge despachos__tab-badge--gray">
-            {despachos.length}
+            {despachosBaseHistorico.length}
           </span>
         </button>
       </div>
@@ -432,7 +484,7 @@ export function DespachosPage() {
         <div className="despachos__cards-grid">
           {despachosActivos.length === 0 ? (
             <div className="despachos__empty">
-              <div className="despachos__empty-icon">✅</div>
+              <div className="despacho-empty-icon">✅</div>
               <h3 style={{ margin: '0 0 var(--space-1)', color: 'var(--color-navy-900)' }}>
                 No hay emergencias en curso actualmente
               </h3>
@@ -450,7 +502,9 @@ export function DespachosPage() {
             <div className="despachos__empty">
               <div className="despachos__empty-icon">🔍</div>
               <h3 style={{ margin: '0 0 var(--space-1)', color: 'var(--color-navy-900)' }}>
-                No se encontraron despachos en el histórico
+                {puedeVerTodoElHistorico
+                  ? 'No se encontraron despachos en el histórico'
+                  : 'No se encontraron despachos en los que hayas participado'}
               </h3>
               <p style={{ margin: 0, fontSize: '0.875rem' }}>
                 Prueba ajustando los filtros de fecha o búsqueda de texto.

@@ -41,8 +41,13 @@ export function VehiculosCards({ vehiculos, companias, onEditar }: VehiculosCard
 
             <div className="vehiculo-card__body">
               <div className="vehiculo-card__titulo">
-                <h2 className="vehiculo-card__patente">{v.patente}</h2>
-                <span className="vehiculo-card__modelo">{v.marca} {v.modelo}</span>
+                <h2 className="vehiculo-card__patente">
+                  {v.nomenclatura ? `${v.nomenclatura} · ${v.patente}` : v.patente}
+                </h2>
+                <span className="vehiculo-card__modelo">
+                  {v.marca} {v.modelo}
+                  {v.tipoVehiculo?.nombre_tipo ? ` (${v.tipoVehiculo.nombre_tipo.toUpperCase()})` : ''}
+                </span>
               </div>
 
               <dl className="vehiculo-card__datos">

@@ -4,16 +4,19 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/login/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { UsuariosPage } from './pages/usuarios/UsuariosPage';
 import { VehiculosPage } from './pages/vehiculos/VehiculosPage';
-import { CentralMapaPage } from './pages/mapa/CentralMapaPage';
-import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
 import { MantencionesPage } from './pages/mantenciones/MantencionesPage';
-import { GrifosPage } from './pages/grifos/GrifosPage';
 import { InventarioPage } from './pages/inventario/InventarioPage';
+import { HistorialEstadosPage } from './pages/historial-estados/HistorialEstadosPage';
+import { HistorialCambiosPage } from './pages/historial-cambios/HistorialCambiosPage';
+import { GrifosPage } from './pages/grifos/GrifosPage';
+import { CentralMapaPage } from './pages/mapa/CentralMapaPage';
+import { PermisosPage } from './pages/permisos/PermisosPage';
+import { UsuariosPage } from './pages/usuarios/UsuariosPage';
 import { DespachosPage } from './pages/despachos/DespachosPage';
+import { InicioPage } from './pages/InicioPage';
 
-function App() {
+export function App() {
   return (
     <AuthProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -27,34 +30,70 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<DashboardPage />} />
-            {/* Despachos: Central opera; Comandancia/Capitán y Bomberos monitorean */}
+            <Route
+              index
+              element={
+                <ProtectedRoute modulo="inicio">
+                  <InicioPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedRoute modulo="dashboard">
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Despachos de Emergencia */}
             <Route
               path="despachos"
               element={
-                <ProtectedRoute roles={['administrador', 'central', 'capitan', 'bombero']}>
+                <ProtectedRoute modulo="despachos">
                   <DespachosPage />
                 </ProtectedRoute>
               }
             />
-            <Route path="vehiculos" element={<VehiculosPage />} />
+
+            <Route
+              path="vehiculos"
+              element={
+                <ProtectedRoute modulo="vehiculos">
+                  <VehiculosPage />
+                </ProtectedRoute>
+              }
+            />
             
             {/* Historial de Estados (incluye registro de estado integrado) */}
             <Route
               path="historial-estados"
               element={
-                <ProtectedRoute roles={['administrador', 'mecanico', 'bombero', 'capitan']}>
+                <ProtectedRoute modulo="operatividad">
                   <HistorialEstadosPage />
                 </ProtectedRoute>
               }
             />
+
+            {/* Historial de Cambios (Auditoría V2) */}
+            <Route
+              path="historial-cambios"
+              element={
+                <ProtectedRoute permiso="auditoria.ver">
+                  <HistorialCambiosPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Redirección para compatibilidad si alguien accede a /registrar-estado */}
             <Route path="registrar-estado" element={<Navigate to="/historial-estados" replace />} />
 
             <Route
               path="mantenciones"
               element={
-                <ProtectedRoute roles={['administrador', 'mecanico', 'capitan']}>
+                <ProtectedRoute modulo="mantenciones">
                   <MantencionesPage />
                 </ProtectedRoute>
               }
@@ -63,19 +102,36 @@ function App() {
             <Route
               path="inventario"
               element={
-                <ProtectedRoute roles={['administrador', 'mecanico', 'capitan']}>
+                <ProtectedRoute modulo="inventario">
                   <InventarioPage />
                 </ProtectedRoute>
               }
             />
 
-            <Route path="grifos" element={<GrifosPage />} />
+            <Route
+              path="grifos"
+              element={
+                <ProtectedRoute modulo="grifos">
+                  <GrifosPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="mapa"
               element={
-                <ProtectedRoute roles={['administrador', 'central', 'capitan', 'bombero']}>
+                <ProtectedRoute modulo="mapa">
                   <CentralMapaPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Permisos: Panel exclusivo de Administrador */}
+            <Route
+              path="permisos"
+              element={
+                <ProtectedRoute roles={['administrador']}>
+                  <PermisosPage />
                 </ProtectedRoute>
               }
             />
@@ -83,7 +139,7 @@ function App() {
             <Route
               path="usuarios"
               element={
-                <ProtectedRoute roles={['administrador', 'capitan']}>
+                <ProtectedRoute modulo="usuarios">
                   <UsuariosPage />
                 </ProtectedRoute>
               }
@@ -96,5 +152,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;

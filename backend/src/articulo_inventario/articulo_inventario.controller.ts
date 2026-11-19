@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+  Query,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { ArticuloInventarioService } from './articulo_inventario.service';
 import { CreateArticuloInventarioDto } from './dto/create-articulo_inventario.dto';
 import { UpdateArticuloInventarioDto } from './dto/update-articulo_inventario.dto';
@@ -11,31 +24,63 @@ import { UpdateArticuloInventarioDto } from './dto/update-articulo_inventario.dt
 export class ArticuloInventarioController {
   constructor(private readonly service: ArticuloInventarioService) {}
 
-  @Roles('administrador', 'mecanico', 'capitan')
+  @RequirePermission('inventario', 'create')
   @Post()
-  create(@Body() dto: CreateArticuloInventarioDto) {
+  create(@Req() req: any, @Body() dto: CreateArticuloInventarioDto) {
+    if (req.rbacScope === 'COMPANY') {
+      dto.id_compania = Number(req.user?.id_compania);
+    }
     return this.service.create(dto);
   }
 
+  @RequirePermission('inventario', 'view')
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Req() req: any, @Query('id_compania') idCompania?: string) {
+    let cid: number | undefined;
+    if (req.rbacScope === 'COMPANY') {
+      cid = Number(req.user?.id_compania);
+    } else {
+      cid = idCompania ? Number(idCompania) : undefined;
+    }
+    return this.service.findAll(cid);
   }
 
+  @RequirePermission('inventario', 'view')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  async findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const item = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY' && item.id_compania && item.id_compania !== Number(req.user?.id_compania)) {
+      throw new ForbiddenException('Acceso denegado: el artículo de inventario pertenece a otra compañía');
+    }
+    return item;
   }
 
-  @Roles('administrador', 'mecanico', 'capitan')
+  @RequirePermission('inventario', 'update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateArticuloInventarioDto) {
+  async update(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateArticuloInventarioDto,
+  ) {
+    const item = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY') {
+      if (item.id_compania && item.id_compania !== Number(req.user?.id_compania)) {
+        throw new ForbiddenException('Acceso denegado: no puedes modificar inventario de otra compañía');
+      }
+      if (dto.id_compania && Number(dto.id_compania) !== Number(req.user?.id_compania)) {
+        throw new ForbiddenException('No puedes reasignar artículos a otra compañía');
+      }
+    }
     return this.service.update(id, dto);
   }
 
-  @Roles('administrador')
+  @RequirePermission('inventario', 'delete')
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const item = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY' && item.id_compania && item.id_compania !== Number(req.user?.id_compania)) {
+      throw new ForbiddenException('Acceso denegado: no puedes eliminar inventario de otra compañía');
+    }
     return this.service.remove(id);
   }
 }

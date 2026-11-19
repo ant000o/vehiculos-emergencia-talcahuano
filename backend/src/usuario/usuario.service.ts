@@ -17,19 +17,37 @@ export class UsuarioService {
     const { password, ...rest } = dto;
     const password_hash = await bcrypt.hash(password, 10);
     const usuario = this.repo.create({ ...rest, password_hash });
-    return this.repo.save(usuario);
+    const guardado = await this.repo.save(usuario);
+    return this.findOne(guardado.id_usuario);
   }
 
-  findAll() {
-    return this.repo.find({
+  async findAll(opts: { esAdmin?: boolean; id_compania?: number } = {}) {
+    const { esAdmin = true, id_compania } = opts;
+    const where: any = {};
+    if (id_compania) {
+      where.id_compania = id_compania;
+    }
+
+    const usuarios = await this.repo.find({
+      where: Object.keys(where).length > 0 ? where : undefined,
       relations: {
         rol: true,
         compania: true,
       },
+      order: { id_usuario: 'ASC' },
     });
+
+    if (!esAdmin) {
+      return usuarios.map((u) => {
+        const { rut: _rut, ...sinRut } = u;
+        return sinRut;
+      });
+    }
+
+    return usuarios;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, esAdmin = true) {
     const usuario = await this.repo.findOne({
       where: {
         id_usuario: id,
@@ -44,6 +62,11 @@ export class UsuarioService {
       throw new NotFoundException(
         `Usuario con id ${id} no encontrado`,
       );
+    }
+
+    if (!esAdmin) {
+      const { rut: _rut, ...sinRut } = usuario;
+      return sinRut as Usuario;
     }
 
     return usuario;
@@ -73,7 +96,8 @@ export class UsuarioService {
       Object.assign(usuario, dto);
     }
 
-    return this.repo.save(usuario);
+    await this.repo.save(usuario);
+    return this.findOne(id);
   }
 
   async remove(id: number) {

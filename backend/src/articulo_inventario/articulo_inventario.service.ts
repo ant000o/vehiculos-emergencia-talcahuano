@@ -16,10 +16,15 @@ export class ArticuloInventarioService {
     return this.repo.save(this.repo.create(dto));
   }
 
-  findAll() {
+  findAll(id_compania?: number) {
     return this.repo.find({
+      where: id_compania ? { id_compania } : undefined,
       relations: {
         categoria: true,
+        compania: true,
+      },
+      order: {
+        id_articulo: 'ASC',
       },
     });
   }
@@ -29,6 +34,7 @@ export class ArticuloInventarioService {
       where: { id_articulo: id },
       relations: {
         categoria: true,
+        compania: true,
       },
     });
 
@@ -42,9 +48,6 @@ export class ArticuloInventarioService {
   async update(id: number, dto: UpdateArticuloInventarioDto) {
     const item = await this.findOne(id);
 
-    // stock_actual es controlado por el trigger de BD (movimiento_inventario).
-    // Se excluye del update para evitar desincronizar el inventario.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { stock_actual, ...safeDto } = dto as any;
 
     Object.assign(item, safeDto);

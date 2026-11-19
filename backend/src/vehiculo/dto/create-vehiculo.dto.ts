@@ -9,6 +9,11 @@ export class CreateVehiculoDto {
   patente: string;
 
   @IsString()
+  @IsOptional()
+  @MaxLength(15)
+  nomenclatura?: string;
+
+  @IsString()
   @IsNotEmpty()
   @MaxLength(80)
   marca: string;
@@ -33,6 +38,11 @@ export class CreateVehiculoDto {
   @IsEnum(EstadoVehiculo)
   @IsOptional()
   estado_operativo?: EstadoVehiculo;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsOptional()
+  id_tipo_vehiculo?: number;
 
   @Type(() => Number)
   @IsInt()

@@ -37,7 +37,7 @@ export function VehiculosPage() {
 
   // HU-12 y HU-13: Filtro y Búsqueda
   const [q, setQ] = useState('');
-  const [qDebounced, setQDebounced] = useState('');
+  const [qDebounced] = useState('');
   const [estado, setEstado] = useState<EstadoVehiculo | ''>('');
   const [idCompania, setIdCompania] = useState<string>('');
   const [loadError, setLoadError] = useState<string | null>(null);

@@ -1,0 +1,480 @@
+.vehiculos-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.vehiculos-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.vehiculos-page__title {
+  font-family: var(--font-display);
+  color: var(--color-navy-900);
+  font-size: 1.875rem;
+  margin: 0;
+}
+
+.vehiculos-page__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+
+.vehiculos-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-700);
+}
+
+.vehiculos-stat-pill strong {
+  color: var(--color-ink-900);
+}
+
+.vehiculos-stat-pill.is-operativo {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.vehiculos-stat-pill.is-mantencion {
+  background: #fefce8;
+  border-color: #fef08a;
+  color: #854d0e;
+}
+
+.vehiculos-stat-pill.is-fuera {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.vehiculos-page__nuevo {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-white);
+  background-color: var(--color-navy-900);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.vehiculos-page__nuevo:hover {
+  background-color: var(--color-navy-700);
+}
+
+/* Filtros HU-12 y HU-13 */
+.vehiculos-page__filtros {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.vehiculos-page__search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.vehiculos-page__search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 0.9375rem;
+  color: var(--color-ink-400);
+  pointer-events: none;
+}
+
+.vehiculos-page__filtro-input {
+  width: 100%;
+  padding-left: 36px !important;
+  padding-right: 36px !important;
+}
+
+.vehiculos-page__search-clear {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 0.875rem;
+  color: var(--color-ink-400);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.vehiculos-page__search-clear:hover {
+  color: var(--color-ink-900);
+}
+
+.vehiculos-page__filtro-input,
+.vehiculos-page__filtro-select {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  transition: border-color 0.15s ease;
+}
+
+.vehiculos-page__filtro-input:focus-visible,
+.vehiculos-page__filtro-select:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.vehiculos-page__filtro-select {
+  width: 220px;
+}
+
+@media (max-width: 640px) {
+  .vehiculos-page__filtros {
+    flex-direction: column;
+  }
+  .vehiculos-page__filtro-input,
+  .vehiculos-page__filtro-select {
+    width: 100%;
+  }
+  .vehiculos-page__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vehiculos-page__nuevo {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Formulario */
+.vehiculos-form {
+  max-width: 560px;
+  width: 100%;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-6);
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .vehiculos-form {
+    padding: var(--space-4);
+  }
+}
+
+.vehiculos-form__title {
+  font-family: var(--font-display);
+  color: var(--color-navy-900);
+  margin: 0 0 var(--space-4);
+}
+
+.vehiculos-form__alert {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-red-700);
+  background: rgba(193, 39, 45, 0.08);
+  border: 1px solid rgba(193, 39, 45, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.vehiculos-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 560px) {
+  .vehiculos-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vehiculos-form__field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-4);
+}
+
+.vehiculos-form__field label {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-900);
+  margin-bottom: var(--space-2);
+}
+
+.vehiculos-form__field input,
+.vehiculos-form__field select {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink-900);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.vehiculos-form__field input:focus-visible,
+.vehiculos-form__field select:focus-visible {
+  outline: none;
+  border-color: var(--color-navy-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.vehiculos-form__error {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-red-700);
+  margin-top: var(--space-1);
+}
+
+.vehiculos-form__hint {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-ink-400);
+  margin-top: var(--space-1);
+}
+
+.vehiculos-form__field input:disabled {
+  background: var(--color-paper);
+  color: var(--color-ink-600);
+  cursor: not-allowed;
+}
+
+.vehiculos-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.vehiculos-form__cancel {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.vehiculos-form__submit {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-white);
+  background-color: var(--color-navy-900);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.vehiculos-form__submit:hover:not(:disabled) {
+  background-color: var(--color-navy-700);
+}
+
+.vehiculos-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vehiculos-page__contador {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-500);
+}
+
+.vehiculos-page__vacio {
+  font-family: var(--font-body);
+  color: var(--color-ink-600);
+}
+
+/* ---------- Tarjetas de vehículos ---------- */
+.vehiculos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.vehiculo-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.vehiculo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: #c9ced6;
+}
+
+.vehiculo-card.is-fuera_de_servicio {
+  border-top: 3px solid var(--color-red-600);
+}
+
+.vehiculo-card__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--color-navy-900);
+  overflow: hidden;
+}
+
+.vehiculo-card__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehiculo-card__estado {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-900);
+  box-shadow: 0 1px 3px rgba(10, 22, 40, 0.25);
+}
+
+.vehiculo-card__estado::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+}
+
+.vehiculo-card__estado.is-en_mantencion::before { background: #d97706; }
+.vehiculo-card__estado.is-fuera_de_servicio::before { background: var(--color-red-600); }
+
+.vehiculo-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  flex: 1;
+}
+
+.vehiculo-card__titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.vehiculo-card__patente {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-red-700);
+}
+
+.vehiculo-card__modelo {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--color-ink-600);
+}
+
+.vehiculo-card__datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.vehiculo-card__datos dt {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}
+
+.vehiculo-card__datos dd {
+  margin: 2px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink-900);
+  overflow-wrap: anywhere;
+}
+
+.vehiculo-card__datos dd.is-vencida {
+  color: var(--color-red-700);
+}
+
+.vehiculo-card__acciones {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vehiculo-card__acciones button {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-navy-900);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px var(--space-4);
+  cursor: pointer;
+}
+
+.vehiculo-card__acciones button:hover {
+  border-color: var(--color-navy-500);
+  background: #f8fafc;
+}

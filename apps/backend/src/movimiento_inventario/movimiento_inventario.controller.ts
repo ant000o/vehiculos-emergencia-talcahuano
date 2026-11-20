@@ -1,30 +1,58 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe, Query, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { MovimientoInventarioService } from './movimiento_inventario.service';
 import { CreateMovimientoInventarioDto } from './dto/create-movimiento_inventario.dto';
+import { ArticuloInventarioService } from '../articulo_inventario/articulo_inventario.service';
 
-// Sin PATCH/DELETE a propósito: el kardex es un historial append-only.
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('movimientos-inventario')
 export class MovimientoInventarioController {
-  constructor(private readonly service: MovimientoInventarioService) {}
+  constructor(
+    private readonly service: MovimientoInventarioService,
+    private readonly articuloService: ArticuloInventarioService,
+  ) {}
 
-  @Roles('administrador', 'mecanico', 'capitan')
+  @RequirePermission('inventario', 'create')
   @Post()
-  create(@Body() dto: CreateMovimientoInventarioDto) {
+  async create(@Req() req: any, @Body() dto: CreateMovimientoInventarioDto) {
+    if (!dto.id_usuario && req.user?.sub) {
+      dto.id_usuario = req.user.sub;
+    }
+
+    if (req.rbacScope === 'COMPANY') {
+      const art = await this.articuloService.findOne(dto.id_articulo);
+      if (art && art.id_compania && art.id_compania !== Number(req.user?.id_compania)) {
+        throw new ForbiddenException('Acceso denegado: no puedes crear movimientos en artículos de otra compañía');
+      }
+    }
+
     return this.service.create(dto);
   }
 
+  @RequirePermission('inventario', 'view')
   @Get()
-  findAll(@Query('id_articulo') id_articulo?: string) {
-    if (id_articulo) return this.service.findByArticulo(Number(id_articulo));
+  async findAll(@Req() req: any, @Query('id_articulo') id_articulo?: string) {
+    if (id_articulo) {
+      if (req.rbacScope === 'COMPANY') {
+        const art = await this.articuloService.findOne(Number(id_articulo));
+        if (art && art.id_compania && art.id_compania !== Number(req.user?.id_compania)) {
+          throw new ForbiddenException('Acceso denegado: el artículo pertenece a otra compañía');
+        }
+      }
+      return this.service.findByArticulo(Number(id_articulo));
+    }
     return this.service.findAll();
   }
 
+  @RequirePermission('inventario', 'view')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  async findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const mov = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY' && mov?.articulo?.id_compania && mov.articulo.id_compania !== Number(req.user?.id_compania)) {
+      throw new ForbiddenException('Acceso denegado: el movimiento pertenece a otra compañía');
+    }
+    return mov;
   }
 }

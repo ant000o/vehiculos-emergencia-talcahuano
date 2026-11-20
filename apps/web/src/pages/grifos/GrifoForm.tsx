@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import type { CompaniaOption, EstadoGrifo } from '../../services/grifos';
+import { formatoNombreCompania } from '../../services/usuarios';
 import { MapaSeleccionUbicacion } from './MapaSeleccionUbicacion';
 
 interface GrifoFormValues {
@@ -59,7 +60,7 @@ export function GrifoForm({ companias, isSaving, serverError, onSubmit, onCancel
       )}
 
       <div className="grifos-form__field">
-        <label htmlFor="direccion">Dirección (opcional)</label>
+        <label htmlFor="direccion">Dirección</label>
         <input
           id="direccion"
           value={direccion}
@@ -85,8 +86,8 @@ export function GrifoForm({ companias, isSaving, serverError, onSubmit, onCancel
           onChange={(e) => setIdCompania(Number(e.target.value))}
         >
           {companias.map((c) => (
-            <option key={c.id_compania} value={c.id_compania}>
-              {c.nombre}
+            <option key={c.id_compania} value={c.id_compania} title={c.nombre}>
+              {formatoNombreCompania(c.nombre)}
             </option>
           ))}
         </select>

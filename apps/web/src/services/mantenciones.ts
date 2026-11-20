@@ -30,7 +30,15 @@ export interface Mantencion {
   id_vehiculo: number;
   id_usuario_mecanico: number | null;
   taller_externo: string | null;
-  vehiculo?: { id_vehiculo: number; patente: string; marca?: string; modelo?: string; kilometraje?: number | string };
+  vehiculo?: {
+    id_vehiculo: number;
+    patente: string;
+    marca?: string;
+    modelo?: string;
+    kilometraje?: number | string;
+    id_compania?: number;
+    compania?: { id_compania: number; nombre: string; numero_compania: number };
+  };
   usuarioMecanico?: { id_usuario: number; nombre: string; apellidos: string };
   detalles_articulos?: DetalleRepuestoEnMantencion[];
 }
@@ -45,6 +53,16 @@ export interface CrearMantencionInput {
   id_usuario_mecanico?: number;
   taller_externo?: string;
   fecha_ingreso?: string;
+  fecha_salida?: string;
+}
+
+export interface ActualizarMantencionInput {
+  tipo_mantencion?: TipoMantencion;
+  estado_mantencion?: EstadoMantencion;
+  kilometraje?: number | null;
+  descripcion_falla?: string;
+  costo_mano_obra?: number;
+  taller_externo?: string;
   fecha_salida?: string;
 }
 
@@ -73,6 +91,13 @@ export async function crearMantencion(input: CrearMantencionInput): Promise<Mant
     costo_mano_obra: Number(input.costo_mano_obra ?? 0),
     kilometraje: input.kilometraje !== undefined && input.kilometraje !== null ? Number(input.kilometraje) : undefined,
   });
+}
+
+export async function actualizarMantencion(
+  id: number,
+  input: ActualizarMantencionInput,
+): Promise<Mantencion> {
+  return apiClient.patch<Mantencion>(`/mantenciones/${id}`, input);
 }
 
 export async function actualizarEstadoMantencion(

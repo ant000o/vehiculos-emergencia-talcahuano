@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Compania } from '../../compania/entities/compania.entity';
+import { TipoVehiculo } from '../../tipo_vehiculo/entities/tipo_vehiculo.entity';
 import { RegistroOperatividad } from '../../registro_operatividad/entities/registro_operatividad.entity';
 import { Mantencion } from '../../mantencion/entities/mantencion.entity';
 import { DespachoEmergencia } from '../../despacho_emergencia/entities/despacho_emergencia.entity';
@@ -12,6 +13,9 @@ export class Vehiculo {
 
   @Column({ type: 'varchar', length: 10, unique: true })
   patente: string;
+
+  @Column({ type: 'varchar', length: 15, nullable: true })
+  nomenclatura: string;
 
   @Column({ type: 'varchar', length: 80 })
   marca: string;
@@ -27,6 +31,13 @@ export class Vehiculo {
 
   @Column({ type: 'enum', enum: EstadoVehiculo, default: EstadoVehiculo.OPERATIVO })
   estado_operativo: EstadoVehiculo;
+
+  @Column({ type: 'int', nullable: true })
+  id_tipo_vehiculo: number;
+
+  @ManyToOne(() => TipoVehiculo, (tv) => tv.vehiculos, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'id_tipo_vehiculo' })
+  tipoVehiculo: TipoVehiculo;
 
   @Column({ type: 'int' })
   id_compania: number;

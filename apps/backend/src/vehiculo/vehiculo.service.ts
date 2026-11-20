@@ -33,10 +33,25 @@ export class VehiculoService {
   // ============================================================
 
   async create(dto: CreateVehiculoDto) {
+    let coordenadas = dto.coordenadas ? toPostGIS(dto.coordenadas as any) : undefined;
+    if (!coordenadas && dto.id_compania) {
+      try {
+        const ciaRes = await this.repo.query(
+          `SELECT ubicacion_geo FROM compania WHERE id_compania = $1`,
+          [dto.id_compania],
+        );
+        if (ciaRes && ciaRes.length > 0 && ciaRes[0].ubicacion_geo) {
+          coordenadas = ciaRes[0].ubicacion_geo;
+        }
+      } catch {
+        // Ignorar si no se puede obtener la ubicación de la compañía
+      }
+    }
+
     const entity = this.repo.create({
       ...dto,
-      ...(dto.coordenadas && {
-        coordenadas: toPostGIS(dto.coordenadas as any),
+      ...(coordenadas && {
+        coordenadas,
       }),
     });
 
@@ -58,9 +73,10 @@ export class VehiculoService {
       q?: string;
       page?: number;
       limit?: number;
+      id_compania?: number;
     } = {},
   ) {
-    const { estado, q, page = 1, limit = 50 } = opts;
+    const { estado, q, page = 1, limit = 50, id_compania } = opts;
 
     // Evitar páginas y límites inválidos.
     const currentPage = Math.max(1, Math.floor(page));
@@ -71,6 +87,7 @@ export class VehiculoService {
 
     const where: any[] = [];
     const search = q?.trim();
+    const ciaFilter = id_compania ? { id_compania } : {};
 
     if (search) {
       const pattern = ILike(`%${search}%`);
@@ -79,18 +96,23 @@ export class VehiculoService {
         : {};
 
       where.push(
-        { patente: pattern, ...estadoFilter },
-        { marca: pattern, ...estadoFilter },
-        { modelo: pattern, ...estadoFilter },
+        { patente: pattern, ...estadoFilter, ...ciaFilter },
+        { nomenclatura: pattern, ...estadoFilter, ...ciaFilter },
+        { marca: pattern, ...estadoFilter, ...ciaFilter },
+        { modelo: pattern, ...estadoFilter, ...ciaFilter },
       );
-    } else if (estado) {
-      where.push({ estado_operativo: estado });
+    } else {
+      const baseFilter = { ...(estado ? { estado_operativo: estado } : {}), ...ciaFilter };
+      if (Object.keys(baseFilter).length > 0) {
+        where.push(baseFilter);
+      }
     }
 
     const [items, total] = await this.repo.findAndCount({
       where: where.length > 0 ? where : undefined,
       relations: {
         compania: true,
+        tipoVehiculo: true,
       },
       skip: (currentPage - 1) * currentLimit,
       take: currentLimit,
@@ -123,6 +145,7 @@ export class VehiculoService {
       },
       relations: {
         compania: true,
+        tipoVehiculo: true,
       },
     });
 
@@ -137,6 +160,22 @@ export class VehiculoService {
       coordenadas: fromPostGIS(item.coordenadas),
       proxima_mantencion: Number(item.kilometraje ?? 0) + 10000,
     };
+  }
+
+  // ============================================================
+  // OBTENER DESDE LA VISTA vista_vehiculos
+  // ============================================================
+
+  async findVistaVehiculos(idCompania?: number) {
+    if (idCompania) {
+      return this.repo.query(
+        `SELECT * FROM vista_vehiculos WHERE id_compania = $1 ORDER BY id_vehiculo ASC`,
+        [idCompania],
+      );
+    }
+    return this.repo.query(`
+      SELECT * FROM vista_vehiculos ORDER BY id_vehiculo ASC
+    `);
   }
 
   // ============================================================

@@ -1,10 +1,11 @@
 .mapa-container {
-  height: calc(100vh - 120px);
+  height: clamp(500px, 68vh, 850px);
   width: 100%;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: 0 4px 16px rgba(15, 31, 56, 0.08);
   margin-top: 16px;
+  border: 1px solid var(--color-border);
 }
 
 /* HU-20: marcador de emergencia con emoji */
@@ -119,4 +120,69 @@
 
 .emergencia-panel__mensaje--error {
   color: var(--color-red-700);
+}
+
+/* Banner de supervisión y monitoreo (Capitán / Comandancia / Bombero) */
+.mapa-banner-monitoreo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+  border: 1px solid #cbd5e1;
+  border-left: 5px solid var(--color-navy-700);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mapa-banner-monitoreo__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 360px;
+}
+
+.mapa-banner-monitoreo__icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.mapa-banner-monitoreo__content strong {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-navy-900);
+  margin-bottom: 2px;
+}
+
+.mapa-banner-monitoreo__content p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+  line-height: 1.35;
+}
+
+.mapa-banner-monitoreo__leyenda {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.mapa-leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-700);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }

@@ -1,3 +1,9 @@
+.registro-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
 .registro-page__title {
   font-family: var(--font-display);
   color: var(--color-navy-900);
@@ -33,11 +39,13 @@
 }
 
 .registro-form {
-  max-width: 480px;
+  max-width: 640px;
+  margin: 0 auto;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-6);
+  box-shadow: 0 4px 16px rgba(15, 31, 56, 0.05);
 }
 
 .registro-form__field {

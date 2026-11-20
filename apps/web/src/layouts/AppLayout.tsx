@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { NAV_ITEMS, ROLE_LABELS } from '../config/navigation';
+import { NAV_ITEMS, obtenerEtiquetaRol } from '../config/navigation';
 import { getSocket } from '../services/socket';
-import { ToastAlertaGrave } from '../components/ToastAlertaGrave';
+import { ToastAlertaGrave, type ToastData } from '../components/ToastAlertaGrave';
 import { NavIcon } from './NavIcon';
+import escudoBombero from '../public/escudo_bombero.png';
 import './AppLayout.css';
 
 interface NotificacionItem {
@@ -16,10 +17,11 @@ interface NotificacionItem {
 }
 
 export function AppLayout() {
-  const { user, logout } = useAuth();
-  const [alerta, setAlerta] = useState<string | null>(null);
+  const { user, logout, tienePermiso, hasPermission } = useAuth();
+  const [alerta, setAlerta] = useState<ToastData | null>(null);
   const [notificaciones, setNotificaciones] = useState<NotificacionItem[]>([]);
   const [panelAbierto, setPanelAbierto] = useState(false);
+  const [menuMobileAbierto, setMenuMobileAbierto] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +33,11 @@ export function AppLayout() {
     // HU-16: Falla grave reportada en vehículo
     const onAlertaFalla = (data: { vehiculo?: any; observaciones?: string }) => {
       const msg = data.observaciones || 'Un vehículo fue reportado Fuera de Servicio.';
-      setAlerta(msg);
+      setAlerta({
+        titulo: '🚨 Alerta Crítica de Flota',
+        mensaje: msg,
+        tipo: 'falla',
+      });
       setNotificaciones((prev) => [
         {
           id: Math.random().toString(),
@@ -47,7 +53,11 @@ export function AppLayout() {
     // HU-20 / HU-21: Nuevo despacho de emergencia emitido
     const onNuevoDespacho = (data: { tipo_emergencia?: string; vehiculo?: any }) => {
       const msg = `Despacho ${data.tipo_emergencia ?? 'de emergencia'} generado para ${data.vehiculo?.patente ?? 'unidad'}.`;
-      setAlerta(msg);
+      setAlerta({
+        titulo: '🚒 Nuevo Despacho en Curso',
+        mensaje: msg,
+        tipo: 'despacho',
+      });
       setNotificaciones((prev) => [
         {
           id: Math.random().toString(),
@@ -60,12 +70,56 @@ export function AppLayout() {
       ]);
     };
 
+    // Notificación en tiempo real cuando un despacho se controla o finaliza
+    const onDespachoActualizado = (data: {
+      id_despacho?: number;
+      tipo_emergencia?: string;
+      estado_emergencia?: string;
+      vehiculo?: any;
+    }) => {
+      const estado = data.estado_emergencia;
+      const patente = data.vehiculo?.patente ? `unidad ${data.vehiculo.patente}` : 'unidad';
+      
+      let titulo = '📋 Despacho Actualizado';
+      let msg = `Despacho #${data.id_despacho ?? ''} actualizado a estado ${estado}.`;
+      let tipo: 'controlada' | 'finalizada' | 'despacho' = 'despacho';
+
+      if (estado === 'controlada') {
+        titulo = '🟡 Emergencia Controlada';
+        msg = `Despacho #${data.id_despacho ?? ''} (${data.tipo_emergencia ?? 'Emergencia'}) con ${patente} marcado como CONTROLADO.`;
+        tipo = 'controlada';
+      } else if (estado === 'finalizada') {
+        titulo = '✅ Emergencia Finalizada';
+        msg = `Despacho #${data.id_despacho ?? ''} (${data.tipo_emergencia ?? 'Emergencia'}) FINALIZADO. La ${patente} y su personal vuelven a estar operativos.`;
+        tipo = 'finalizada';
+      }
+
+      setAlerta({
+        titulo,
+        mensaje: msg,
+        tipo,
+      });
+
+      setNotificaciones((prev) => [
+        {
+          id: Math.random().toString(),
+          tipo: 'despacho',
+          titulo,
+          mensaje: msg,
+          fecha: new Date(),
+        },
+        ...prev,
+      ]);
+    };
+
     socket.on('alerta_falla_grave', onAlertaFalla);
     socket.on('nuevo_despacho', onNuevoDespacho);
+    socket.on('despacho_actualizado', onDespachoActualizado);
 
     return () => {
       socket.off('alerta_falla_grave', onAlertaFalla);
       socket.off('nuevo_despacho', onNuevoDespacho);
+      socket.off('despacho_actualizado', onDespachoActualizado);
     };
   }, [user]);
 
@@ -82,7 +136,11 @@ export function AppLayout() {
 
   const handleSimularNotificacion = () => {
     const msg = 'Vehículo EEEE44 acaba de ser reportado como Fuera de Servicio (Alerta de prueba).';
-    setAlerta(msg);
+    setAlerta({
+      titulo: '🚨 Alerta de Prueba (WebSocket)',
+      mensaje: msg,
+      tipo: 'falla',
+    });
     setNotificaciones((prev) => [
       {
         id: Math.random().toString(),
@@ -95,20 +153,63 @@ export function AppLayout() {
     ]);
   };
 
-  // Filtra el menú completo de la A a la Z
-  const itemsVisibles = NAV_ITEMS.filter((item) =>
-    user ? item.roles.includes(user.rol) : false,
-  );
+  // Filtra el menú dinámicamente según la matriz de permisos de la base de datos (RBAC).
+  const userRolLower = (user?.rol || '').toLowerCase().trim();
+  const esAdmin = userRolLower === 'administrador';
+
+  const itemsVisibles = NAV_ITEMS.filter((item) => {
+    if (!user) return false;
+    // Administrador tiene acceso total a todos los módulos
+    if (esAdmin) return true;
+
+    // Si tiene restricción explícita por roles (ej: Permisos exclusivo Administrador)
+    if (item.roles && item.roles.length > 0) {
+      return item.roles.some((r) => r.toLowerCase().trim() === userRolLower);
+    }
+
+    // Inicio siempre es accesible si no está bloqueado
+    if (item.path === '/') return true;
+
+    // Verificación centralizada por módulo RBAC
+    if (item.modulo) {
+      return hasPermission(item.modulo, 'view');
+    }
+
+    // Si el ítem define permisos, verificar estrictamente contra la base de datos
+    if (item.permiso) {
+      if (Array.isArray(item.permiso)) {
+        return item.permiso.some((p) => tienePermiso(p));
+      }
+      return tienePermiso(item.permiso);
+    }
+
+    return true;
+  });
 
   return (
     <div className="app-layout">
-      {alerta && <ToastAlertaGrave mensaje={alerta} onClose={() => setAlerta(null)} />}
+      {alerta && <ToastAlertaGrave data={alerta} onClose={() => setAlerta(null)} />}
+
+      {/* Overlay de fondo en mobile al abrir el menú */}
+      {menuMobileAbierto && (
+        <div
+          className="app-layout__mobile-backdrop"
+          onClick={() => setMenuMobileAbierto(false)}
+        />
+      )}
 
       {/* SIDEBAR */}
-      <aside className="app-layout__sidebar">
+      <aside className={`app-layout__sidebar ${menuMobileAbierto ? 'is-mobile-open' : ''}`}>
         <div className="app-layout__brand">
-          <span className="app-layout__brand-eyebrow">Bomberos</span>
-          <span className="app-layout__brand-title">TALCAHUANO</span>
+          <img
+            src={escudoBombero}
+            alt="Escudo Cuerpo de Bomberos de Talcahuano"
+            className="app-layout__brand-logo"
+          />
+          <div className="app-layout__brand-text">
+            <span className="app-layout__brand-eyebrow">Cuerpo de Bomberos</span>
+            <span className="app-layout__brand-title">TALCAHUANO</span>
+          </div>
         </div>
 
         <nav className="app-layout__nav">
@@ -117,6 +218,7 @@ export function AppLayout() {
               key={item.path}
               to={item.path}
               end={item.path === '/'}
+              onClick={() => setMenuMobileAbierto(false)}
               className={({ isActive }) =>
                 isActive ? 'app-layout__nav-link is-active' : 'app-layout__nav-link'
               }
@@ -131,15 +233,32 @@ export function AppLayout() {
       {/* CONTENT WRAPPER */}
       <div className="app-layout__content-wrapper">
         <header className="app-layout__topbar">
-          <div className="app-layout__user">
-            <span className="app-layout__avatar" aria-hidden="true">
-              {`${user?.nombre?.[0] ?? ''}${user?.apellidos?.[0] ?? ''}`.toUpperCase()}
-            </span>
-            <div className="app-layout__user-text">
-              <span className="app-layout__user-name">{user?.nombre} {user?.apellidos}</span>
-              <span className="app-layout__user-role">
-                {user ? ROLE_LABELS[user.rol] : ''}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button
+              type="button"
+              className="app-layout__mobile-toggle"
+              onClick={() => setMenuMobileAbierto(!menuMobileAbierto)}
+              aria-label="Abrir o cerrar menú de navegación"
+            >
+              {menuMobileAbierto ? '✕' : '☰'}
+            </button>
+
+            <div className="app-layout__user">
+              <span className="app-layout__avatar" aria-hidden="true">
+                {`${user?.nombre?.[0] ?? ''}${user?.apellidos?.[0] ?? ''}`.toUpperCase()}
               </span>
+              <div className="app-layout__user-text">
+                <span className="app-layout__user-name">{user?.nombre} {user?.apellidos}</span>
+                <span className="app-layout__user-role">
+                  {user
+                    ? `${obtenerEtiquetaRol(user.rol)}${
+                        user.compania && !['administrador', 'comandante', 'central'].includes(userRolLower)
+                          ? ` • ${user.compania}`
+                          : ''
+                      }`
+                    : ''}
+                </span>
+              </div>
             </div>
           </div>
 

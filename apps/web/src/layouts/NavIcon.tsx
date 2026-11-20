@@ -15,6 +15,12 @@ const ICONOS: Record<string, ReactElement> = {
       <path d="M9 4h6v3H9zM9 12h6M9 16h6" />
     </>
   ),
+  '/historial-cambios': (
+    <>
+      <path d="M12 8v4l3 3" />
+      <circle cx="12" cy="12" r="9" />
+    </>
+  ),
   '/inventario': (
     <>
       <path d="M3 7l9-4 9 4v10l-9 4-9-4z" />
@@ -28,6 +34,12 @@ const ICONOS: Record<string, ReactElement> = {
     <>
       <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z" />
       <path d="M9 4v14M15 6v14" />
+    </>
+  ),
+  '/permisos': (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
     </>
   ),
   '/usuarios': (

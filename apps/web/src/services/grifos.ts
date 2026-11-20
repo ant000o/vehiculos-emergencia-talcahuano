@@ -41,8 +41,12 @@ export interface CrearGrifoInput {
 
 export type EditarGrifoInput = Partial<CrearGrifoInput>;
 
-export async function listarGrifos(): Promise<Grifo[]> {
-  return apiClient.get<Grifo[]>('/grifos');
+export async function listarGrifos(params?: { estado?: EstadoGrifo; id_compania?: number }): Promise<Grifo[]> {
+  const q = new URLSearchParams();
+  if (params?.estado) q.set('estado', params.estado);
+  if (params?.id_compania) q.set('id_compania', String(params.id_compania));
+  const query = q.toString() ? `?${q.toString()}` : '';
+  return apiClient.get<Grifo[]>(`/grifos${query}`);
 }
 
 export async function crearGrifo(input: CrearGrifoInput): Promise<Grifo> {

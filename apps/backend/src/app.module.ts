@@ -20,6 +20,10 @@ import { DespachoPersonalModule } from './despacho_personal/despacho_personal.mo
 import { AuthModule } from './auth/auth.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
+import { TipoVehiculoModule } from './tipo_vehiculo/tipo_vehiculo.module';
+import { PermisoModule } from './permiso/permiso.module';
+import { RolPermisoModule } from './rol_permiso/rol_permiso.module';
+import { HistorialCambiosModule } from './historial_cambios/historial_cambios.module';
 
 
 @Module({
@@ -55,6 +59,10 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module';
     AuthModule,
     EstadisticasModule,
     NotificacionesModule,
+    TipoVehiculoModule,
+    PermisoModule,
+    RolPermisoModule,
+    HistorialCambiosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

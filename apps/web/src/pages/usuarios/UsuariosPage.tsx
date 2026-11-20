@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../context/useAuth';
 import {
   listarUsuarios,
   listarRoles,
@@ -6,6 +7,7 @@ import {
   crearUsuario,
   editarUsuario,
   cambiarEstadoUsuario,
+  formatoNombreCompania,
   type Usuario,
   type RolOption,
   type CompaniaOption,
@@ -17,6 +19,15 @@ import './usuarios.css';
 type Vista = { modo: 'lista' } | { modo: 'crear' } | { modo: 'editar'; usuario: Usuario };
 
 export function UsuariosPage() {
+  const { user, hasPermission, getScope } = useAuth();
+  const userRol = (user?.rol || '').toLowerCase().trim();
+  const esAdmin = userRol === 'administrador';
+  const scope = getScope('usuarios');
+  const esAlcanceCompania = scope === 'COMPANY' && Boolean(user?.id_compania);
+  const puedeVerTodasCompanias = scope === 'GLOBAL' || esAdmin;
+  const puedeCrearUsuarios = hasPermission('usuarios', 'create') || esAdmin;
+  const puedeEditarUsuarios = hasPermission('usuarios', 'update') || esAdmin;
+
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [roles, setRoles] = useState<RolOption[]>([]);
   const [companias, setCompanias] = useState<CompaniaOption[]>([]);
@@ -25,6 +36,13 @@ export function UsuariosPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Filtros: Búsqueda por RUT, nombre o compañía, y estado (activo/inactivo)
+  const [q, setQ] = useState('');
+  const [estado, setEstado] = useState<'todos' | 'activos' | 'inactivos'>('todos');
+  const [idCompania, setIdCompania] = useState<string>(() => {
+    return esAlcanceCompania && user?.id_compania ? String(user.id_compania) : 'todas';
+  });
 
   // Carga inicial: usuarios + catálogos de roles y compañías para los <select>.
   useEffect(() => {
@@ -37,10 +55,12 @@ export function UsuariosPage() {
         ]);
         setUsuarios(listaUsuarios);
         setRoles(listaRoles);
-        setCompanias(listaCompanias);
+        setCompanias(
+          [...listaCompanias].sort(
+            (a, b) => (a.numero_compania ?? a.id_compania) - (b.numero_compania ?? b.id_compania),
+          ),
+        );
       } catch (err) {
-        // F15: antes, si alguna de las 3 llamadas fallaba, la página se
-        // quedaba en "Cargando usuarios…" para siempre.
         setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los usuarios.');
       } finally {
         setIsLoading(false);
@@ -93,6 +113,50 @@ export function UsuariosPage() {
     setUsuarios((prev) => prev.map((u) => (u.id_usuario === usuario.id_usuario ? actualizado : u)));
   }
 
+  const usuariosFiltrados = useMemo(() => {
+    return usuarios.filter((u) => {
+      // Si el alcance es COMPANY, restringir por compañía propia
+      if (esAlcanceCompania && user?.id_compania && u.id_compania !== user.id_compania) {
+        return false;
+      }
+
+      // Para jefaturas que no son admin: no ver administradores de sistema
+      if (!esAdmin) {
+        const rawRol = roles.find((r) => r.id_rol === u.id_rol)?.nombre_rol || '';
+        const rolLower = rawRol.toLowerCase().trim();
+        if (rolLower === 'administrador') {
+          return false;
+        }
+      }
+
+      // Filtro por estado
+      if (estado === 'activos' && !u.estado_activo) return false;
+      if (estado === 'inactivos' && u.estado_activo) return false;
+
+      // Filtro por compañía seleccionada
+      if (idCompania !== 'todas' && String(u.id_compania) !== idCompania) return false;
+
+      // Filtro texto (RUT, nombre, apellidos o compañía)
+      if (q.trim()) {
+        const query = q.toLowerCase().trim();
+        const rut = (u.rut || '').toLowerCase();
+        const nombreCompleto = `${u.nombre || ''} ${u.apellidos || ''}`.toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        const ciaNombre = companias.find((c) => c.id_compania === u.id_compania)?.nombre.toLowerCase() || '';
+
+        const match =
+          (esAdmin && rut.includes(query)) ||
+          nombreCompleto.includes(query) ||
+          email.includes(query) ||
+          ciaNombre.includes(query);
+
+        if (!match) return false;
+      }
+
+      return true;
+    });
+  }, [usuarios, roles, q, estado, idCompania, companias, esAdmin, esAlcanceCompania, user?.id_compania]);
+
   if (isLoading) {
     return <p>Cargando usuarios…</p>;
   }
@@ -104,8 +168,23 @@ export function UsuariosPage() {
   return (
     <div className="usuarios-page">
       <div className="usuarios-page__header">
-        <h1 className="usuarios-page__title">Usuarios</h1>
-        {vista.modo === 'lista' && (
+        <div>
+          <h1 className="usuarios-page__title">
+            {esAdmin
+              ? 'Usuarios del Sistema'
+              : esAlcanceCompania
+              ? `Personal y Dotación — ${user?.compania || 'Mi Compañía'}`
+              : 'Personal y Dotación Institucional'}
+          </h1>
+          <p style={{ margin: 'var(--space-1) 0 0', fontFamily: 'var(--font-body)', fontSize: '0.875rem', color: 'var(--color-ink-500)' }}>
+            {esAdmin
+              ? 'Gestión y administración de cuentas de usuario, roles y credenciales.'
+              : esAlcanceCompania
+              ? 'Nómina, cargos y estado de disponibilidad del personal de la compañía.'
+              : 'Nómina del personal institucional, cargos y estado de disponibilidad.'}
+          </p>
+        </div>
+        {puedeCrearUsuarios && vista.modo === 'lista' && (
           <button
             className="usuarios-page__nuevo"
             onClick={() => {
@@ -119,22 +198,77 @@ export function UsuariosPage() {
       </div>
 
       {vista.modo === 'lista' && (
-        <UsuariosTable
-          usuarios={usuarios}
-          roles={roles}
-          companias={companias}
-          onEditar={(usuario) => {
-            setFormError(null);
-            setVista({ modo: 'editar', usuario });
-          }}
-          onCambiarEstado={handleCambiarEstado}
-        />
+        <>
+          <div className="usuarios-page__filtros">
+            <input
+              type="text"
+              className="usuarios-page__filtro-input"
+              placeholder={esAdmin ? "Buscar por RUT, nombre o cargo..." : "Buscar por nombre, correo o cargo..."}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+
+            {/* Filtro de Compañía: visible solo si el alcance es GLOBAL */}
+            {puedeVerTodasCompanias && (
+              <select
+                className="usuarios-page__filtro-select"
+                style={{
+                  maxWidth: '220px',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                }}
+                value={idCompania}
+                onChange={(e) => setIdCompania(e.target.value)}
+              >
+                <option value="todas">Todas las compañías</option>
+                {companias.map((c) => (
+                  <option key={c.id_compania} value={String(c.id_compania)} title={c.nombre}>
+                    {c.numero_compania
+                      ? `${c.numero_compania}ª Cía. — ${c.nombre.replace(/^.*Compañía\s*/i, '')}`
+                      : formatoNombreCompania(c.nombre)}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <select
+              className="usuarios-page__filtro-select"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as 'todos' | 'activos' | 'inactivos')}
+            >
+              <option value="todos">Todos los estados</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Deshabilitados</option>
+            </select>
+          </div>
+
+          <UsuariosTable
+            usuarios={usuariosFiltrados}
+            roles={roles}
+            companias={companias}
+            esAdmin={esAdmin}
+            puedeEditar={puedeEditarUsuarios}
+            onEditar={
+              puedeEditarUsuarios
+                ? (usuario) => {
+                    setFormError(null);
+                    setVista({ modo: 'editar', usuario });
+                  }
+                : undefined
+            }
+            onCambiarEstado={puedeEditarUsuarios ? handleCambiarEstado : undefined}
+          />
+        </>
       )}
 
       {vista.modo === 'crear' && (
         <UsuarioForm
           roles={roles}
           companias={companias}
+          esAdmin={esAdmin}
+          esAlcanceCompania={esAlcanceCompania}
+          idCompaniaFija={user?.id_compania}
           isSaving={isSaving}
           serverError={formError}
           onSubmit={handleCrear}
@@ -147,6 +281,9 @@ export function UsuariosPage() {
           usuarioExistente={vista.usuario}
           roles={roles}
           companias={companias}
+          esAdmin={esAdmin}
+          esAlcanceCompania={esAlcanceCompania}
+          idCompaniaFija={user?.id_compania}
           isSaving={isSaving}
           serverError={formError}
           onSubmit={(values) => handleEditar(vista.usuario.id_usuario, values)}

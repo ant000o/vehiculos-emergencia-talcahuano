@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+  Query,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { GrifoService } from './grifo.service';
 import { CreateGrifoDto } from './dto/create-grifo.dto';
 import { UpdateGrifoDto } from './dto/update-grifo.dto';
@@ -12,17 +25,36 @@ import { EstadoGrifo } from '../common/enums/estados.enum';
 export class GrifoController {
   constructor(private readonly service: GrifoService) {}
 
-  @Roles('administrador', 'capitan')
+  @RequirePermission('grifos', 'create')
   @Post()
-  create(@Body() dto: CreateGrifoDto) { return this.service.create(dto); }
+  create(@Req() req: any, @Body() dto: CreateGrifoDto) {
+    if (req.rbacScope === 'COMPANY') {
+      dto.id_compania = Number(req.user?.id_compania);
+    }
+    return this.service.create(dto);
+  }
 
-  /** GET /grifos?estado=operativo */
+  /** GET /grifos?estado=operativo&id_compania=11 */
+  @RequirePermission('grifos', 'view')
   @Get()
-  findAll(@Query('estado') estado?: EstadoGrifo) { return this.service.findAll(estado); }
+  findAll(
+    @Req() req: any,
+    @Query('estado') estado?: EstadoGrifo,
+    @Query('id_compania') idCompania?: string,
+  ) {
+    let cid: number | undefined;
+    if (req.rbacScope === 'COMPANY') {
+      cid = Number(req.user?.id_compania);
+    } else {
+      cid = idCompania ? Number(idCompania) : undefined;
+    }
+    return this.service.findAll(estado, cid);
+  }
 
   /**
    * GET /grifos/cercanos?lat=-36.72&lng=-73.11&radio=1000&solo_operativos=true
    */
+  @RequirePermission('grifos', 'view')
   @Get('cercanos')
   findCercanos(
     @Query('lat') lat: string,
@@ -38,14 +70,42 @@ export class GrifoController {
     );
   }
 
+  @RequirePermission('grifos', 'view')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) { return this.service.findOne(id); }
+  async findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const grifo = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY' && grifo.id_compania && grifo.id_compania !== Number(req.user?.id_compania)) {
+      throw new ForbiddenException('Acceso denegado: el grifo pertenece a otra compañía');
+    }
+    return grifo;
+  }
 
-  @Roles('administrador', 'capitan', 'mecanico')
+  @RequirePermission('grifos', 'update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateGrifoDto) { return this.service.update(id, dto); }
+  async update(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateGrifoDto,
+  ) {
+    const grifo = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY') {
+      if (grifo.id_compania && grifo.id_compania !== Number(req.user?.id_compania)) {
+        throw new ForbiddenException('Acceso denegado: no puedes modificar grifos de otra compañía');
+      }
+      if (dto.id_compania && Number(dto.id_compania) !== Number(req.user?.id_compania)) {
+        throw new ForbiddenException('No puedes reasignar grifos a otra compañía');
+      }
+    }
+    return this.service.update(id, dto);
+  }
 
-  @Roles('administrador')
+  @RequirePermission('grifos', 'delete')
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) { return this.service.remove(id); }
+  async remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const grifo = await this.service.findOne(id);
+    if (req.rbacScope === 'COMPANY' && grifo.id_compania && grifo.id_compania !== Number(req.user?.id_compania)) {
+      throw new ForbiddenException('Acceso denegado: no puedes eliminar grifos de otra compañía');
+    }
+    return this.service.remove(id);
+  }
 }

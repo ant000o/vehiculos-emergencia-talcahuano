@@ -11,12 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { puedeEditarPersonal } from '../utils/roles';
 import { listarUsuarios } from '../services/usuario.service';
 import { Usuario } from '../types/auth';
 
 export default function UsuariosListScreen({ navigation }: any) {
   const { usuario: usuarioSesion } = useAuth();
-  const esAdmin = usuarioSesion?.rol === 'administrador';
+  const esAdmin = puedeEditarPersonal(usuarioSesion?.rol);
 
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [cargando, setCargando] = useState(true);

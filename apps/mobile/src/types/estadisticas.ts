@@ -21,4 +21,15 @@ export interface AlertaMantencion {
   motivo_alerta: string;
   nivel_alerta: 'critica' | 'advertencia';
 }
- 
+
+// Respuesta de GET /estadisticas/kpis-inicio (disponible para roles sin acceso al dashboard completo).
+export interface KpisInicio {
+  bomberos_operativos: number;
+  bomberos_en_emergencia: number;
+  flota_operativa: number;
+  flota_en_emergencia: number;
+  flota_en_mantencion: number;
+  grifos_operativos: number;
+  grifos_fuera_servicio: number;
+  repuestos_criticos: number;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
@@ -16,10 +16,11 @@ import MantencionDetalleScreen from '../screens/MantencionDetalleScreen';
 import GrifosListScreen from '../screens/GrifosListScreen';
 import GrifoDetalleScreen from '../screens/GrifoDetalleScreen';
 import DespachosScreen from '../screens/DespachosScreen';
+import DespachoDetalleScreen from '../screens/DespachoDetalleScreen';
+import { navigationRef } from './navigationRef';
 import BarraInferior, { RUTAS_CON_BARRA } from '../components/BarraInferior';
 
 const Stack = createNativeStackNavigator();
-const navigationRef = createNavigationContainerRef<any>();
 
 export default function RootNavigator() {
   const { usuario, cargando } = useAuth();
@@ -106,6 +107,11 @@ export default function RootNavigator() {
               name="DespachosList"
               component={DespachosScreen}
               options={{ title: 'Despachos en curso' }}
+            />
+            <Stack.Screen
+              name="DespachoDetalle"
+              component={DespachoDetalleScreen}
+              options={{ title: 'Despacho' }}
             />
             <Stack.Screen
               name="GrifoDetalle"

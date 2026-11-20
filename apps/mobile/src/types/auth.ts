@@ -23,14 +23,21 @@ export interface Usuario {
   estado_activo: boolean;
 }
 
+// Usuario que devuelven POST /auth/login y GET /auth/me (backend con RBAC).
+export interface UsuarioSesion {
+  id_usuario: number;
+  nombre: string;
+  apellidos: string;
+  email: string;
+  rol: string;
+  compania: string;
+  id_rol?: number;
+  id_compania?: number;
+  permisos?: string[];
+  alcances?: Record<string, string>;
+}
+
 export interface LoginResponse {
   access_token: string;
-  usuario: {
-    id_usuario: number;
-    nombre: string;
-    apellidos: string;
-    email: string;
-    rol: string;
-    compania: string;
-  };
+  usuario: UsuarioSesion;
 }

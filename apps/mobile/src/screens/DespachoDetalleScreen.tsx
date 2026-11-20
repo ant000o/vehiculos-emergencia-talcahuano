@@ -1,0 +1,132 @@
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, ActivityIndicator } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import LoginScreen from '../screens/LoginScreen';
+import HomeScreen from '../screens/HomeScreen';
+import UsuariosListScreen from '../screens/UsuariosListScreen';
+import UsuarioFormScreen from '../screens/UsuarioFormScreen';
+import VehiculosListScreen from '../screens/VehiculosListScreen';
+import VehiculoDetalleScreen from '../screens/VehiculoDetalleScreen';
+import RegistroOperatividadFormScreen from '../screens/RegistroOperatividadFormScreen';
+import MantencionesListScreen from '../screens/MantencionesListScreen';
+import MantencionFormScreen from '../screens/MantencionFormScreen';
+import MantencionDetalleScreen from '../screens/MantencionDetalleScreen';
+import GrifosListScreen from '../screens/GrifosListScreen';
+import GrifoDetalleScreen from '../screens/GrifoDetalleScreen';
+import DespachosScreen from '../screens/DespachosScreen';
+import DespachoDetalleScreen from '../screens/DespachoDetalleScreen';
+import { navigationRef } from '../navigation/navigationRef';
+import BarraInferior, { RUTAS_CON_BARRA } from '../components/BarraInferior';
+
+const Stack = createNativeStackNavigator();
+
+export default function RootNavigator() {
+  const { usuario, cargando } = useAuth();
+  const [rutaActual, setRutaActual] = useState<string | undefined>(undefined);
+
+  function actualizarRuta() {
+    setRutaActual(navigationRef.getCurrentRoute()?.name);
+  }
+
+  function irAPestana(ruta: string) {
+    if (ruta === rutaActual) return;
+    // La pestaña pasa a ser la pantalla raíz (como las pestañas de Instagram).
+    navigationRef.reset({ index: 0, routes: [{ name: ruta }] });
+  }
+
+  if (cargando) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#B91C1C" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+    <NavigationContainer ref={navigationRef} onReady={actualizarRuta} onStateChange={actualizarRuta}>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: '#B91C1C' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '800' },
+          headerShadowVisible: false,
+        }}
+      >
+        {usuario ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen
+              name="UsuariosList"
+              component={UsuariosListScreen}
+              options={{ title: 'Personal' }}
+            />
+            <Stack.Screen
+              name="UsuarioForm"
+              component={UsuarioFormScreen}
+              options={{ title: 'Usuario' }}
+            />
+            <Stack.Screen
+              name="VehiculosList"
+              component={VehiculosListScreen}
+              options={{ title: 'Vehículos' }}
+            />
+            <Stack.Screen
+              name="VehiculoDetalle"
+              component={VehiculoDetalleScreen}
+              options={{ title: 'Detalle del vehículo' }}
+            />
+            <Stack.Screen
+              name="RegistroOperatividadForm"
+              component={RegistroOperatividadFormScreen}
+              options={{ title: 'Registrar revisión' }}
+            />
+            <Stack.Screen
+              name="MantencionesList"
+              component={MantencionesListScreen}
+              options={{ title: 'Mantenciones' }}
+            />
+            <Stack.Screen
+              name="MantencionForm"
+              component={MantencionFormScreen}
+              options={{ title: 'Nueva mantención' }}
+            />
+            <Stack.Screen
+              name="MantencionDetalle"
+              component={MantencionDetalleScreen}
+              options={{ title: 'Mantención' }}
+            />
+            <Stack.Screen
+              name="GrifosList"
+              component={GrifosListScreen}
+              options={{ title: 'Grifos' }}
+            />
+            <Stack.Screen
+              name="DespachosList"
+              component={DespachosScreen}
+              options={{ title: 'Despachos en curso' }}
+            />
+            <Stack.Screen
+              name="DespachoDetalle"
+              component={DespachoDetalleScreen}
+              options={{ title: 'Despacho' }}
+            />
+            <Stack.Screen
+              name="GrifoDetalle"
+              component={GrifoDetalleScreen}
+              options={{ title: 'Grifo' }}
+            />
+          </>
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+    {usuario && rutaActual && RUTAS_CON_BARRA.includes(rutaActual) && (
+      <BarraInferior rol={usuario.rol} rutaActual={rutaActual} onSeleccionar={irAPestana} />
+    )}
+    </View>
+  );
+}

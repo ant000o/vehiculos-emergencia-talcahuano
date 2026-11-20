@@ -16,6 +16,7 @@ import { RequirePermission } from '../auth/decorators/permissions.decorator';
 import { DespachoEmergenciaService } from './despacho_emergencia.service';
 import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dto';
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
+import { ResponderDespachoDto } from './dto/responder-despacho.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller(['despachos-emergencia', 'despacho-emergencia'])
@@ -48,6 +49,23 @@ export class DespachoEmergenciaController {
     @Body() dto: UpdateDespachoEmergenciaDto,
   ) {
     return this.service.update(id, dto, req.rbacScope, req.user);
+  }
+
+  // Cualquier usuario autenticado (no mecánico) puede responder "voy / no voy",
+  // aunque no esté en la tripulación; por eso no lleva @RequirePermission.
+  @Post(':id/respuesta')
+  responder(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ResponderDespachoDto,
+  ) {
+    return this.service.responder(id, dto, req.user);
+  }
+
+  @RequirePermission('despachos', 'view')
+  @Get(':id/respuestas')
+  respuestas(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.service.listarRespuestas(id, req.rbacScope, req.user);
   }
 
   @RequirePermission('despachos', 'delete')

@@ -1,8 +1,16 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DespachoEmergencia } from './entities/despacho_emergencia.entity';
 import { DespachoPersonal } from '../despacho_personal/entities/despacho_personal.entity';
+import { DespachoRespuesta } from './entities/despacho_respuesta.entity';
+import { ResponderDespachoDto } from './dto/responder-despacho.dto';
+import { EstadoEmergencia } from '../common/enums/estados.enum';
 import { CreateDespachoEmergenciaDto } from './dto/create-despacho_emergencia.dto';
 import { UpdateDespachoEmergenciaDto } from './dto/update-despacho_emergencia.dto';
 import { toPostGIS, fromPostGIS } from '../common/utils/geo.util';
@@ -16,6 +24,8 @@ export class DespachoEmergenciaService {
     private readonly repo: Repository<DespachoEmergencia>,
     @InjectRepository(DespachoPersonal)
     private readonly personalRepo: Repository<DespachoPersonal>,
+    @InjectRepository(DespachoRespuesta)
+    private readonly respuestaRepo: Repository<DespachoRespuesta>,
     private readonly notificacionesGateway: NotificacionesGateway,
   ) {}
 
@@ -120,6 +130,8 @@ export class DespachoEmergenciaService {
     const item = await this.repo.findOne({ where: { id_despacho: id } });
     if (!item) throw new NotFoundException(`Despacho con id ${id} no encontrado`);
 
+    const estadoAnterior = item.estado_emergencia;
+
     Object.assign(item, {
       ...dto,
       ...(dto.coordenada_destino && {
@@ -128,7 +140,87 @@ export class DespachoEmergenciaService {
     });
 
     await this.repo.save(item);
-    return this.findOne(id);
+    const completo = await this.findOne(id);
+
+    // Avisa a mobile y web cuando el despacho cambia de estado
+    // (controlado, finalizado o cancelado).
+    if (completo.estado_emergencia !== estadoAnterior) {
+      this.notificacionesGateway.emitDespachoActualizado(completo);
+    }
+
+    return completo;
+  }
+
+  /**
+   * Un bombero notificado (que no está en la tripulación) indica si va a apoyar o no.
+   * No exige pertenecer al despacho: por eso no pasa por findOne con alcance.
+   */
+  async responder(id: number, dto: ResponderDespachoDto, user: JwtPayload) {
+    const rol = String(user.nombre_rol || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    if (rol.includes('mecanic')) {
+      throw new ForbiddenException('Tu perfil no participa en despachos de emergencia');
+    }
+
+    const despacho = await this.repo.findOne({
+      where: { id_despacho: id },
+      relations: { tripulacion: true },
+    });
+    if (!despacho) throw new NotFoundException();
+
+    if (despacho.estado_emergencia !== EstadoEmergencia.EN_CURSO) {
+      throw new BadRequestException('El despacho ya no está en curso');
+    }
+
+    const yaAsignado = (despacho.tripulacion || []).some(
+      (t) => Number(t.id_usuario) === Number(user.sub),
+    );
+    if (yaAsignado) {
+      throw new BadRequestException('Ya estás asignado a este despacho');
+    }
+
+    await this.respuestaRepo.save(
+      this.respuestaRepo.create({
+        id_despacho: id,
+        id_usuario: Number(user.sub),
+        decision: dto.decision,
+        fecha_respuesta: new Date(),
+      }),
+    );
+
+    const guardada = await this.respuestaRepo.findOne({
+      where: { id_despacho: id, id_usuario: Number(user.sub) },
+      relations: { usuario: true },
+    });
+
+    this.notificacionesGateway.emitRespuestaApoyo({
+      id_despacho: id,
+      id_usuario: Number(user.sub),
+      nombre: guardada?.usuario?.nombre,
+      apellidos: guardada?.usuario?.apellidos,
+      decision: dto.decision,
+    });
+
+    return { id_despacho: id, decision: dto.decision };
+  }
+
+  /** Quién respondió "voy" / "no voy" a un despacho (para Central y capitanes). */
+  async listarRespuestas(id: number, scope: string = 'GLOBAL', user?: JwtPayload) {
+    await this.findOne(id, scope, user);
+    const filas = await this.respuestaRepo.find({
+      where: { id_despacho: id },
+      relations: { usuario: true },
+      order: { fecha_respuesta: 'ASC' },
+    });
+    return filas.map((r) => ({
+      id_usuario: r.id_usuario,
+      nombre: r.usuario?.nombre,
+      apellidos: r.usuario?.apellidos,
+      decision: r.decision,
+      fecha_respuesta: r.fecha_respuesta,
+    }));
   }
 
   async remove(id: number, scope: string = 'GLOBAL', user?: JwtPayload) {

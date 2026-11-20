@@ -82,6 +82,13 @@ export class NotificacionesGateway implements OnGatewayConnection, OnGatewayDisc
   }
 
   /**
+   * Un bombero notificado respondió "voy a apoyar" / "no puedo ir".
+   */
+  emitRespuestaApoyo(respuesta: any) {
+    this.server.emit('respuesta_apoyo', this.sanitizeData(respuesta));
+  }
+
+  /**
    * HU-16: Notificar a central/oficial de una falla grave.
    */
   emitAlertaFallaGrave(vehiculo: any, observaciones: string = 'Vehículo reportado como Fuera de Servicio') {

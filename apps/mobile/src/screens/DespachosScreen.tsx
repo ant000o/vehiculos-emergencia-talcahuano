@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 import { listarDespachosEnCurso } from '../services/despacho.service';
@@ -12,6 +12,7 @@ import { esMecanico } from '../utils/roles';
 export default function DespachosScreen() {
   const { usuario } = useAuth();
   const { suscribir } = useRealtime();
+  const navigation = useNavigation<any>();
   const [despachos, setDespachos] = useState<DespachoEmergencia[]>([]);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
@@ -41,9 +42,17 @@ export default function DespachosScreen() {
   // Cuando llega un despacho nuevo por WebSocket, se recarga la lista.
   useEffect(() => {
     if (sinAcceso) return;
-    return suscribir('nuevo_despacho', () => {
+    const quitarNuevo = suscribir('nuevo_despacho', () => {
       cargar();
     });
+    // Si un despacho se finaliza/cancela, sale de la lista "en curso".
+    const quitarActualizado = suscribir('despacho_actualizado', () => {
+      cargar();
+    });
+    return () => {
+      quitarNuevo();
+      quitarActualizado();
+    };
   }, [suscribir, sinAcceso]);
 
   async function onRefresh() {
@@ -80,7 +89,12 @@ export default function DespachosScreen() {
         ListEmptyComponent={
           <Text style={styles.vacioTexto}>No hay despachos en curso. ✅</Text>
         }
-        renderItem={({ item }) => <DespachoCard despacho={item} />}
+        renderItem={({ item }) => (
+          <DespachoCard
+            despacho={item}
+            onPress={() => navigation.navigate('DespachoDetalle', { despacho: item })}
+          />
+        )}
       />
     </SafeAreaView>
   );

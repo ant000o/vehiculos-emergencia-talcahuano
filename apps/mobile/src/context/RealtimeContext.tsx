@@ -12,17 +12,24 @@ import { io, Socket } from 'socket.io-client';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from './AuthContext';
 import { esMecanico } from '../utils/roles';
+import { navigationRef } from '../navigation/navigationRef';
 
 // Misma clave con la que AuthContext guarda el token de sesión.
 const TOKEN_KEY = 'sigev_access_token';
 
-type Evento = 'nuevo_despacho' | 'alerta_falla_grave' | 'alerta_mantencion';
+type Evento =
+  | 'nuevo_despacho'
+  | 'despacho_actualizado'
+  | 'alerta_falla_grave'
+  | 'alerta_mantencion';
 
 interface AlertaEntrante {
   id: number;
   emoji: string;
   titulo: string;
   detalle: string;
+  // Si viene, al tocar el aviso se abre el detalle de ese despacho.
+  despacho?: any;
 }
 
 interface RealtimeValue {
@@ -84,8 +91,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
       socket = io(process.env.EXPO_PUBLIC_API_URL as string, {
         transports: ['websocket'],
-        // Hoy el backend no valida el token; se envía para cuando el equipo
-        // proteja el gateway (handshake.auth.token).
+        // El gateway del backend exige el token (handshake.auth.token).
         auth: { token },
         reconnection: true,
       });
@@ -104,7 +110,24 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
             detalle: `${d?.tipo_emergencia ?? 'Emergencia'}${
               d?.vehiculo?.patente ? ` · ${d.vehiculo.patente}` : ''
             }`,
+            despacho: d,
           });
+        }
+      });
+
+      // Cambio de estado de un despacho (finalizado, controlado, cancelado).
+      socket.on('despacho_actualizado', (d: any) => {
+        avisar('despacho_actualizado', d);
+        if (esMecanico(rol)) return;
+        const detalle = `${d?.tipo_emergencia ?? 'Emergencia'}${
+          d?.vehiculo?.patente ? ` · ${d.vehiculo.patente}` : ''
+        }`;
+        if (d?.estado_emergencia === 'finalizada') {
+          mostrar({ emoji: '✅', titulo: 'Despacho finalizado', detalle, despacho: d });
+        } else if (d?.estado_emergencia === 'controlada') {
+          mostrar({ emoji: '🟡', titulo: 'Despacho controlado', detalle, despacho: d });
+        } else if (d?.estado_emergencia === 'cancelada') {
+          mostrar({ emoji: '⚪', titulo: 'Despacho cancelado', detalle, despacho: d });
         }
       });
 
@@ -141,7 +164,13 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         <TouchableOpacity
           activeOpacity={0.9}
           style={[styles.banner, { top: insets.top + 8 }]}
-          onPress={() => setAlerta(null)}
+          onPress={() => {
+            const d = alerta.despacho;
+            setAlerta(null);
+            if (d && navigationRef.isReady()) {
+              navigationRef.navigate('DespachoDetalle', { despacho: d });
+            }
+          }}
         >
           <Text style={styles.bannerEmoji}>{alerta.emoji}</Text>
           <View style={styles.bannerTextos}>

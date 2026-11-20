@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
 import { getToken, saveToken, clearToken } from '../services/api';
-import { login as loginRequest } from '../services/auth.service';
-import { LoginResponse } from '../types/auth';
+import { login as loginRequest, obtenerPerfil } from '../services/auth.service';
+import { UsuarioSesion } from '../types/auth';
 
-type UsuarioSesion = LoginResponse['usuario'];
+const USUARIO_KEY = 'sigev_usuario';
 
 interface AuthContextValue {
   usuario: UsuarioSesion | null;
@@ -14,35 +15,99 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+async function leerUsuarioGuardado(): Promise<UsuarioSesion | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(USUARIO_KEY);
+    return raw ? (JSON.parse(raw) as UsuarioSesion) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function guardarUsuario(u: UsuarioSesion) {
+  try {
+    await SecureStore.setItemAsync(USUARIO_KEY, JSON.stringify(u));
+  } catch {
+    // Si no se puede guardar, la sesión igual funciona; solo no queda en caché.
+  }
+}
+
+async function borrarUsuario() {
+  try {
+    await SecureStore.deleteItemAsync(USUARIO_KEY);
+  } catch {
+    // nada
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
   const [cargando, setCargando] = useState(true);
 
-  // Al abrir la app, revisa si ya había un token guardado de una sesión anterior.
+  // Al abrir la app: si hay token, se recupera la sesión.
+  //  1) Se muestra de inmediato el usuario guardado (abre rápido, aunque el
+  //     servidor esté "dormido" o no haya señal).
+  //  2) En segundo plano se valida el token con GET /auth/me y se refrescan
+  //     rol y permisos. Solo se cierra la sesión si el servidor responde 401.
   useEffect(() => {
+    let cancelado = false;
+
     async function restaurarSesion() {
       const token = await getToken();
-      // Nota: por ahora solo verificamos que exista el token.
-      // El backend igual lo valida en cada request (JwtAuthGuard),
-      // así que un token vencido simplemente fallará en la primera
-      // llamada protegida y ahí se puede forzar logout.
-      if (token) {
-        // TODO: si más adelante se agrega GET /auth/me, usarlo aquí
-        // para recuperar los datos del usuario, no solo saber que hay token.
+      if (!token) {
+        if (!cancelado) setCargando(false);
+        return;
       }
-      setCargando(false);
+
+      const guardado = await leerUsuarioGuardado();
+      if (guardado && !cancelado) {
+        setUsuario(guardado);
+        setCargando(false);
+      }
+
+      for (let intento = 0; intento < 3 && !cancelado; intento++) {
+        try {
+          const fresco = await obtenerPerfil();
+          if (cancelado) return;
+          setUsuario(fresco);
+          await guardarUsuario(fresco);
+          setCargando(false);
+          return;
+        } catch (err: any) {
+          if (err?.response?.status === 401) {
+            await clearToken();
+            await borrarUsuario();
+            if (!cancelado) {
+              setUsuario(null);
+              setCargando(false);
+            }
+            return;
+          }
+          // Error de red / servidor despertando: se reintenta.
+        }
+      }
+
+      // No se pudo validar: si había usuario guardado se mantiene la sesión;
+      // si no, se pide login.
+      if (!cancelado) setCargando(false);
     }
+
     restaurarSesion();
+    return () => {
+      cancelado = true;
+    };
   }, []);
 
   async function login(email: string, password: string) {
     const data = await loginRequest(email, password);
     await saveToken(data.access_token);
+    await guardarUsuario(data.usuario);
     setUsuario(data.usuario);
   }
 
   async function logout() {
     await clearToken();
+    await borrarUsuario();
     setUsuario(null);
   }
 

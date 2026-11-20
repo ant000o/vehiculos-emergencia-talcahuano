@@ -15,10 +15,18 @@ import { listarDespachosEnCurso } from '../services/despacho.service';
 import { DespachoEmergencia } from '../types/despacho';
 import DespachoCard from '../components/DespachoCard';
 import MenuAjustes from '../components/MenuAjustes';
-import { esMecanico } from '../utils/roles';
-import { obtenerDashboard, obtenerAlertasMantencion } from '../services/estadisticas.service';
-import { DashboardEstadisticas, AlertaMantencion, ConteoPorEstado } from '../types/estadisticas';
-
+import { esMecanico, puedeVerInventario } from '../utils/roles';
+import {
+  obtenerDashboard,
+  obtenerAlertasMantencion,
+  obtenerKpisInicio,
+} from '../services/estadisticas.service';
+import {
+  DashboardEstadisticas,
+  AlertaMantencion,
+  ConteoPorEstado,
+  KpisInicio,
+} from '../types/estadisticas';
 
 function total(lista: ConteoPorEstado[] | undefined, ...estados: string[]): number {
   if (!lista) return 0;
@@ -40,22 +48,42 @@ export default function HomeScreen({ navigation }: any) {
   const { usuario, logout } = useAuth();
   const [dashboard, setDashboard] = useState<DashboardEstadisticas | null>(null);
   const [alertas, setAlertas] = useState<AlertaMantencion[] | null>(null);
+  const [kpis, setKpis] = useState<KpisInicio | null>(null);
   const [refrescando, setRefrescando] = useState(false);
   const [despachos, setDespachos] = useState<DespachoEmergencia[]>([]);
   const { conectado, suscribir } = useRealtime();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const mecanico = esMecanico(usuario?.rol);
 
-  // Si una de las dos consultas falla, la otra igual se muestra (allSettled).
+  // El dashboard completo solo lo ven los roles con permiso sobre ese módulo
+  // (comandante, director, administrador). El resto usa los indicadores de Inicio.
+  const veDashboard =
+    !usuario?.alcances ||
+    (!!usuario.alcances.dashboard && usuario.alcances.dashboard !== 'NONE');
+
+  // Si una consulta falla, las otras igual se muestran (allSettled).
   async function cargarResumen() {
+    const sinPermiso = Promise.reject(new Error('sin permiso de dashboard'));
+    sinPermiso.catch(() => {});
     const [d, a, desp] = await Promise.allSettled([
-      obtenerDashboard(),
-      obtenerAlertasMantencion(),
+      veDashboard ? obtenerDashboard() : sinPermiso,
+      veDashboard ? obtenerAlertasMantencion() : sinPermiso,
       mecanico ? Promise.resolve([] as DespachoEmergencia[]) : listarDespachosEnCurso(),
     ]);
     setDespachos(desp.status === 'fulfilled' ? desp.value : []);
-    setDashboard(d.status === 'fulfilled' ? d.value : null);
+    const dash = d.status === 'fulfilled' ? d.value : null;
+    setDashboard(dash);
     setAlertas(a.status === 'fulfilled' ? a.value : null);
+
+    if (dash) {
+      setKpis(null);
+    } else {
+      try {
+        setKpis(await obtenerKpisInicio());
+      } catch {
+        setKpis(null);
+      }
+    }
   }
 
   useFocusEffect(
@@ -67,9 +95,17 @@ export default function HomeScreen({ navigation }: any) {
   // Si llega un despacho nuevo en vivo, se refresca el resumen del inicio.
   useEffect(() => {
     if (mecanico) return;
-    return suscribir('nuevo_despacho', () => {
+    const quitarNuevo = suscribir('nuevo_despacho', () => {
       cargarResumen();
     });
+    // Si un despacho se finaliza o cancela, sale del resumen.
+    const quitarActualizado = suscribir('despacho_actualizado', () => {
+      cargarResumen();
+    });
+    return () => {
+      quitarNuevo();
+      quitarActualizado();
+    };
   }, [suscribir, mecanico]);
 
   async function onRefresh() {
@@ -125,6 +161,66 @@ export default function HomeScreen({ navigation }: any) {
       fondo: '#E5E7EB',
     },
   ];
+
+  // Indicadores para roles sin acceso al dashboard completo.
+  const modoKpis = !dashboard && !!kpis;
+  const statsFlotaKpis: StatDef[] = kpis
+    ? [
+        {
+          valor: kpis.flota_operativa,
+          etiqueta: 'Disponibles',
+          color: '#166534',
+          fondo: '#DCFCE7',
+          ruta: 'VehiculosList',
+        },
+        {
+          valor: kpis.flota_en_emergencia,
+          etiqueta: 'En emergencia',
+          color: '#991B1B',
+          fondo: '#FEE2E2',
+          ruta: 'VehiculosList',
+        },
+        {
+          valor: kpis.flota_en_mantencion,
+          etiqueta: 'En mantención',
+          color: '#854D0E',
+          fondo: '#FEF9C3',
+          ruta: 'VehiculosList',
+        },
+      ]
+    : [];
+  const statsOtrosKpis: StatDef[] = kpis
+    ? [
+        ...(mecanico
+          ? []
+          : [
+              {
+                valor: kpis.bomberos_operativos,
+                etiqueta: 'Bomberos disponibles',
+                color: '#1E40AF',
+                fondo: '#DBEAFE',
+              },
+              {
+                valor: kpis.bomberos_en_emergencia,
+                etiqueta: 'Bomberos en emergencia',
+                color: '#9A3412',
+                fondo: '#FFEDD5',
+              },
+            ]),
+        ...(puedeVerInventario(usuario?.rol)
+          ? [
+              {
+                valor: kpis.repuestos_criticos,
+                etiqueta: 'Repuestos con poco stock',
+                color: '#374151',
+                fondo: '#E5E7EB',
+              },
+            ]
+          : []),
+      ]
+    : [];
+  const flotaMostrar = modoKpis ? statsFlotaKpis : statsFlota;
+  const otrosMostrar = modoKpis ? statsOtrosKpis : statsOtros;
 
   function Tile({ s }: { s: StatDef }) {
     const contenido = (
@@ -183,12 +279,12 @@ export default function HomeScreen({ navigation }: any) {
 
         <Text style={styles.seccion}>Resumen</Text>
         <View style={styles.statFila}>
-          {statsFlota.map((st) => (
+          {flotaMostrar.map((st) => (
             <Tile key={st.etiqueta} s={st} />
           ))}
         </View>
         <View style={styles.statFila}>
-          {statsOtros.map((st) => (
+          {otrosMostrar.map((st) => (
             <Tile key={st.etiqueta} s={st} />
           ))}
         </View>
@@ -206,7 +302,10 @@ export default function HomeScreen({ navigation }: any) {
             ) : (
               despachos.slice(0, 2).map((d) => (
                 <View key={d.id_despacho} style={{ marginBottom: 12 }}>
-                  <DespachoCard despacho={d} />
+                  <DespachoCard
+                    despacho={d}
+                    onPress={() => navigation.navigate('DespachoDetalle', { despacho: d })}
+                  />
                 </View>
               ))
             )}

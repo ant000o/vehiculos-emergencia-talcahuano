@@ -6,7 +6,7 @@ import { Vehiculo, EstadoVehiculo } from '../types/vehiculo';
 import { RegistroOperatividad } from '../types/registroOperatividad';
 import { obtenerUltimoRegistroDeVehiculo } from '../services/registroOperatividad.service';
 import { useAuth } from '../context/AuthContext';
-import { puedeGestionarMantenciones } from '../utils/roles';
+import { puedeVerMantenciones, puedeRegistrarRevision } from '../utils/roles';
 
 const ESTADO_LABEL: Record<EstadoVehiculo, string> = {
   [EstadoVehiculo.OPERATIVO]: 'Operativo',
@@ -51,7 +51,8 @@ function NivelFila({
 
 export default function VehiculoDetalleScreen({ route, navigation }: any) {
   const { usuario } = useAuth();
-  const verMantenciones = puedeGestionarMantenciones(usuario?.rol);
+  const verMantenciones = puedeVerMantenciones(usuario?.rol);
+  const registraRevision = puedeRegistrarRevision(usuario?.rol);
   const vehiculo: Vehiculo = route.params.vehiculo;
 
   const [ultimoRegistro, setUltimoRegistro] = useState<RegistroOperatividad | null>(null);
@@ -144,12 +145,14 @@ export default function VehiculoDetalleScreen({ route, navigation }: any) {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity
-          style={styles.boton}
-          onPress={() => navigation.navigate('RegistroOperatividadForm', { vehiculo })}
-        >
-          <Text style={styles.botonTexto}>Registrar revisión</Text>
-        </TouchableOpacity>
+        {registraRevision && (
+          <TouchableOpacity
+            style={styles.boton}
+            onPress={() => navigation.navigate('RegistroOperatividadForm', { vehiculo })}
+          >
+            <Text style={styles.botonTexto}>Registrar revisión</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapaEmergencia from './MapaEmergencia';
 import { DespachoEmergencia, RolEnDespacho } from '../types/despacho';
 import { emojiEmergencia } from '../utils/emergencia';
@@ -13,7 +13,13 @@ function hace(fechaIso: string): string {
   return new Date(fechaIso).toLocaleDateString('es-CL');
 }
 
-export default function DespachoCard({ despacho }: { despacho: DespachoEmergencia }) {
+export default function DespachoCard({
+  despacho,
+  onPress,
+}: {
+  despacho: DespachoEmergencia;
+  onPress?: () => void;
+}) {
   const emoji = emojiEmergencia(despacho.tipo_emergencia);
   const coords = despacho.coordenada_destino?.coordinates;
   const tripulacion = despacho.tripulacion ?? [];
@@ -32,7 +38,7 @@ export default function DespachoCard({ despacho }: { despacho: DespachoEmergenci
     );
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={!onPress} style={styles.card}>
       <View>
         {coords ? (
           <MapaEmergencia latitud={coords[0]} longitud={coords[1]} emoji={emoji} />
@@ -90,8 +96,9 @@ export default function DespachoCard({ despacho }: { despacho: DespachoEmergenci
             valor={despacho.grifo.direccion ?? `Grifo #${despacho.grifo.id_grifo}`}
           />
         )}
+        <Text style={styles.verDetalle}>Ver detalle ›</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -149,6 +156,7 @@ const styles = StyleSheet.create({
   },
   chipEstadoTexto: { color: '#B91C1C', fontWeight: '800', fontSize: 11 },
   cuerpo: { padding: 16 },
+  verDetalle: { color: '#B91C1C', fontWeight: '800', fontSize: 13, textAlign: 'right', marginTop: 8 },
   titulo: { fontSize: 18, fontWeight: '800', color: '#111827' },
   hora: { fontSize: 12, color: '#6B7280', marginTop: 2 },
   separador: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 12 },

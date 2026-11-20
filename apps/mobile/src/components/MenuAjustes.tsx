@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { esMecanico, puedeGestionarMantenciones } from '../utils/roles';
+import { esMecanico, puedeVerMantenciones, puedeVerPersonal } from '../utils/roles';
 
 interface Props {
   visible: boolean;
@@ -87,9 +87,9 @@ export default function MenuAjustes({
   const items: ItemMenu[] = [
     { icono: '🚨', etiqueta: 'Despachos', ruta: 'DespachosList', insignia: despachosEnCurso, visible: !mecanico },
     { icono: '🚒', etiqueta: 'Vehículos', ruta: 'VehiculosList', visible: true },
-    { icono: '🔧', etiqueta: 'Mantenciones', ruta: 'MantencionesList', visible: puedeGestionarMantenciones(rol) },
+    { icono: '🔧', etiqueta: 'Mantenciones', ruta: 'MantencionesList', visible: puedeVerMantenciones(rol) },
     { icono: '💧', etiqueta: 'Grifos', ruta: 'GrifosList', visible: !mecanico },
-    { icono: '👥', etiqueta: 'Personal', ruta: 'UsuariosList', visible: !mecanico },
+    { icono: '👥', etiqueta: 'Personal', ruta: 'UsuariosList', visible: puedeVerPersonal(rol) },
   ].filter((i) => i.visible);
 
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { esMecanico, puedeGestionarMantenciones } from '../utils/roles';
+import { esMecanico, puedeVerMantenciones } from '../utils/roles';
 
 interface Props {
   rol: string | undefined | null;
@@ -34,7 +34,7 @@ export default function BarraInferior({ rol, rutaActual, onSeleccionar }: Props)
     { ruta: 'Home', icono: '🏠', etiqueta: 'Inicio', visible: true },
     { ruta: 'DespachosList', icono: '🚨', etiqueta: 'Despachos', visible: !mecanico },
     { ruta: 'VehiculosList', icono: '🚒', etiqueta: 'Vehículos', visible: true },
-    { ruta: 'MantencionesList', icono: '🔧', etiqueta: 'Mantención', visible: puedeGestionarMantenciones(rol) },
+    { ruta: 'MantencionesList', icono: '🔧', etiqueta: 'Mantención', visible: puedeVerMantenciones(rol) },
     { ruta: 'GrifosList', icono: '💧', etiqueta: 'Grifos', visible: !mecanico },
   ].filter((p) => p.visible);
 

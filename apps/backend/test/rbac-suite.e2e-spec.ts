@@ -107,7 +107,7 @@ describe('RBAC & Scope Authorization Suite (e2e)', () => {
   }, 30000);
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
   });
 
   // ==========================================

@@ -19,6 +19,14 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "lint": "npm run lint --workspaces --if-present",
     "db:up": "docker compose -f docker/docker-compose.yml up -d db adminer",
-    "db:down": "docker compose -f docker/docker-compose.yml down"
+    "db:down": "docker compose -f docker/docker-compose.yml down",
+    "qa:backend": "vitest run --config apps/backend/vitest.e2e.config.ts",
+    "qa:web": "vitest run --root apps/web",
+    "qa:mobile": "vitest run --root apps/mobile",
+    "qa:e2e": "playwright test --config apps/web/playwright.config.ts --reporter=list",
+    "qa:all": "npm run qa:backend && npm run qa:web && npm run qa:mobile && npm run qa:e2e"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.9"
   }
 }

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Mantencion } from './entities/mantencion.entity';
 import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
 import { CreateMantencionDto } from './dto/create-mantencion.dto';
@@ -27,8 +27,22 @@ export class MantencionService {
     if ((dto.id_usuario_mecanico && dto.taller_externo) || (!dto.id_usuario_mecanico && !dto.taller_externo)) {
       throw new BadRequestException('Debe indicar exactamente uno: id_usuario_mecanico o taller_externo');
     }
-    const entity = this.repo.create(dto);
-    const saved = await this.repo.save(entity);
+
+    const vehiculoExiste = await this.vehiculoRepo.findOne({ where: { id_vehiculo: dto.id_vehiculo } });
+    if (!vehiculoExiste) {
+      throw new NotFoundException(`Vehículo con id ${dto.id_vehiculo} no encontrado`);
+    }
+
+    let saved: Mantencion;
+    try {
+      const entity = this.repo.create(dto);
+      saved = await this.repo.save(entity);
+    } catch (err) {
+      if (err instanceof QueryFailedError && (err as any).code === '23503') {
+        throw new BadRequestException('Referencia inválida en mantención (vehículo o mecánico inexistente)');
+      }
+      throw err;
+    }
 
     // Si se especificó kilometraje al ingreso, actualizar odómetro del vehículo si es mayor
     if (dto.kilometraje !== undefined && dto.kilometraje !== null) {

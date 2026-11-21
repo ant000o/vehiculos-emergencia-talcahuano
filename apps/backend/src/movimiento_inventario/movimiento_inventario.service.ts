@@ -23,8 +23,9 @@ export class MovimientoInventarioService {
     return this.repo.save(movimiento);
   }
 
-  findAll() {
+  findAll(idCompania?: number) {
     return this.repo.find({
+      where: idCompania ? { articulo: { id_compania: idCompania } } : undefined,
       relations: {
         articulo: true,
         mantencion: true,

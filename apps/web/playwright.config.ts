@@ -11,13 +11,13 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npm run start:dev --workspace=apps/backend',
+      command: 'npm --prefix ../backend run start:dev',
       url: 'http://localhost:3000',
       reuseExistingServer: true,
       timeout: 60000,
     },
     {
-      command: 'npm run dev --workspace=apps/web',
+      command: 'npm run dev',
       url: 'http://localhost:5173',
       reuseExistingServer: true,
       timeout: 60000,

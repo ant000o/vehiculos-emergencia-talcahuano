@@ -43,7 +43,9 @@ export class MovimientoInventarioController {
       }
       return this.service.findByArticulo(Number(id_articulo));
     }
-    return this.service.findAll();
+
+    const idCompania = req.rbacScope === 'COMPANY' ? Number(req.user?.id_compania) : undefined;
+    return this.service.findAll(idCompania);
   }
 
   @RequirePermission('inventario', 'view')

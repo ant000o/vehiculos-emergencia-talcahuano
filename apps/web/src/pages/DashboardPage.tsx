@@ -229,6 +229,11 @@ export function DashboardPage() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {puedeVerGraficosYDetalles && (
+        <div className="dashboard__tables-grid">
           <div className="dashboard__card">
             <div className="dashboard__card-header">
               <h3 className="dashboard__card-title">Top Vehículos con Mayor Gasto de Mantención</h3>
@@ -271,7 +276,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="dashboard__card" style={{ marginTop: 'var(--space-6)' }}>
+          <div className="dashboard__card">
             <div className="dashboard__card-header">
               <h3 className="dashboard__card-title">Resumen de Tiempos de Reparación y Estadía en Taller</h3>
             </div>

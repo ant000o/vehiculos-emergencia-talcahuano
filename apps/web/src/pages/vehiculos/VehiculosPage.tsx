@@ -37,32 +37,57 @@ export function VehiculosPage() {
 
   // HU-12 y HU-13: Filtro y Búsqueda
   const [q, setQ] = useState('');
-  const [qDebounced] = useState('');
+  const [qDebounced, setQDebounced] = useState('');
   const [estado, setEstado] = useState<EstadoVehiculo | ''>('');
   const [idCompania, setIdCompania] = useState<string>('');
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Espera a que el usuario deje de escribir antes de consultar al backend.
+  // Espera 300ms a que el usuario deje de escribir (o limpia de inmediato si q está vacío)
   useEffect(() => {
-      if (esAlcanceCompania && user?.id_compania) {
-        setIdCompania(String(user.id_compania));
-      } else if (puedeVerTodasCompanias) {
-        setIdCompania('');
-      }
-    }, [esAlcanceCompania, puedeVerTodasCompanias, user?.id_compania]);
+    const trimmed = q.trim();
+    if (!trimmed) {
+      setQDebounced('');
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setQDebounced(trimmed);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [q]);
 
-  const cargarVehiculos = () => {
+  useEffect(() => {
+    if (esAlcanceCompania && user?.id_compania) {
+      setIdCompania(String(user.id_compania));
+    } else if (puedeVerTodasCompanias) {
+      setIdCompania('');
+    }
+  }, [esAlcanceCompania, puedeVerTodasCompanias, user?.id_compania]);
+
+  const cargarVehiculos = (signal?: { cancelled: boolean }) => {
     setIsLoading(true);
-    listarVehiculos(estado ? { estado, q: qDebounced } : { q: qDebounced })
+    const companiaIdNum =
+      esAlcanceCompania && user?.id_compania
+        ? Number(user.id_compania)
+        : idCompania
+          ? Number(idCompania)
+          : undefined;
+
+    listarVehiculos({
+      ...(estado ? { estado } : {}),
+      ...(qDebounced ? { q: qDebounced } : {}),
+      ...(companiaIdNum ? { id_compania: companiaIdNum } : {}),
+    })
       .then((res) => {
+        if (signal?.cancelled) return;
         setVehiculos(res as unknown as Vehiculo[]);
         setLoadError(null);
       })
       .catch((err) => {
+        if (signal?.cancelled) return;
         setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los vehículos.');
       })
       .finally(() => {
-        setIsLoading(false);
+        if (!signal?.cancelled) setIsLoading(false);
       });
   };
 
@@ -74,8 +99,12 @@ export function VehiculosPage() {
   }, []);
 
   useEffect(() => {
-    cargarVehiculos();
-  }, [estado, qDebounced]);
+    const signal = { cancelled: false };
+    cargarVehiculos(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [estado, qDebounced, idCompania, esAlcanceCompania, user?.id_compania]);
 
   async function handleCrear(values: VehiculoFormValues) {
     setIsSaving(true);
@@ -110,7 +139,7 @@ export function VehiculosPage() {
     }
   }
 
-  // Filtrar vehículos por compañía según alcance RBAC (COMPANY vs GLOBAL)
+  // Filtrado instantáneo por compañía, estado y texto mientras el usuario escribe
   const vehiculosFiltrados = useMemo(() => {
     let lista = vehiculos;
     if (esAlcanceCompania && user?.id_compania) {
@@ -118,8 +147,19 @@ export function VehiculosPage() {
     } else if (idCompania) {
       lista = lista.filter((v) => String(v.id_compania) === idCompania);
     }
+    if (estado) {
+      lista = lista.filter((v) => v.estado_operativo === estado);
+    }
+    const termino = q.trim().toLowerCase();
+    if (termino) {
+      lista = lista.filter((v) =>
+        [v.patente, v.nomenclatura, v.marca, v.modelo]
+          .filter(Boolean)
+          .some((campo) => String(campo).toLowerCase().includes(termino)),
+      );
+    }
     return lista;
-  }, [vehiculos, esAlcanceCompania, user?.id_compania, idCompania]);
+  }, [vehiculos, esAlcanceCompania, user?.id_compania, idCompania, estado, q]);
 
   // Estadísticas rápidas de estado para Comandancia y Operaciones
   const statsFlota = useMemo(() => {
@@ -175,7 +215,6 @@ export function VehiculosPage() {
         <>
           <div className="vehiculos-page__filtros">
             <div className="vehiculos-page__search-wrap">
-              <span className="vehiculos-page__search-icon">🔍</span>
               <input
                 type="text"
                 className="vehiculos-page__filtro-input"

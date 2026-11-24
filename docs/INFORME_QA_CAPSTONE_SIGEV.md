@@ -2,8 +2,8 @@
 
 **Proyecto Capstone:** Sistema Integral de Gestión de Emergencias y Vehículos (`vehiculos-emergencia-talcahuano`)
 **Organización destinataria:** Cuerpo de Bomberos de Talcahuano
-**Institución:** Duoc UC — Ingeniería en Informática (Especialización Ciencia de Datos)
-**Autor:** Carlo Reyes Espinoza
+**Institución:** Duoc UC — Ingeniería en Informática
+**Autor:** Antonio Campos, Ignacia Reyes, Carlo Reyes.
 **Fecha de informe:** 20 de noviembre de 2026
 
 ---

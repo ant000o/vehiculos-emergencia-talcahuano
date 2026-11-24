@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="9s-G7DhteF0a9L4GKedt">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="173" y="77.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="453" y="77.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;" value="" vertex="1">
+          <mxGeometry height="170" width="490" x="173" y="237.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-4" edge="1" parent="1" source="9Gj4vVRu1NKiYgNn0Tu_-1" style="endArrow=classic;html=1;rounded=0;entryX=0.204;entryY=0.019;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryPerimeter=0;" target="9Gj4vVRu1NKiYgNn0Tu_-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="333" y="187.5" as="sourcePoint" />
+            <mxPoint x="533" y="277.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-5" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.204;entryY=0.019;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="552.5" y="157.5" as="sourcePoint" />
+            <mxPoint x="552.5" y="240.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;Web (React + Vite)&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Login de usuarios&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="151" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;App móvil (Expo)&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Login de bomberos&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="431" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 18px;&quot;&gt;&lt;b&gt;Backend (NestJS)&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;API REST&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="296" y="217.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="195" y="307.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="431" y="307.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space-collapse: collapse; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;AuthModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Login + JWT&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="173" y="292.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space-collapse: collapse; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;UsersModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;CRUD usuarios&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="409" y="292.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-14" edge="1" parent="1" source="9Gj4vVRu1NKiYgNn0Tu_-3" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="409" y="419.5" as="sourcePoint" />
+            <mxPoint x="418" y="502.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="323" y="502.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;vía TypeORM&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="301" y="495" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

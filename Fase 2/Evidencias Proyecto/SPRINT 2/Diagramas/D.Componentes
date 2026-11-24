@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="9s-G7DhteF0a9L4GKedt">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;" value="" vertex="1">
+          <mxGeometry height="422.5" width="1000" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="80" y="312.5" as="geometry" />
+        </mxCell>
+        <mxCell id="9Gj4vVRu1NKiYgNn0Tu_-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space-collapse: collapse; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;AuthModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Login + JWT&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="232" x="58" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="MpqeM_2h8krXLKK_faqr-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="320" y="312.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="560" y="312.5" as="geometry" />
+        </mxCell>
+        <mxCell id="MpqeM_2h8krXLKK_faqr-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;div&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;MantencionModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;mantención + repuestos&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="538" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="200" x="800" y="312.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;div&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;FlotaModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;GET/Behiculos?q=&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="298" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div&gt;&lt;div&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;EstadisticasModule&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Alertas por SQL&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="778" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="105" width="440" x="320" y="467.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(240, 239, 236), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;«&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space-collapse: collapse; text-align: start;&quot;&gt;component&lt;/span&gt;&lt;span style=&quot;background-color: transparent; white-space: nowrap; font-family: anthropic-sans, -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, sans-serif; font-size: 12px; text-align: start;&quot;&gt;»&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;AlertasGateway (Socket.IO)&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="95" width="244" x="418" y="467.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="105" width="280" x="400" y="682.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;PostgreSQL&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;i&gt;TypeORM + triggers&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="192" x="444" y="702.5" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--9" edge="1" parent="1" source="9Gj4vVRu1NKiYgNn0Tu_-3" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="vXoCiebgdTxvlieaA_6--7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="610" y="562.5" as="sourcePoint" />
+            <mxPoint x="660" y="512.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--10" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="vXoCiebgdTxvlieaA_6--5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="418" y="392.5" as="sourcePoint" />
+            <mxPoint x="419.5" y="452.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--11" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="662" y="392.5" as="sourcePoint" />
+            <mxPoint x="662" y="467.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--12" edge="1" parent="1" source="vXoCiebgdTxvlieaA_6--4" style="endArrow=classic;html=1;rounded=0;entryX=1.007;entryY=0.571;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;dashed=1;dashPattern=8 8;" target="vXoCiebgdTxvlieaA_6--6" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="527.45" />
+            </Array>
+            <mxPoint x="610" y="562.5" as="sourcePoint" />
+            <mxPoint x="660" y="512.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="105" width="280" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;Web (React + Vite)&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;i&gt;Búsqueda, filtros, alertas&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="226" x="67" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="105" width="280" x="400" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;App móvil (Expo)&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;i&gt;Estados, grifos, avisos&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="192" x="444" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
+          <mxGeometry height="105" width="280" x="760" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Verdana;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;OpenStreetMap&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;i&gt;Leaflet (unpkg)&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="192" x="804" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--19" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="179.5" y="135" as="sourcePoint" />
+            <mxPoint x="179.5" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--20" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="530" y="135" as="sourcePoint" />
+            <mxPoint x="530" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vXoCiebgdTxvlieaA_6--21" edge="1" parent="1" source="vXoCiebgdTxvlieaA_6--15" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="vXoCiebgdTxvlieaA_6--17" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="720" y="90" as="sourcePoint" />
+            <mxPoint x="720" y="155" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

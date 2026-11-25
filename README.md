@@ -191,17 +191,7 @@ Docente guía: Diego Garcés Miranda. Working agreements del equipo en el docume
 
 La documentación de la Fase 1 (mapas, visión, épicas, historias de usuario, backlog) está en la carpeta [`Fase 1/Evidencias Grupales`](<./Fase 1/Evidencias Grupales>). Diagramas en [`docs/architecture`](./docs/architecture).
 
-## 📌 Estado actual
-
-El proyecto está en su recta final. Ajustes en curso:
-
-- **Web:** el bombero no registra el nuevo estado del vehículo · el mecánico no ve grifos · registrar qué usuario creó cada ficha, estado o registro.
-- **Móvil:** abrir el despacho desde la tarjeta · mantener la sesión abierta.
-- **Web y móvil:** notificar la finalización de un despacho.
-- **Base de datos:** agregar el tipo/nomenclatura del vehículo.
-- **Roles:** Capitán (solo su compañía), Director (más información de su compañía) y Comandante (acceso total).
-
-Ya resuelto: guardado automático de la dirección al pinchar el mapa, emoji en el mapa de despacho y botón de actualizar.
+La documentación de la Fase 2 (documentos de sprint 0-3) está en la carpeta [`Fase 2/Evidencias Grupales`](<./Fase 2/Evidencias Grupales>).
 
 ## Licencia
 
